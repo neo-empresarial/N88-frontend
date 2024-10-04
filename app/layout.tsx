@@ -3,6 +3,7 @@ import Link from "next/link";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
+import { ThemeProvider } from "@/components/ui/theme-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -25,11 +26,19 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const theme = "light";
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen`}
       >
+        <ThemeProvider
+            attribute="class"
+            defaultTheme={theme}
+            enableSystem
+            disableTransitionOnChange
+          >
         <div className="flex flex-col h-full">
           <Menubar>
             <MenubarMenu>
@@ -47,9 +56,15 @@ export default function RootLayout({
                 Professores
               </MenubarTrigger>
             </MenubarMenu>
+            <MenubarMenu>
+              <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
+                <Link href={"/about"}>Sobre</Link>
+              </MenubarTrigger>
+            </MenubarMenu>
           </Menubar>
-          <div className="bg-[#f8f8f8] flex-grow h-full">{children}</div>
+          <div className="flex-grow h-full">{children}</div>
         </div>
+        </ThemeProvider>
       </body>
     </html>
   );
