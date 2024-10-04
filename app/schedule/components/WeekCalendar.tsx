@@ -26,7 +26,10 @@ function getDayIndex(day: string): number {
   return dayMapping[day.toLowerCase()] ?? -1; // Returns -1 if no match is found
 }
 
-function formatSubjectsToTableData(subjects: SubjectsType[]): object{
+function formatSubjectsToTableData(subjects: SubjectsType[]): {
+  formattedData: { [key: string]: string }[];
+  conflicts: { [key: string]: string | string[] }[];
+} {
   const formattedData: { [key: string]: string }[] = [];
   const conflicts: { [key: string]: string | string[] }[] = [];
 
@@ -38,12 +41,14 @@ function formatSubjectsToTableData(subjects: SubjectsType[]): object{
         time: time,
         day: day,
         code: "",
-        color: ""
-      })
+        color: "",
+      });
 
       const subject = subjects.filter((subject) => {
         return subject.schedules.find((schedule) => {
-          const class_start_time = timeSlots.findIndex((t) => t === schedule.starttime);
+          const class_start_time = timeSlots.findIndex(
+            (t) => t === schedule.starttime
+          );
           const class_end_time = class_start_time + schedule.classesnumber - 1;
           return (
             getDayIndex(day) === Number(schedule.weekday) &&
@@ -56,21 +61,23 @@ function formatSubjectsToTableData(subjects: SubjectsType[]): object{
       if (subject.length > 1) {
         conflicts.push({
           subjects: subject.map((s) => s.code),
-          time: time
-        })
+          time: time,
+        });
         formattedData[formattedData.length - 1].code = subject[-1].code;
         formattedData[formattedData.length - 1].color = "red";
       } else if (subject.length === 1) {
         formattedData[formattedData.length - 1].code = subject[0].code;
-        formattedData[formattedData.length - 1].color = subject[0].color ? subject[0].color : "blue";
+        formattedData[formattedData.length - 1].color = subject[0].color
+          ? subject[0].color
+          : "blue";
       } else {
         formattedData[formattedData.length - 1].code = "";
         formattedData[formattedData.length - 1].color = "";
       }
-    })
-  })
+    });
+  });
 
-  return {formattedData, conflicts};
+  return { formattedData, conflicts };
 }
 
 export default function WeekCalendarComponent(data: { data: SubjectsType[] }) {
@@ -92,40 +99,22 @@ export default function WeekCalendarComponent(data: { data: SubjectsType[] }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {timeSlots.map((slot) => (
-            <TableRow key={slot}>
+          {timeSlots.map((time) => (
+            <TableRow key={time}>
               {weekDays.map((day) =>
                 day === "" ? (
-                  <TableCell key={`${day}-${slot}`} className="w-24">
+                  <TableCell key={`${day}-${time}`} className="w-24">
                     <div className="w-full text-center h-6 align-middle font-medium text-muted-foreground">
-                      {slot}
+                      {time}
                     </div>
                   </TableCell>
                 ) : (
-                  <TableCell key={`${day}-${slot}`} className="w-24">
-                    {data.data.map((subject, index) => {
-                      const schedule = subject.schedules.find((schedule) => {
-                        return (
-                          getDayIndex(day) === Number(schedule.weekday) &&
-                          schedule.starttime === slot
-                        );
-                      });
-
-                      // Return JSX based on whether a schedule was found or not
-                      return schedule ? (
-                        <div key={index} className="h-7 w-30">
-                          <Card className={`rounded-sm h-full w-full ${subject.color}`}>
-                            <CardContent>
-                              <div className="h-full text-center">
-                                <span>{subject.code}</span>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        </div>
-                      ) : (
-                        <div key={index} className="h-7 w-30"></div>
-                      );
-                    })}
+                  <TableCell key={`${day}-${time}`} className="w-24">
+                    <div className="w-full h-6 align-middle font-medium text-muted-foreground">
+                      {formattedData.find(
+                        (data) => data.time === time && data.day === day
+                      )?.code || ""}
+                    </div>
                   </TableCell>
                 )
               )}
