@@ -1,4 +1,6 @@
-﻿import { Calendar } from "@/components/ui/calendar";
+﻿"use client";
+
+import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
 
 export default function SelectedSubject() {

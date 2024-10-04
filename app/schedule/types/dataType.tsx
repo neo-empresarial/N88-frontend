@@ -21,7 +21,7 @@ export type SubjectsType = {
   freevacancies: number;
   schedules: SchedulesType[];
   professors: ProfessorsType[];
-  color?: string;
+  color?: string[];
 };
 
 export type DataType = {

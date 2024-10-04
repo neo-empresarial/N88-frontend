@@ -1,4 +1,6 @@
-﻿import { Card, CardContent, CardHeader } from "@/components/ui/card";
+﻿"use client";
+
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -13,6 +15,8 @@ import {
 import { weekDays, timeSlots } from "../constants/week-times-and-days";
 import { SubjectsType } from "../types/dataType";
 
+import { useTheme } from "next-themes";
+
 function getDayIndex(day: string): number {
   const dayMapping: { [key: string]: number } = {
     segunda: 2,
@@ -26,10 +30,10 @@ function getDayIndex(day: string): number {
 }
 
 function formatSubjectsToTableData(subjects: SubjectsType[]): {
-  formattedData: { [key: string]: string }[];
+  formattedData: { [key: string]: string | string[] }[];
   conflicts: { [key: string]: string | string[] }[];
 } {
-  const formattedData: { [key: string]: string }[] = [];
+  const formattedData: { [key: string]: string | string[] }[] = [];
   const conflicts: { [key: string]: string | string[] }[] = [];
 
   timeSlots.forEach((time) => {
@@ -79,6 +83,20 @@ function formatSubjectsToTableData(subjects: SubjectsType[]): {
   return { formattedData, conflicts };
 }
 
+function chooseColor(
+  data: { [key: string]: string | string[] } | undefined
+): string {
+  const { theme } = useTheme();
+
+  if (!data) return "";
+
+  if (theme === "light") {
+    return data.color[0];
+  } else {
+    return data.color[1];
+  }
+}
+
 export default function WeekCalendarComponent(data: { data: SubjectsType[] }) {
   const { formattedData, conflicts } = formatSubjectsToTableData(data.data);
 
@@ -103,16 +121,24 @@ export default function WeekCalendarComponent(data: { data: SubjectsType[] }) {
               {weekDays.map((day) =>
                 day === "" ? (
                   <TableCell key={`${day}-${time}`} className="w-24">
-                    <div className="w-full text-center h-6 align-middle font-medium text-muted-foreground">
+                    <div className="w-full text-center h-6 font-medium text-muted-foreground">
                       {time}
                     </div>
                   </TableCell>
                 ) : (
                   <TableCell key={`${day}-${time}`} className="w-24">
-                    <div className="w-full h-6 align-middle font-medium text-muted-foreground">
-                      {formattedData.find(
-                        (data) => data.time === time && data.day === day
-                      )?.code || ""}
+                    <div
+                      className={chooseColor(
+                        formattedData.find(
+                          (data) => data.time === time && data.day === day
+                        )
+                      ) + " " + "w-full flex justify-center items-center h-6 rounded-sm"}
+                    >
+                      <div className="text-center font-medium">
+                        {formattedData.find(
+                          (data) => data.time === time && data.day === day
+                        )?.code || ""}
+                      </div>
                     </div>
                   </TableCell>
                 )

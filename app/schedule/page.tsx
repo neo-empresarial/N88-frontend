@@ -6,7 +6,7 @@
 import SelectedSubject from "./components/SelectedSubject";
 import SubjectsTable from "./components/SubjectsTable";
 import WeekCalendarComponent from "./components/WeekCalendar";
-import { lightColors } from "./constants/ligth-colors";
+import { lightColors, darkColors } from "./constants/colors";
 import { DataType, SubjectsType } from "./types/dataType";
 
 const data = {
@@ -81,7 +81,10 @@ function defineColorToEachSubject({
     (subject, index) => {
       return {
         ...subject,
-        color: lightColors[index % lightColors.length], // Assigning color
+        color: [
+          lightColors[index % lightColors.length],
+          darkColors[index % darkColors.length],
+        ],
       };
     }
   );
@@ -94,29 +97,30 @@ export default async function SchedulePage() {
 
   return (
     <div className="p-10">
-    <ResizablePanelGroup
-      direction="horizontal"
-      className="w-screen rounded-lg border md:min-w-[450px]"
-    >
-      <ResizablePanel defaultSize={50}>
-        <ResizablePanelGroup direction="vertical">
-          <ResizablePanel defaultSize={50}>
-            <SubjectsTable data={subjects_with_color} />
-          </ResizablePanel>
-          <ResizableHandle />
-          <ResizablePanel defaultSize={50}>
-            <SelectedSubject />
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </ResizablePanel>
+      <ResizablePanelGroup
+        direction="horizontal"
+        className="w-screen rounded-lg border md:min-w-[450px]"
+      >
+        <ResizablePanel defaultSize={50}>
+          <ResizablePanelGroup direction="vertical">
+            <ResizablePanel defaultSize={50}>
+              <SubjectsTable data={subjects_with_color} />
+            </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel defaultSize={50}>
+              <SelectedSubject />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </ResizablePanel>
 
-      <ResizableHandle />
+        <ResizableHandle />
 
-      <ResizablePanel defaultSize={50}>
-        <WeekCalendarComponent data={subjects_with_color} />
-      </ResizablePanel>
+        <ResizablePanel defaultSize={50}>
+          <WeekCalendarComponent data={subjects_with_color} />
+        </ResizablePanel>
 
-      <ResizableHandle />
-    </ResizablePanelGroup></div>
+        <ResizableHandle />
+      </ResizablePanelGroup>
+    </div>
   );
 }

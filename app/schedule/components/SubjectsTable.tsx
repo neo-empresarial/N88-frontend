@@ -36,6 +36,10 @@ import { Separator } from "@/components/ui/separator";
 
 import { SubjectsType } from "../types/dataType";
 
+import { useTheme } from "next-themes";
+
+export const column_height = "h-5";
+
 export const columns: ColumnDef<SubjectsType>[] = [
   {
     id: "select",
@@ -52,7 +56,7 @@ export const columns: ColumnDef<SubjectsType>[] = [
       </div>
     ),
     cell: ({ row }) => (
-      <div className="flex justify-center">
+      <div className={`flex justify-center items-center ${column_height}`}>
         <Checkbox
           checked={row.getIsSelected()}
           onCheckedChange={(value) => row.toggleSelected(!!value)}
@@ -66,33 +70,35 @@ export const columns: ColumnDef<SubjectsType>[] = [
   {
     accessorKey: "code",
     header: "Código",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("code")}</div>,
+    cell: ({ row }) => (
+      <div className={`flex items-center capitalize ${column_height}`}>{row.getValue("code")}</div>
+    ),
   },
   {
     accessorKey: "classcode",
     header: "Turma",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("classcode")}</div>
+      <div className={`flex items-center capitalize ${column_height}`}>{row.getValue("classcode")}</div>
     ),
   },
   {
     accessorKey: "name",
     header: "Nome da disciplina",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
+    cell: ({ row }) => (
+      <div className={`flex items-center capitalize ${column_height}`}>{row.getValue("name")}</div>
+    ),
   },
   {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
       return (
-        <div className="flex justify-end">
-          <Button variant="ghost">
-            <ChevronUp className="h-4" />
-          </Button>
-          <Button variant="ghost">
-            <ChevronDown className="h-4" />
-          </Button>
-          <DropdownMenu>
+        <div className={`flex justify-end ${column_height}`}>
+          <ChevronUp className="h-4 m-1" />
+
+          <ChevronDown className="h-4 m-1" />
+
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-12 p-0">
                 <span className="sr-only">Open menu</span>
@@ -108,7 +114,7 @@ export const columns: ColumnDef<SubjectsType>[] = [
                 Excluir
               </DropdownMenuItem>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
         </div>
       );
     },
@@ -117,6 +123,7 @@ export const columns: ColumnDef<SubjectsType>[] = [
 
 export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
   const [rowSelection, setRowSelection] = React.useState({});
+  const { theme } = useTheme();
 
   const table = useReactTable<SubjectsType>({
     data,
@@ -139,7 +146,7 @@ export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
       </div>
       <Separator className="my-2" />
       <Table>
-        <TableHeader className="w-2">
+        <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header) => {
@@ -163,7 +170,13 @@ export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
-                className={`${row.original.color}`}
+                className={
+                  row.original.color && Array.isArray(row.original.color)
+                    ? theme === "light"
+                      ? `${row.original.color[0]}`
+                      : `${row.original.color[1]}`
+                    : ""
+                }
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
