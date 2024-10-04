@@ -12,7 +12,6 @@ import {
 
 import { weekDays, timeSlots } from "../constants/week-times-and-days";
 import { SubjectsType } from "../types/dataType";
-import { list } from "postcss";
 
 function getDayIndex(day: string): number {
   const dayMapping: { [key: string]: number } = {

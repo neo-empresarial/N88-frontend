@@ -3,7 +3,10 @@ import Link from "next/link";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
-import { ThemeProvider } from "@/components/ui/theme-provider";
+import { ThemeProvider } from "@/components/theme-provider";
+import dynamic from 'next/dynamic'
+ 
+const ChangeThemeMode = dynamic(() => import("@/components/ChangeThemeMode"), { ssr: false })
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,36 +37,36 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen`}
       >
         <ThemeProvider
-            attribute="class"
-            defaultTheme={theme}
-            enableSystem
-            disableTransitionOnChange
-          >
-        <div className="flex flex-col h-full">
-          <Menubar>
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
-                <Link href={"/"}>Home</Link>
-              </MenubarTrigger>
-            </MenubarMenu>
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
-                <Link href={"/schedule"}>Matérias</Link>
-              </MenubarTrigger>
-            </MenubarMenu>
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
-                Professores
-              </MenubarTrigger>
-            </MenubarMenu>
-            <MenubarMenu>
-              <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
-                <Link href={"/about"}>Sobre</Link>
-              </MenubarTrigger>
-            </MenubarMenu>
-          </Menubar>
-          <div className="flex-grow h-full">{children}</div>
-        </div>
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          
+        >
+          <div className="flex flex-col h-full">
+            <Menubar>
+              <MenubarMenu>
+                <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
+                  <Link href={"/"}>Home</Link>
+                </MenubarTrigger>
+              </MenubarMenu>
+              <MenubarMenu>
+                <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
+                  <Link href={"/schedule"}>Matérias</Link>
+                </MenubarTrigger>
+              </MenubarMenu>
+              <MenubarMenu>
+                <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
+                  Professores
+                </MenubarTrigger>
+              </MenubarMenu>
+              <MenubarMenu >
+                <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
+                  {<ChangeThemeMode />}
+                </MenubarTrigger>
+              </MenubarMenu>
+            </Menubar>
+            <div className="flex-grow h-full">{children}</div>
+          </div>
         </ThemeProvider>
       </body>
     </html>
