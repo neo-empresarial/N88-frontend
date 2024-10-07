@@ -3,10 +3,14 @@ import Link from "next/link";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
+import { Button } from "@/components/ui/button";
 import { ThemeProvider } from "@/components/theme-provider";
-import dynamic from 'next/dynamic'
- 
-const ChangeThemeMode = dynamic(() => import("@/components/ChangeThemeMode"), { ssr: false })
+import dynamic from "next/dynamic";
+import { MenubarContent } from "@radix-ui/react-menubar";
+
+const ChangeThemeMode = dynamic(() => import("@/components/ChangeThemeMode"), {
+  ssr: false,
+});
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -36,32 +40,27 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          
-        >
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <div className="flex flex-col h-full">
             <Menubar>
               <MenubarMenu>
-                <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
+                <MenubarTrigger>
                   <Link href={"/"}>Home</Link>
                 </MenubarTrigger>
               </MenubarMenu>
               <MenubarMenu>
-                <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
+                <MenubarTrigger>
                   <Link href={"/schedule"}>Matérias</Link>
                 </MenubarTrigger>
               </MenubarMenu>
               <MenubarMenu>
-                <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
-                  Professores
+                <MenubarTrigger>
+                  <Link href={"/professors"}>Professores</Link>
                 </MenubarTrigger>
               </MenubarMenu>
-              <MenubarMenu >
-                <MenubarTrigger className="cursor-pointer hover:bg-gray-200">
-                  {<ChangeThemeMode />}
+              <MenubarMenu>
+                <MenubarTrigger>
+                  <ChangeThemeMode />
                 </MenubarTrigger>
               </MenubarMenu>
             </Menubar>
