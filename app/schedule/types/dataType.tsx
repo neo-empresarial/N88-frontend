@@ -12,15 +12,20 @@ export type ProfessorsType = {
   name: string;
 };
 
-export type SubjectsType = {
-  idsubject: number;
-  code: string;
+export type ClassesType = {
+  idclass: number;
   classcode: string;
-  name: string;
   totalvacancies: number;
   freevacancies: number;
   schedules: SchedulesType[];
   professors: ProfessorsType[];
+}
+
+export type SubjectsType = {
+  idsubject: number;
+  code: string;
+  name: string;
+  classes: ClassesType[];
   color?: string[];
 };
 

@@ -1,6 +1,9 @@
 ﻿"use client";
 
 import * as React from "react";
+import { useContext } from "react";
+import { SelectedSubjectContext } from "../providers/selectedSubjectContext";
+
 import {
   ColumnDef,
   flexRender,
@@ -10,18 +13,10 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronUp, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -38,7 +33,7 @@ import { SubjectsType } from "../types/dataType";
 
 import { useTheme } from "next-themes";
 
-export const column_height = "h-5";
+const column_height = "h-5";
 
 export const columns: ColumnDef<SubjectsType>[] = [
   {
@@ -71,21 +66,27 @@ export const columns: ColumnDef<SubjectsType>[] = [
     accessorKey: "code",
     header: "Código",
     cell: ({ row }) => (
-      <div className={`flex items-center capitalize ${column_height}`}>{row.getValue("code")}</div>
+      <div className={`flex items-center capitalize ${column_height}`}>
+        {row.getValue("code")}
+      </div>
     ),
   },
   {
     accessorKey: "classcode",
     header: "Turma",
     cell: ({ row }) => (
-      <div className={`flex items-center capitalize ${column_height}`}>{row.getValue("classcode")}</div>
+      <div className={`flex items-center capitalize ${column_height}`}>
+        {row.getValue("classcode")}
+      </div>
     ),
   },
   {
     accessorKey: "name",
     header: "Nome da disciplina",
     cell: ({ row }) => (
-      <div className={`flex items-center capitalize ${column_height}`}>{row.getValue("name")}</div>
+      <div className={`flex items-center capitalize ${column_height}`}>
+        {row.getValue("name")}
+      </div>
     ),
   },
   {
@@ -124,6 +125,8 @@ export const columns: ColumnDef<SubjectsType>[] = [
 export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
   const [rowSelection, setRowSelection] = React.useState({});
   const { theme } = useTheme();
+
+  const { setSelectedSubject } = useContext(SelectedSubjectContext);
 
   const table = useReactTable<SubjectsType>({
     data,
@@ -171,12 +174,17 @@ export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}
                 className={
-                  row.original.color && Array.isArray(row.original.color)
+                  (row.original.color && Array.isArray(row.original.color)
                     ? theme === "light"
                       ? `${row.original.color[0]}`
                       : `${row.original.color[1]}`
-                    : ""
+                    : "") +
+                  " " +
+                  "cursor-pointer"
                 }
+                onClick={() => {
+                  setSelectedSubject(row.original);
+                }}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>

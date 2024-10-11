@@ -1,4 +1,6 @@
-﻿import {
+﻿"use client";
+
+import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
@@ -6,8 +8,11 @@
 import SelectedSubject from "./components/SelectedSubject";
 import SubjectsTable from "./components/SubjectsTable";
 import WeekCalendarComponent from "./components/WeekCalendar";
+import SearchSubject from "./components/SearchSubject";
 import { lightColors, darkColors } from "./constants/colors";
 import { DataType, SubjectsType } from "./types/dataType";
+
+import SelectedSubjectContext from "./providers/selectedSubjectContext";
 
 const data = {
   idsavedschedule: 7,
@@ -16,56 +21,66 @@ const data = {
     {
       idsubject: 23,
       code: "ACL5135",
-      classcode: "06102G",
       name: "Hematologia Clínica",
-      totalvacancies: 7,
-      freevacancies: 4,
-      schedules: [
+      classes: [
         {
-          idschedule: 30,
-          weekday: "3",
-          starttime: "13:30",
-          classesnumber: 4,
-          building: "CCS",
-          room: "K101",
-        },
-        {
-          idschedule: 23,
-          weekday: "2",
-          starttime: "10:10",
-          classesnumber: 2,
-          building: "CCS",
-          room: "J006",
-        },
-      ],
-      professors: [
-        {
-          idprofessor: 8,
-          name: "Solange Lucia Blatt",
+          idclass: 1,
+          classcode: "06102G",
+          totalvacancies: 7,
+          freevacancies: 4,
+          schedules: [
+            {
+              idschedule: 30,
+              weekday: "3",
+              starttime: "13:30",
+              classesnumber: 4,
+              building: "CCS",
+              room: "K101",
+            },
+            {
+              idschedule: 23,
+              weekday: "2",
+              starttime: "10:10",
+              classesnumber: 2,
+              building: "CCS",
+              room: "J006",
+            },
+          ],
+          professors: [
+            {
+              idprofessor: 8,
+              name: "Solange Lucia Blatt",
+            },
+          ],
         },
       ],
     },
     {
       idsubject: 24,
       code: "ACL5136",
-      classcode: "06102A",
       name: "Uroanálise [Cancelada]",
-      totalvacancies: 0,
-      freevacancies: 0,
-      schedules: [
+      classes: [
         {
-          idschedule: 31,
-          weekday: "3",
-          starttime: "09:10",
-          classesnumber: 3,
-          building: "AUX",
-          room: "ALOCAR\n",
-        },
-      ],
-      professors: [
-        {
-          idprofessor: 11,
-          name: "Dirleise Colle",
+          idclass: 2,
+          classcode: "06102A",
+          totalvacancies: 0,
+          freevacancies: 0,
+          schedules: [
+            {
+              idschedule: 31,
+              weekday: "3",
+              starttime: "09:10",
+              classesnumber: 3,
+              building: "AUX",
+              room: "ALOCAR\n",
+            },
+          ],
+          professors: [
+            {
+              idprofessor: 11,
+              name: "Dirleise Colle",
+            },
+          ],
         },
       ],
     },
@@ -92,35 +107,42 @@ function defineColorToEachSubject({
   return subjects_with_color;
 }
 
-export default async function SchedulePage() {
+export default function SchedulePage() {
   const subjects_with_color = defineColorToEachSubject({ data });
 
   return (
     <div className="p-10">
-      <ResizablePanelGroup
-        direction="horizontal"
-        className="w-screen rounded-lg border md:min-w-[450px]"
-      >
-        <ResizablePanel defaultSize={50}>
-          <ResizablePanelGroup direction="vertical">
-            <ResizablePanel defaultSize={50}>
-              <SubjectsTable data={subjects_with_color} />
-            </ResizablePanel>
-            <ResizableHandle />
-            <ResizablePanel defaultSize={50}>
-              <SelectedSubject />
-            </ResizablePanel>
-          </ResizablePanelGroup>
-        </ResizablePanel>
+      <SelectedSubjectContext>
+        <SearchSubject />
+        <ResizablePanelGroup
+          direction="horizontal"
+          className="w-screen rounded-lg border md:min-w-[450px]"
+        >
+          <ResizablePanel defaultSize={50}>
+            <ResizablePanelGroup direction="vertical">
+              <ResizablePanel defaultSize={50}>
+                <SubjectsTable data={subjects_with_color} />
+              </ResizablePanel>
+              <ResizableHandle />
+              <ResizablePanel defaultSize={50}>
+                <SelectedSubject />
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </ResizablePanel>
 
-        <ResizableHandle />
+          <ResizableHandle />
 
-        <ResizablePanel defaultSize={50}>
-          <WeekCalendarComponent data={subjects_with_color} />
-        </ResizablePanel>
+          <ResizablePanel defaultSize={50}>
+            <WeekCalendarComponent data={subjects_with_color} />
+          </ResizablePanel>
 
-        <ResizableHandle />
-      </ResizablePanelGroup>
+          <ResizableHandle />
+        </ResizablePanelGroup>
+      </SelectedSubjectContext>
     </div>
   );
 }
+
+// export default async function SchedulePageWithProvider() {
+//   return <SelectedSubjectContext children={<SchedulePage />} />;
+// }

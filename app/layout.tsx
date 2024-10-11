@@ -33,7 +33,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const theme = "dark";
 
   return (
     <html lang="en">
