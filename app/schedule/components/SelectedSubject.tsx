@@ -71,7 +71,7 @@ export const columns: ColumnDef<SubjectsType>[] = [
     header: "Professores",
     cell: ({ row }) => (
       <div className={`flex items-center capitalize ${column_height}`}>
-        {row.getValue("professors").map((professor) => professor.name)}
+        {row.getValue("professors")}
       </div>
     ),
   }

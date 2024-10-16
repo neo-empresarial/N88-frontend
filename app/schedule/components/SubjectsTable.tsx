@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useContext } from "react";
 import { SelectedSubjectContext } from "../providers/selectedSubjectContext";
+import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
 
 import {
   ColumnDef,
@@ -17,7 +18,6 @@ import { ChevronUp, ChevronDown } from "lucide-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -26,8 +26,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Label } from "@radix-ui/react-dropdown-menu";
-import { Separator } from "@/components/ui/separator";
 
 import { SubjectsType } from "../types/dataType";
 
@@ -127,6 +125,8 @@ export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
   const { theme } = useTheme();
 
   const { setSelectedSubject } = useContext(SelectedSubjectContext);
+  const { setOnFocusSubject } = useContext(onFocusSubjectContext);
+  
 
   const table = useReactTable<SubjectsType>({
     data,
@@ -143,11 +143,6 @@ export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
 
   return (
     <div className="p-3">
-      <div className="flex flex-row items-center">
-        <Label className="text-base mx-2">Pesquise pela matéria: </Label>
-        <Input className="min-w-12 w-1/4"></Input>
-      </div>
-      <Separator className="my-2" />
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -185,6 +180,8 @@ export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
                 onClick={() => {
                   setSelectedSubject(row.original);
                 }}
+                onMouseEnter={() => setOnFocusSubject(row.original)}
+                onMouseLeave={() => setOnFocusSubject({} as SubjectsType)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>

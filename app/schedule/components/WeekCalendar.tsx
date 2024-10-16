@@ -1,6 +1,8 @@
 ﻿"use client";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useContext } from "react";
+import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
+
 import {
   Table,
   TableBody,
@@ -48,16 +50,21 @@ function formatSubjectsToTableData(subjects: SubjectsType[]): {
       });
 
       const subject = subjects.filter((subject) => {
-        return subject.schedules.find((schedule) => {
-          const class_start_time = timeSlots.findIndex(
-            (t) => t === schedule.starttime
-          );
-          const class_end_time = class_start_time + schedule.classesnumber - 1;
-          return (
-            getDayIndex(day) === Number(schedule.weekday) &&
-            timeSlots.indexOf(time) >= class_start_time &&
-            timeSlots.indexOf(time) <= class_end_time
-          );
+        return subject.classes.find((classData) => {
+          return classData.schedules.find((schedule) => {
+            const class_start_time = timeSlots.findIndex(
+              (t) => t === schedule.starttime
+            );
+            const class_end_time =
+              class_start_time + schedule.classesnumber - 1;
+
+            const condition =
+              getDayIndex(day) === Number(schedule.weekday) &&
+              timeSlots.indexOf(time) >= class_start_time &&
+              timeSlots.indexOf(time) <= class_end_time;
+
+            return condition;
+          });
         });
       });
 
@@ -87,20 +94,27 @@ function chooseColor(
   data: { [key: string]: string | string[] } | undefined
 ): string {
   const { theme } = useTheme();
+  const { onFocusSubject } = useContext(onFocusSubjectContext);
 
   if (!data) return "";
 
   if (theme === "light") {
-    return data.color[0];
+    if (!(data.code === onFocusSubject.code)) {
+      return data.color[0];
+    } else {
+      return 'bg-gray-300 border-2 border-black';
+    }
   } else {
-    return data.color[1];
+    if (!(data.code === onFocusSubject.code)) {
+      return data.color[1];
+    } else {
+      return 'bg-gray-600 border-2 border-white';
+    }
   }
 }
 
 export default function WeekCalendarComponent(data: { data: SubjectsType[] }) {
   const { formattedData, conflicts } = formatSubjectsToTableData(data.data);
-
-  // console.log(formattedData);
 
   return (
     <div className="p-3 max-h-screen">
@@ -128,11 +142,15 @@ export default function WeekCalendarComponent(data: { data: SubjectsType[] }) {
                 ) : (
                   <TableCell key={`${day}-${time}`} className="w-24">
                     <div
-                      className={chooseColor(
-                        formattedData.find(
-                          (data) => data.time === time && data.day === day
-                        )
-                      ) + " " + "w-full flex justify-center items-center h-6 rounded-sm"}
+                      className={
+                        chooseColor(
+                          formattedData.find(
+                            (data) => data.time === time && data.day === day
+                          )
+                        ) +
+                        " " +
+                        "w-full flex justify-center items-center h-6 rounded-sm"
+                      }
                     >
                       <div className="text-center font-medium">
                         {formattedData.find(

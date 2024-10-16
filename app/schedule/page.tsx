@@ -13,6 +13,7 @@ import { lightColors, darkColors } from "./constants/colors";
 import { DataType, SubjectsType } from "./types/dataType";
 
 import SelectedSubjectContext from "./providers/selectedSubjectContext";
+import OnFocusSubjectProvider from "./providers/onFocusSubjectContext";
 
 const data = {
   idsavedschedule: 7,
@@ -113,31 +114,33 @@ export default function SchedulePage() {
   return (
     <div className="p-10">
       <SelectedSubjectContext>
-        <SearchSubject />
-        <ResizablePanelGroup
-          direction="horizontal"
-          className="w-screen rounded-lg border md:min-w-[450px]"
-        >
-          <ResizablePanel defaultSize={50}>
-            <ResizablePanelGroup direction="vertical">
-              <ResizablePanel defaultSize={50}>
-                <SubjectsTable data={subjects_with_color} />
-              </ResizablePanel>
-              <ResizableHandle />
-              <ResizablePanel defaultSize={50}>
-                <SelectedSubject />
-              </ResizablePanel>
-            </ResizablePanelGroup>
-          </ResizablePanel>
+        <OnFocusSubjectProvider>
+          <SearchSubject />
+          <ResizablePanelGroup
+            direction="horizontal"
+            className="w-screen rounded-lg border md:min-w-[450px]"
+          >
+            <ResizablePanel defaultSize={50}>
+              <ResizablePanelGroup direction="vertical">
+                <ResizablePanel defaultSize={50}>
+                  <SubjectsTable data={subjects_with_color} />
+                </ResizablePanel>
+                <ResizableHandle />
+                <ResizablePanel defaultSize={50}>
+                  <SelectedSubject />
+                </ResizablePanel>
+              </ResizablePanelGroup>
+            </ResizablePanel>
 
-          <ResizableHandle />
+            <ResizableHandle />
 
-          <ResizablePanel defaultSize={50}>
-            <WeekCalendarComponent data={subjects_with_color} />
-          </ResizablePanel>
+            <ResizablePanel defaultSize={50}>
+              <WeekCalendarComponent data={subjects_with_color} />
+            </ResizablePanel>
 
-          <ResizableHandle />
-        </ResizablePanelGroup>
+            <ResizableHandle />
+          </ResizablePanelGroup>
+        </OnFocusSubjectProvider>
       </SelectedSubjectContext>
     </div>
   );
