@@ -73,8 +73,8 @@ function formatSubjectsToTableData(subjects: SubjectsType[]): {
           subjects: subject.map((s) => s.code),
           time: time,
         });
-        formattedData[formattedData.length - 1].code = subject[-1].code;
-        formattedData[formattedData.length - 1].color = "red";
+        formattedData[formattedData.length - 1].code = subject[subject.length - 1].code;
+        formattedData[formattedData.length - 1].color = "bg-rose-800";
       } else if (subject.length === 1) {
         formattedData[formattedData.length - 1].code = subject[0].code;
         formattedData[formattedData.length - 1].color = subject[0].color

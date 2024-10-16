@@ -40,7 +40,7 @@ const data = {
             },
             {
               idschedule: 23,
-              weekday: "2",
+              weekday: "3",
               starttime: "10:10",
               classesnumber: 2,
               building: "CCS",
@@ -80,6 +80,28 @@ const data = {
             {
               idprofessor: 11,
               name: "Dirleise Colle",
+            },
+          ],
+        },
+        {
+          idclass: 3,
+          classcode: "06102B",
+          totalvacancies: 0,
+          freevacancies: 0,
+          schedules: [
+            {
+              idschedule: 31,
+              weekday: "3",
+              starttime: "09:10",
+              classesnumber: 3,
+              building: "AUX",
+              room: "ALOCAR\n",
+            },
+          ],
+          professors: [
+            {
+              idprofessor: 11,
+              name: "Dirleise Colle 2",
             },
           ],
         },
