@@ -14,6 +14,8 @@ import { DataType, SubjectsType } from "./types/dataType";
 
 import SelectedSubjectContext from "./providers/selectedSubjectContext";
 import OnFocusSubjectProvider from "./providers/onFocusSubjectContext";
+import { useEffect, useState } from "react";
+import useAxios from "@/api/AxiosInstance";
 
 const data = {
   idsavedschedule: 7,
@@ -109,16 +111,26 @@ function defineColorToEachSubject({
 }
 
 export default function SchedulePage() {
+  const { getAllSubjects } = useAxios();
+  const [subjects, setSubjects] = useState<SubjectsType[]>([]);
+  const [isLoadingSubjects, setIsLoadingSubjects] = useState(true);
   const subjects_with_color = defineColorToEachSubject({ data });
+
+  useEffect(() => {
+    getAllSubjects().then((data) => {
+      setSubjects(data);
+      setIsLoadingSubjects(false);
+    });
+  }, []);
 
   return (
     <div className="p-10">
       <SelectedSubjectContext>
         <OnFocusSubjectProvider>
-          <SearchSubject />
+          <SearchSubject subjects={subjects} isLoading={isLoadingSubjects} />
           <ResizablePanelGroup
             direction="horizontal"
-            className="w-screen rounded-lg border md:min-w-[450px]"
+            className="w-screen rounded-lg border md:min-w-[450px] mt-4"
           >
             <ResizablePanel defaultSize={50}>
               <ResizablePanelGroup direction="vertical">
