@@ -83,9 +83,20 @@ const useAxios = () => {
     }
   }
 
+  const getSubject = async (id: number) => {
+    try {
+      const response = await axiosPublicInstace.get(`/subjects/${id}`);
+      return response.data;
+    } catch (error) {
+      throw error
+    }
+  }
+
 
   return {
     getAllSubjects,
+    getFilteredSubjects,
+    getSubject
   }
 }
 

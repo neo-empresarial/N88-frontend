@@ -135,7 +135,7 @@ export default function SchedulePage() {
             <ResizablePanel defaultSize={50}>
               <ResizablePanelGroup direction="vertical">
                 <ResizablePanel defaultSize={50}>
-                  <SubjectsTable data={subjects_with_color} />
+                  <SubjectsTable />
                 </ResizablePanel>
                 <ResizableHandle />
                 <ResizablePanel defaultSize={50}>

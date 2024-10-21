@@ -1,7 +1,6 @@
 ﻿"use client";
 
-import * as React from "react";
-import { useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { SelectedSubjectContext } from "../providers/selectedSubjectContext";
 import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
 
@@ -120,16 +119,24 @@ export const columns: ColumnDef<SubjectsType>[] = [
   },
 ];
 
-export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
-  const [rowSelection, setRowSelection] = React.useState({});
+export default function SubjectsTable() {
+  const [rowSelection, setRowSelection] = useState({});
   const { theme } = useTheme();
 
-  const { setSelectedSubject } = useContext(SelectedSubjectContext);
+  const {
+    interestSubjects,
+    selectedSubject,
+    setInterestSubjects,
+    setSelectedSubject,
+  } = useContext(SelectedSubjectContext);
   const { setOnFocusSubject } = useContext(onFocusSubjectContext);
-  
+
+  useEffect(() => {
+    console.log(interestSubjects);
+  }, [interestSubjects]);
 
   const table = useReactTable<SubjectsType>({
-    data,
+    interestSubjects,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -142,7 +149,13 @@ export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
   });
 
   return (
-    <div className="p-3">
+    <div
+      className="p-3"
+      onClick={() => {
+        console.log(interestSubjects);
+      }}
+    >
+      alda
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
@@ -163,8 +176,8 @@ export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
+          {table?.getRowModel()?.rows?.length ? (
+            table?.getRowModel()?.rows.map((row) => (
               <TableRow
                 key={row.id}
                 data-state={row.getIsSelected() && "selected"}

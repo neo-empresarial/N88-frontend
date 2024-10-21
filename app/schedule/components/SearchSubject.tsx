@@ -1,7 +1,8 @@
 ﻿"use client";
 import { SubjectsType } from "../types/dataType";
-import * as React from "react";
+import { useState, useEffect, useContext, useMemo } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
+import { SelectedSubjectContext } from "../providers/selectedSubjectContext";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import useAxios from "@/api/AxiosInstance";
+
 interface SearchSubjectProps {
   subjects: SubjectsType[];
   isLoading: boolean;
@@ -28,13 +31,17 @@ export default function SearchSubject({
   subjects,
   isLoading,
 }: SearchSubjectProps) {
-  const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState("");
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [paginationLimit, setPaginationLimit] = React.useState(20); // initial limit
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const { getSubject } = useAxios();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [paginationLimit, setPaginationLimit] = useState(20); // initial limit
+  const { interestSubjects, setInterestSubjects } = useContext(
+    SelectedSubjectContext
+  );
 
   // filter objects based on user input
-  const filteredSubjects = React.useMemo(() => {
+  const filteredSubjects = useMemo(() => {
     return subjects.filter((subject) =>
       subject.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -44,6 +51,31 @@ export default function SearchSubject({
 
   const loadMoreItems = () => {
     setPaginationLimit((prevLimit) => prevLimit + 20); // increase the limit by 20
+  };
+
+  const handleInterrestSubjects = (subject: SubjectsType) => {
+    const isAlreadySelected = interestSubjects.some((interestsSubject) => {
+      return interestsSubject.name == subject.name;
+    });
+
+    if (isAlreadySelected) {
+      setInterestSubjects(
+        interestSubjects.filter(
+          (interestsSubject) => interestsSubject.name != subject.name
+        )
+      );
+    } else {
+      let tempSubject;
+      getSubject(subject.idsubject).then((response) =>
+        setInterestSubjects([...interestSubjects, response])
+      );
+    }
+  };
+
+  const handleOnSelect = (currentSubject: SubjectsType) => {
+    setValue(currentSubject.name === value ? "" : currentSubject.name);
+    setOpen(false);
+    handleInterrestSubjects(currentSubject);
   };
 
   return (
@@ -77,15 +109,17 @@ export default function SearchSubject({
                   <CommandItem
                     key={subject.name}
                     value={subject.name}
-                    onSelect={(currentValue) => {
-                      setValue(currentValue === value ? "" : currentValue);
-                      setOpen(false);
-                    }}
+                    onSelect={() => handleOnSelect(subject)}
                   >
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        value === subject.name ? "opacity-100" : "opacity-0"
+                        interestSubjects.find(
+                          (interestSubject) =>
+                            interestSubject.name === subject.name
+                        )
+                          ? "opacity-100"
+                          : "opacity-0"
                       )}
                     />
                     {subject.name}
