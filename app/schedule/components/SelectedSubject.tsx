@@ -1,9 +1,11 @@
 ﻿"use client";
 
 import * as React from "react";
-import { useContext } from "react";
-import { SelectedSubjectContext } from "../providers/selectedSubjectContext";
-import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
+// import { useContext } from "react";
+// import { SelectedSubjectContext } from "../providers/selectedSubjectContext";
+// import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
+
+import { useSubjects } from "../providers/subjectsContext";
 
 import { useTheme } from "next-themes";
 
@@ -31,74 +33,127 @@ import { ClassesType } from "../types/dataType";
 
 const column_height = "h-5";
 
-export const columns: ColumnDef<ClassesType>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex justify-center w-10">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className={`flex justify-center items-center w-10 ${column_height}`}>
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "classcode",
-    header: "Turma",
-    cell: ({ row }) => (
-      <div className={`flex items-center capitalize ${column_height}`}>
-        {row.getValue("classcode")}
-      </div>
-    ),
-  },
-  {
-    header: "Vagas",
-    accessorFn: (row) =>
-      `${row.totalvacancies - row.freevacancies}/${row.totalvacancies}`,
-
-    // cell: ({ row }) => (
-    //   <div className={`flex items-center ${column_height}`}>
-    //     {row.getValue("freevacancies")}/{row.getValue("totalvacancies")}
-    //   </div>
-    // ),
-  },
-  {
-    accessorKey: "professors",
-    header: "Professores",
-    cell: ({ row }) => (
-      <div className={`flex items-center capitalize ${column_height}`}>
-        {row
-          .getValue("professors")
-          .map((professor) => professor.name)
-          .join(", ")}
-      </div>
-    ),
-  },
-];
-
 export default function SelectedSubject() {
   const [rowSelection, setRowSelection] = React.useState({});
 
   const { theme } = useTheme();
 
-  const { selectedSubject } = useContext(SelectedSubjectContext);
-  const { setOnFocusSubject } = useContext(onFocusSubjectContext);
+  const {
+    selectedSubject,
+    setOnFocusSubjectClass,
+    scheduleSubjects,
+    setScheduleSubjects,
+  } = useSubjects();
+
+  async function addOrRemoveClasses(row: any) {
+    // Check if the subject is already in the schedule
+    const subject = scheduleSubjects.find(
+      (subject) => subject.code === selectedSubject.code
+    );
+
+    // If the subject is not in the schedule, add it
+    if (!subject) {
+      setScheduleSubjects([
+        ...scheduleSubjects,
+        {
+          code: selectedSubject.code,
+          classes: [row.original.classcode],
+        },
+      ]);
+      return;
+    }
+
+    if (!row.getIsSelected()) {
+      // If the subject is already in the schedule, add the class
+      let copy = [...scheduleSubjects];
+      let index = copy.findIndex(
+        (subject) => subject.code === selectedSubject.code
+      );
+      copy[index].classes.push(row.original.classcode);
+      setScheduleSubjects(copy);
+    } else {
+      // If the subject is already in the schedule, remove the class
+      let copy = [...scheduleSubjects];
+      let index = copy.findIndex(
+        (subject) => subject.code === selectedSubject.code
+      );
+      let classIndex = copy[index].classes.findIndex(
+        (classcode) => classcode === row.original.classcode
+      );
+      copy[index].classes.splice(classIndex, 1);
+      setScheduleSubjects(copy);
+    }
+
+    return;
+  }
+
+  const columns: ColumnDef<ClassesType>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <div className="flex justify-center w-10">
+          <Checkbox
+            checked={
+              table.getIsAllPageRowsSelected() ||
+              (table.getIsSomePageRowsSelected() && "indeterminate")
+            }
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
+            aria-label="Select all"
+          />
+        </div>
+      ),
+      cell: ({ row }) => (
+        <div
+          className={`flex justify-center items-center w-10 ${column_height}`}
+        >
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => {
+              row.toggleSelected(!!value);
+              addOrRemoveClasses(row);
+            }}
+            aria-label="Select row"
+          />
+        </div>
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "classcode",
+      header: "Turma",
+      cell: ({ row }) => (
+        <div className={`flex items-center capitalize ${column_height}`}>
+          {row.getValue("classcode")}
+        </div>
+      ),
+    },
+    {
+      header: "Vagas",
+      accessorFn: (row) =>
+        `${row.totalvacancies - row.freevacancies}/${row.totalvacancies}`,
+
+      // cell: ({ row }) => (
+      //   <div className={`flex items-center ${column_height}`}>
+      //     {row.getValue("freevacancies")}/{row.getValue("totalvacancies")}
+      //   </div>
+      // ),
+    },
+    {
+      accessorKey: "professors",
+      header: "Professores",
+      cell: ({ row }) => (
+        <div className={`flex items-center capitalize ${column_height}`}>
+          {row
+            .getValue("professors")
+            .map((professor) => professor.name)
+            .join(", ")}
+        </div>
+      ),
+    },
+  ];
 
   const table = useReactTable<ClassesType>({
     data: selectedSubject.classes || [],
@@ -152,8 +207,13 @@ export default function SelectedSubject() {
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                   className={`${selectedSubject.color}`}
-                  onMouseEnter={() => setOnFocusSubject(selectedSubject)}
-                  onMouseLeave={() => setOnFocusSubject({})}
+                  // onMouseEnter={() =>
+                  //   setOnFocusSubjectClass({
+                  //     code: selectedSubject.code,
+                  //     classcode: row.original.classcode,
+                  //   })
+                  // }
+                  // onMouseLeave={() => setOnFocusSubjectClass({} as any)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>

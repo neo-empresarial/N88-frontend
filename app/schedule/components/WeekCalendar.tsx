@@ -1,7 +1,10 @@
 ﻿"use client";
 
-import { useContext } from "react";
-import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
+// import { useContext } from "react";
+// import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
+
+import { useSubjects } from "../providers/subjectsContext";
+import { scheduleSubjectsType } from "../providers/subjectsContext";
 
 import {
   Table,
@@ -31,18 +34,20 @@ function getDayIndex(day: string): number {
   return dayMapping[day.toLowerCase()] ?? -1; // Returns -1 if no match is found
 }
 
-function formatSubjectsToTableData(subjects: SubjectsType[]): {
-  formattedData: { [key: string]: string | string[] }[];
+function formatSubjectsToTableData(subjects: scheduleSubjectsType[]): {
+  tableData: { [key: string]: string | string[] }[];
   conflicts: { [key: string]: string | string[] }[];
 } {
-  const formattedData: { [key: string]: string | string[] }[] = [];
+  const tableData: { [key: string]: string | string[] }[] = [];
   const conflicts: { [key: string]: string | string[] }[] = [];
+
+  const { searchedSubjects } = useSubjects();
 
   timeSlots.forEach((time) => {
     weekDays.forEach((day) => {
       if (day === "") return;
 
-      formattedData.push({
+      tableData.push({
         time: time,
         day: day,
         code: "",
@@ -50,13 +55,17 @@ function formatSubjectsToTableData(subjects: SubjectsType[]): {
       });
 
       const subject = subjects.filter((subject) => {
-        return subject.classes.find((classData) => {
-          return classData.schedules.find((schedule) => {
+        return subject.classes.find((classcode) => {
+          const schedules =
+            searchedSubjects
+              .find((s) => s.code === subject.code)
+              ?.classes.find((c) => c.classcode === classcode)?.schedules || [];
+
+          return schedules.filter((schedule) => {
             const class_start_time = timeSlots.findIndex(
               (t) => t === schedule.starttime
             );
-            const class_end_time =
-              class_start_time + schedule.classesnumber - 1;
+            const class_end_time = class_start_time + schedule.classesnumber - 1;
 
             const condition =
               getDayIndex(day) === Number(schedule.weekday) &&
@@ -66,35 +75,38 @@ function formatSubjectsToTableData(subjects: SubjectsType[]): {
             return condition;
           });
         });
-      });
+      })
 
       if (subject.length > 1) {
         conflicts.push({
           subjects: subject.map((s) => s.code),
           time: time,
         });
-        formattedData[formattedData.length - 1].code = subject[subject.length - 1].code;
-        formattedData[formattedData.length - 1].color = "bg-rose-800";
+        tableData[tableData.length - 1].code = subject[subject.length - 1].code;
+        tableData[tableData.length - 1].color = "bg-rose-800";
       } else if (subject.length === 1) {
-        formattedData[formattedData.length - 1].code = subject[0].code;
-        formattedData[formattedData.length - 1].color = subject[0].color
+        tableData[tableData.length - 1].code = subject[0].code;
+        tableData[tableData.length - 1].color = subject[0].color
           ? subject[0].color
           : "blue";
       } else {
-        formattedData[formattedData.length - 1].code = "";
-        formattedData[formattedData.length - 1].color = "";
+        tableData[tableData.length - 1].code = "";
+        tableData[tableData.length - 1].color = "";
       }
     });
   });
 
-  return { formattedData, conflicts };
+  console.log({tableData});
+
+  return { tableData, conflicts };
 }
 
 function chooseColor(
   data: { [key: string]: string | string[] } | undefined
 ): string {
   const { theme } = useTheme();
-  const { onFocusSubject } = useContext(onFocusSubjectContext);
+  // const { onFocusSubject } = useContext(onFocusSubjectContext);
+  const { onFocusSubject } = useSubjects();
 
   if (!data) return "";
 
@@ -102,19 +114,21 @@ function chooseColor(
     if (!(data.code === onFocusSubject.code)) {
       return data.color[0];
     } else {
-      return 'bg-gray-300 border-2 border-black';
+      return "bg-gray-300 border-2 border-black";
     }
   } else {
     if (!(data.code === onFocusSubject.code)) {
       return data.color[1];
     } else {
-      return 'bg-gray-600 border-2 border-white';
+      return "bg-gray-600 border-2 border-white";
     }
   }
 }
 
-export default function WeekCalendarComponent(data: { data: SubjectsType[] }) {
-  const { formattedData, conflicts } = formatSubjectsToTableData(data.data);
+export default function WeekCalendarComponent() {
+  const { scheduleSubjects } = useSubjects();
+
+  const { tableData, conflicts } = formatSubjectsToTableData(scheduleSubjects);
 
   return (
     <div className="p-3 max-h-screen">
@@ -144,7 +158,7 @@ export default function WeekCalendarComponent(data: { data: SubjectsType[] }) {
                     <div
                       className={
                         chooseColor(
-                          formattedData.find(
+                          tableData.find(
                             (data) => data.time === time && data.day === day
                           )
                         ) +
@@ -153,7 +167,7 @@ export default function WeekCalendarComponent(data: { data: SubjectsType[] }) {
                       }
                     >
                       <div className="text-center font-medium">
-                        {formattedData.find(
+                        {tableData.find(
                           (data) => data.time === time && data.day === day
                         )?.code || ""}
                       </div>

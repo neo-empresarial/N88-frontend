@@ -1,9 +1,11 @@
 ﻿"use client";
 
 import * as React from "react";
-import { useContext } from "react";
-import { SelectedSubjectContext } from "../providers/selectedSubjectContext";
-import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
+// import { useContext } from "react";
+// import { SelectedSubjectContext } from "../providers/selectedSubjectContext";
+// import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
+
+import { useSubjects } from "../providers/subjectsContext";
 
 import {
   ColumnDef,
@@ -120,16 +122,18 @@ export const columns: ColumnDef<SubjectsType>[] = [
   },
 ];
 
-export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
+export default function SubjectsTable() {
   const [rowSelection, setRowSelection] = React.useState({});
   const { theme } = useTheme();
 
-  const { setSelectedSubject } = useContext(SelectedSubjectContext);
-  const { setOnFocusSubject } = useContext(onFocusSubjectContext);
+  // const { setSelectedSubject } = useContext(SelectedSubjectContext);
+  // const { setOnFocusSubject } = useContext(onFocusSubjectContext);
+
+  const {searchedSubjects, setSelectedSubject, setOnFocusSubject } = useSubjects();
   
 
   const table = useReactTable<SubjectsType>({
-    data,
+    data: searchedSubjects,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -180,8 +184,8 @@ export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
                 onClick={() => {
                   setSelectedSubject(row.original);
                 }}
-                onMouseEnter={() => setOnFocusSubject(row.original)}
-                onMouseLeave={() => setOnFocusSubject({} as SubjectsType)}
+                onMouseEnter={() => setOnFocusSubject({code: row.original.code})}
+                onMouseLeave={() => setOnFocusSubject({} as any)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
