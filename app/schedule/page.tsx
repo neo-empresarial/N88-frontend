@@ -11,12 +11,152 @@ import WeekCalendarComponent from "./components/WeekCalendar";
 import SearchSubject from "./components/SearchSubject";
 import { lightColors, darkColors } from "./constants/colors";
 import { DataType, SubjectsType } from "./types/dataType";
-
 import SelectedSubjectContext from "./providers/selectedSubjectContext";
 import OnFocusSubjectProvider from "./providers/onFocusSubjectContext";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import useAxios from "@/api/AxiosInstance";
 
+const data2 = {
+  idsubject: 5,
+  code: "ACL5137",
+  name: "Micologia Clínica",
+  classes: [
+    {
+      idclass: 14,
+      classcode: "07102A",
+      totalvacancies: 7,
+      freevacancies: 0,
+      schedules: [
+        {
+          idschedule: 20,
+          weekday: "3",
+          starttime: "0910",
+          classesnumber: 3,
+          building: "CCS",
+          room: "K001",
+        },
+      ],
+      professors: [
+        {
+          idprofessor: 9,
+          name: "Jairo Ivo dos Santos",
+        },
+      ],
+    },
+    {
+      idclass: 15,
+      classcode: "07102B",
+      totalvacancies: 7,
+      freevacancies: 0,
+      schedules: [
+        {
+          idschedule: 21,
+          weekday: "4",
+          starttime: "0730",
+          classesnumber: 3,
+          building: "CCS",
+          room: "K001",
+        },
+      ],
+      professors: [
+        {
+          idprofessor: 9,
+          name: "Jairo Ivo dos Santos",
+        },
+      ],
+    },
+    {
+      idclass: 16,
+      classcode: "07102C",
+      totalvacancies: 7,
+      freevacancies: 0,
+      schedules: [
+        {
+          idschedule: 22,
+          weekday: "4",
+          starttime: "1330",
+          classesnumber: 3,
+          building: "CCS",
+          room: "K001",
+        },
+      ],
+      professors: [
+        {
+          idprofessor: 10,
+          name: "Iara Fabricia Kretzer",
+        },
+      ],
+    },
+    {
+      idclass: 17,
+      classcode: "07102D",
+      totalvacancies: 7,
+      freevacancies: 0,
+      schedules: [
+        {
+          idschedule: 23,
+          weekday: "5",
+          starttime: "0820",
+          classesnumber: 3,
+          building: "CCS",
+          room: "K001",
+        },
+      ],
+      professors: [
+        {
+          idprofessor: 9,
+          name: "Jairo Ivo dos Santos",
+        },
+      ],
+    },
+    {
+      idclass: 18,
+      classcode: "07102E",
+      totalvacancies: 7,
+      freevacancies: 0,
+      schedules: [
+        {
+          idschedule: 24,
+          weekday: "6",
+          starttime: "0730",
+          classesnumber: 3,
+          building: "CCS",
+          room: "K001",
+        },
+      ],
+      professors: [
+        {
+          idprofessor: 9,
+          name: "Jairo Ivo dos Santos",
+        },
+      ],
+    },
+    {
+      idclass: 19,
+      classcode: "07102F",
+      totalvacancies: 7,
+      freevacancies: 0,
+      schedules: [
+        {
+          idschedule: 25,
+          weekday: "6",
+          starttime: "1330",
+          classesnumber: 3,
+          building: "CCS",
+          room: "K001",
+        },
+      ],
+      professors: [
+        {
+          idprofessor: 10,
+          name: "Iara Fabricia Kretzer",
+        },
+      ],
+    },
+  ],
+};
+
+// os dados estão diferentes
 const data = {
   idsavedschedule: 7,
   code: "user7",
@@ -90,31 +230,25 @@ const data = {
   ],
 };
 
-function defineColorToEachSubject({
-  data,
-}: {
-  data: DataType;
-}): SubjectsType[] {
-  const subjects_with_color: SubjectsType[] = data.subjects.map(
-    (subject, index) => {
-      return {
-        ...subject,
-        color: [
-          lightColors[index % lightColors.length],
-          darkColors[index % darkColors.length],
-        ],
-      };
-    }
-  );
-
-  return subjects_with_color;
-}
-
 export default function SchedulePage() {
   const { getAllSubjects } = useAxios();
   const [subjects, setSubjects] = useState<SubjectsType[]>([]);
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(true);
-  const subjects_with_color = defineColorToEachSubject({ data });
+  const [interestSubjects, setInterestSubjects] = useState<SubjectsType[]>([]);
+
+  const dataWithColors = interestSubjects.map((subject, index) => {
+    return {
+      ...subject,
+      color: [
+        lightColors[index % lightColors.length],
+        darkColors[index % darkColors.length],
+      ],
+    };
+  });
+
+  useEffect(() => {
+    console.log(dataWithColors);
+  }, [dataWithColors]);
 
   useEffect(() => {
     getAllSubjects().then((data) => {
@@ -127,7 +261,12 @@ export default function SchedulePage() {
     <div className="p-10">
       <SelectedSubjectContext>
         <OnFocusSubjectProvider>
-          <SearchSubject subjects={subjects} isLoading={isLoadingSubjects} />
+          <SearchSubject
+            interestSubjects={interestSubjects}
+            setInterestSubjects={setInterestSubjects}
+            subjects={subjects}
+            isLoading={isLoadingSubjects}
+          />
           <ResizablePanelGroup
             direction="horizontal"
             className="w-screen rounded-lg border md:min-w-[450px] mt-4"
@@ -135,7 +274,7 @@ export default function SchedulePage() {
             <ResizablePanel defaultSize={50}>
               <ResizablePanelGroup direction="vertical">
                 <ResizablePanel defaultSize={50}>
-                  <SubjectsTable />
+                  <SubjectsTable data={dataWithColors} />
                 </ResizablePanel>
                 <ResizableHandle />
                 <ResizablePanel defaultSize={50}>
@@ -143,13 +282,10 @@ export default function SchedulePage() {
                 </ResizablePanel>
               </ResizablePanelGroup>
             </ResizablePanel>
-
             <ResizableHandle />
-
             <ResizablePanel defaultSize={50}>
-              <WeekCalendarComponent data={subjects_with_color} />
+              <WeekCalendarComponent data={dataWithColors} />
             </ResizablePanel>
-
             <ResizableHandle />
           </ResizablePanelGroup>
         </OnFocusSubjectProvider>

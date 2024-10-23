@@ -23,11 +23,15 @@ import {
 import useAxios from "@/api/AxiosInstance";
 
 interface SearchSubjectProps {
+  interestSubjects: SubjectsType[];
+  setInterestSubjects: (subjects: SubjectsType[]) => void;
   subjects: SubjectsType[];
   isLoading: boolean;
 }
 
 export default function SearchSubject({
+  interestSubjects,
+  setInterestSubjects,
   subjects,
   isLoading,
 }: SearchSubjectProps) {
@@ -36,9 +40,6 @@ export default function SearchSubject({
   const { getSubject } = useAxios();
   const [searchTerm, setSearchTerm] = useState("");
   const [paginationLimit, setPaginationLimit] = useState(20); // initial limit
-  const { interestSubjects, setInterestSubjects } = useContext(
-    SelectedSubjectContext
-  );
 
   // filter objects based on user input
   const filteredSubjects = useMemo(() => {

@@ -1,11 +1,11 @@
-
+import { SelectedSubjectContext } from "./schedule/providers/selectedSubjectContext";
 
 export default function Home() {
   return (
-    <div >
-      <main>
-        
-      </main>
+    <div>
+      <div>
+        <main></main>
+      </div>
     </div>
   );
 }

@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown, Trash } from "lucide-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -32,6 +32,9 @@ import { useTheme } from "next-themes";
 
 const column_height = "h-5";
 
+function removeLine(subjects: SubjectsType[], subject: SubjectsType) {
+  return subjects.filter((s) => s.code !== subject.code);
+}
 export const columns: ColumnDef<SubjectsType>[] = [
   {
     id: "select",
@@ -95,31 +98,19 @@ export const columns: ColumnDef<SubjectsType>[] = [
           <ChevronUp className="h-4 m-1" />
 
           <ChevronDown className="h-4 m-1" />
-
-          {/* <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-12 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Editar</DropdownMenuLabel>
-              <DropdownMenuItem>Mover para cima</DropdownMenuItem>
-              <DropdownMenuItem>Mover para baixo</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
-                Excluir
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu> */}
+          <Trash
+            className="h-4 m-1"
+            onClick={() => {
+              console.log("tem que remover aqui");
+            }}
+          />
         </div>
       );
     },
   },
 ];
 
-export default function SubjectsTable() {
+export default function SubjectsTable(data: { data: SubjectsType[] }) {
   const [rowSelection, setRowSelection] = useState({});
   const { theme } = useTheme();
 
@@ -136,7 +127,7 @@ export default function SubjectsTable() {
   }, [interestSubjects]);
 
   const table = useReactTable<SubjectsType>({
-    interestSubjects,
+    data: data.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -152,10 +143,9 @@ export default function SubjectsTable() {
     <div
       className="p-3"
       onClick={() => {
-        console.log(interestSubjects);
+        console.log(data);
       }}
     >
-      alda
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

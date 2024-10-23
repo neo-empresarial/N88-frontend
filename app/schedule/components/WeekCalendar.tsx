@@ -49,9 +49,9 @@ function formatSubjectsToTableData(subjects: SubjectsType[]): {
         color: "",
       });
 
-      const subject = subjects.filter((subject) => {
-        return subject.classes.find((classData) => {
-          return classData.schedules.find((schedule) => {
+      const subject = subjects?.filter((subject) => {
+        return subject?.classes.find((classData) => {
+          return classData?.schedules?.find((schedule) => {
             const class_start_time = timeSlots.findIndex(
               (t) => t === schedule.starttime
             );
@@ -68,17 +68,17 @@ function formatSubjectsToTableData(subjects: SubjectsType[]): {
         });
       });
 
-      if (subject.length > 1) {
+      if (subject?.length > 1) {
         conflicts.push({
           subjects: subject.map((s) => s.code),
           time: time,
         });
-        formattedData[formattedData.length - 1].code = subject[-1].code;
+        formattedData[formattedData.length - 1].code = subject[-1]?.code;
         formattedData[formattedData.length - 1].color = "red";
-      } else if (subject.length === 1) {
-        formattedData[formattedData.length - 1].code = subject[0].code;
-        formattedData[formattedData.length - 1].color = subject[0].color
-          ? subject[0].color
+      } else if (subject?.length === 1) {
+        formattedData[formattedData.length - 1].code = subject[0]?.code;
+        formattedData[formattedData.length - 1].color = subject[0]?.color
+          ? subject[0]?.color
           : "blue";
       } else {
         formattedData[formattedData.length - 1].code = "";
@@ -102,13 +102,13 @@ function chooseColor(
     if (!(data.code === onFocusSubject.code)) {
       return data.color[0];
     } else {
-      return 'bg-gray-300 border-2 border-black';
+      return "bg-gray-300 border-2 border-black";
     }
   } else {
     if (!(data.code === onFocusSubject.code)) {
       return data.color[1];
     } else {
-      return 'bg-gray-600 border-2 border-white';
+      return "bg-gray-600 border-2 border-white";
     }
   }
 }
