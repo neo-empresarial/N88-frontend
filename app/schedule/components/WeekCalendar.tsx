@@ -34,6 +34,22 @@ function getDayIndex(day: string): number {
   return dayMapping[day.toLowerCase()] ?? -1; // Returns -1 if no match is found
 }
 
+function getSchedulesFromSubjectClass(code: string, classCode: string) {
+  const { searchedSubjects } = useSubjects();
+
+  const subject = searchedSubjects.find((subject) => subject.code === code);
+
+  if (!subject) return [];
+
+  const classData = subject.classes.find(
+    (classData) => classData.classcode === classCode
+  );
+
+  if (!classData) return [];
+
+  return classData.schedules;
+}
+
 function formatSubjectsToTableData(subjects: scheduleSubjectsType[]): {
   tableData: { [key: string]: string | string[] }[];
   conflicts: { [key: string]: string | string[] }[];
@@ -41,7 +57,7 @@ function formatSubjectsToTableData(subjects: scheduleSubjectsType[]): {
   const tableData: { [key: string]: string | string[] }[] = [];
   const conflicts: { [key: string]: string | string[] }[] = [];
 
-  const { searchedSubjects } = useSubjects();
+  // const { searchedSubjects } = useSubjects();
 
   timeSlots.forEach((time) => {
     weekDays.forEach((day) => {
@@ -50,53 +66,37 @@ function formatSubjectsToTableData(subjects: scheduleSubjectsType[]): {
       tableData.push({
         time: time,
         day: day,
-        code: "",
-        color: "",
+        code: [],
+        color: [],
       });
-
-      const subject = subjects.filter((subject) => {
-        return subject.classes.find((classcode) => {
-          const schedules =
-            searchedSubjects
-              .find((s) => s.code === subject.code)
-              ?.classes.find((c) => c.classcode === classcode)?.schedules || [];
-
-          return schedules.filter((schedule) => {
-            const class_start_time = timeSlots.findIndex(
-              (t) => t === schedule.starttime
-            );
-            const class_end_time = class_start_time + schedule.classesnumber - 1;
-
-            const condition =
-              getDayIndex(day) === Number(schedule.weekday) &&
-              timeSlots.indexOf(time) >= class_start_time &&
-              timeSlots.indexOf(time) <= class_end_time;
-
-            return condition;
-          });
-        });
-      })
-
-      if (subject.length > 1) {
-        conflicts.push({
-          subjects: subject.map((s) => s.code),
-          time: time,
-        });
-        tableData[tableData.length - 1].code = subject[subject.length - 1].code;
-        tableData[tableData.length - 1].color = "bg-rose-800";
-      } else if (subject.length === 1) {
-        tableData[tableData.length - 1].code = subject[0].code;
-        tableData[tableData.length - 1].color = subject[0].color
-          ? subject[0].color
-          : "blue";
-      } else {
-        tableData[tableData.length - 1].code = "";
-        tableData[tableData.length - 1].color = "";
-      }
     });
   });
 
-  console.log({tableData});
+  subjects.forEach((subject) => {
+    subject.classes.forEach((classCode) => {
+      const schedules = getSchedulesFromSubjectClass(subject.code, classCode);
+
+      if (!schedules) throw new Error("No schedules found for some reason");
+
+      schedules.forEach((schedule) => {
+        const dayIndex = getDayIndex(schedule.weekday);
+
+        if (dayIndex === -1) {
+          throw new Error("Invalid day");
+        }
+
+        const timeIndex = timeSlots.indexOf(schedule.starttime);
+
+        if (timeIndex === -1) {
+          throw new Error("Invalid time");
+        }
+
+        
+      });
+    });
+  });
+
+  console.log({ tableData });
 
   return { tableData, conflicts };
 }
