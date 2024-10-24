@@ -12,8 +12,7 @@ import SearchSubject from "./components/SearchSubject";
 import { lightColors, darkColors } from "./constants/colors";
 import { DataType, SubjectsType } from "./types/dataType";
 
-import SelectedSubjectContext from "./providers/selectedSubjectContext";
-import OnFocusSubjectProvider from "./providers/onFocusSubjectContext";
+import { SubjectsProvider } from "./providers/subjectsContext";
 
 const data = {
   idsavedschedule: 7,
@@ -40,7 +39,37 @@ const data = {
             },
             {
               idschedule: 23,
-              weekday: "2",
+              weekday: "3",
+              starttime: "10:10",
+              classesnumber: 2,
+              building: "CCS",
+              room: "J006",
+            },
+          ],
+          professors: [
+            {
+              idprofessor: 8,
+              name: "Solange Lucia Blatt",
+            },
+          ],
+        },
+        {
+          idclass: 2,
+          classcode: "061022",
+          totalvacancies: 7,
+          freevacancies: 4,
+          schedules: [
+            {
+              idschedule: 30,
+              weekday: "4",
+              starttime: "8:20",
+              classesnumber: 4,
+              building: "CCS",
+              room: "K101",
+            },
+            {
+              idschedule: 23,
+              weekday: "5",
               starttime: "10:10",
               classesnumber: 2,
               building: "CCS",
@@ -56,35 +85,57 @@ const data = {
         },
       ],
     },
-    {
-      idsubject: 24,
-      code: "ACL5136",
-      name: "Uroanálise [Cancelada]",
-      classes: [
-        {
-          idclass: 2,
-          classcode: "06102A",
-          totalvacancies: 0,
-          freevacancies: 0,
-          schedules: [
-            {
-              idschedule: 31,
-              weekday: "3",
-              starttime: "09:10",
-              classesnumber: 3,
-              building: "AUX",
-              room: "ALOCAR\n",
-            },
-          ],
-          professors: [
-            {
-              idprofessor: 11,
-              name: "Dirleise Colle",
-            },
-          ],
-        },
-      ],
-    },
+    // {
+    //   idsubject: 24,
+    //   code: "ACL5136",
+    //   name: "Uroanálise [Cancelada]",
+    //   classes: [
+    //     {
+    //       idclass: 2,
+    //       classcode: "06102A",
+    //       totalvacancies: 0,
+    //       freevacancies: 0,
+    //       schedules: [
+    //         {
+    //           idschedule: 31,
+    //           weekday: "3",
+    //           starttime: "09:10",
+    //           classesnumber: 3,
+    //           building: "AUX",
+    //           room: "ALOCAR\n",
+    //         },
+    //       ],
+    //       professors: [
+    //         {
+    //           idprofessor: 11,
+    //           name: "Dirleise Colle",
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       idclass: 3,
+    //       classcode: "06102B",
+    //       totalvacancies: 0,
+    //       freevacancies: 0,
+    //       schedules: [
+    //         {
+    //           idschedule: 31,
+    //           weekday: "3",
+    //           starttime: "09:10",
+    //           classesnumber: 3,
+    //           building: "AUX",
+    //           room: "ALOCAR\n",
+    //         },
+    //       ],
+    //       professors: [
+    //         {
+    //           idprofessor: 11,
+    //           name: "Dirleise Colle 2",
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
   ],
 };
 
@@ -113,35 +164,33 @@ export default function SchedulePage() {
 
   return (
     <div className="p-10">
-      <SelectedSubjectContext>
-        <OnFocusSubjectProvider>
-          <SearchSubject />
-          <ResizablePanelGroup
-            direction="horizontal"
-            className="w-screen rounded-lg border md:min-w-[450px]"
-          >
-            <ResizablePanel defaultSize={50}>
-              <ResizablePanelGroup direction="vertical">
-                <ResizablePanel defaultSize={50}>
-                  <SubjectsTable data={subjects_with_color} />
-                </ResizablePanel>
-                <ResizableHandle />
-                <ResizablePanel defaultSize={50}>
-                  <SelectedSubject />
-                </ResizablePanel>
-              </ResizablePanelGroup>
-            </ResizablePanel>
+      <SubjectsProvider>
+        <SearchSubject data={subjects_with_color}/>
+        <ResizablePanelGroup
+          direction="horizontal"
+          className="w-screen rounded-lg border md:min-w-[450px]"
+        >
+          <ResizablePanel defaultSize={50}>
+            <ResizablePanelGroup direction="vertical">
+              <ResizablePanel defaultSize={50}>
+                <SubjectsTable/>
+              </ResizablePanel>
+              <ResizableHandle />
+              <ResizablePanel defaultSize={50}>
+                <SelectedSubject />
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </ResizablePanel>
 
-            <ResizableHandle />
+          <ResizableHandle />
 
-            <ResizablePanel defaultSize={50}>
-              <WeekCalendarComponent data={subjects_with_color} />
-            </ResizablePanel>
+          <ResizablePanel defaultSize={50}>
+            <WeekCalendarComponent/>
+          </ResizablePanel>
 
-            <ResizableHandle />
-          </ResizablePanelGroup>
-        </OnFocusSubjectProvider>
-      </SelectedSubjectContext>
+          <ResizableHandle />
+        </ResizablePanelGroup>
+      </SubjectsProvider>
     </div>
   );
 }
