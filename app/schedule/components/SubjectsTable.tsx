@@ -1,8 +1,7 @@
 ﻿"use client";
 
-import { useState, useContext, useEffect } from "react";
-import { SelectedSubjectContext } from "../providers/selectedSubjectContext";
-import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
+import { useState } from "react";
+import { useSubjects } from "../providers/subjectsContext";
 
 import {
   ColumnDef,
@@ -110,24 +109,18 @@ export const columns: ColumnDef<SubjectsType>[] = [
   },
 ];
 
-export default function SubjectsTable(data: { data: SubjectsType[] }) {
+export default function SubjectsTable() {
   const [rowSelection, setRowSelection] = useState({});
   const { theme } = useTheme();
 
-  const {
-    interestSubjects,
-    selectedSubject,
-    setInterestSubjects,
-    setSelectedSubject,
-  } = useContext(SelectedSubjectContext);
-  const { setOnFocusSubject } = useContext(onFocusSubjectContext);
+  // const { setSelectedSubject } = useContext(SelectedSubjectContext);
+  // const { setOnFocusSubject } = useContext(onFocusSubjectContext);
 
-  useEffect(() => {
-    console.log(interestSubjects);
-  }, [interestSubjects]);
+  const {searchedSubjects, setSelectedSubject, setOnFocusSubject } = useSubjects();
+  
 
   const table = useReactTable<SubjectsType>({
-    data: data.data,
+    data: searchedSubjects,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -142,9 +135,6 @@ export default function SubjectsTable(data: { data: SubjectsType[] }) {
   return (
     <div
       className="p-3"
-      onClick={() => {
-        console.log(data);
-      }}
     >
       <Table>
         <TableHeader>
@@ -183,8 +173,8 @@ export default function SubjectsTable(data: { data: SubjectsType[] }) {
                 onClick={() => {
                   setSelectedSubject(row.original);
                 }}
-                onMouseEnter={() => setOnFocusSubject(row.original)}
-                onMouseLeave={() => setOnFocusSubject({} as SubjectsType)}
+                onMouseEnter={() => setOnFocusSubject({code: row.original.code})}
+                onMouseLeave={() => setOnFocusSubject({} as any)}
               >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>

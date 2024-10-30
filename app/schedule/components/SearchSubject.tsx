@@ -2,7 +2,8 @@
 import { SubjectsType } from "../types/dataType";
 import { useState, useEffect, useContext, useMemo } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
-import { SelectedSubjectContext } from "../providers/selectedSubjectContext";
+
+import { useSubjects } from "../providers/subjectsContext";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -23,18 +24,13 @@ import {
 import useAxios from "@/api/AxiosInstance";
 
 interface SearchSubjectProps {
-  interestSubjects: SubjectsType[];
-  setInterestSubjects: (subjects: SubjectsType[]) => void;
   subjects: SubjectsType[];
-  isLoading: boolean;
 }
 
 export default function SearchSubject({
-  interestSubjects,
-  setInterestSubjects,
   subjects,
-  isLoading,
 }: SearchSubjectProps) {
+  const { searchedSubjects, setSearchedSubjects } = useSubjects();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const { getSubject } = useAxios();
@@ -55,20 +51,20 @@ export default function SearchSubject({
   };
 
   const handleInterrestSubjects = (subject: SubjectsType) => {
-    const isAlreadySelected = interestSubjects.some((interestsSubject) => {
+    const isAlreadySelected = searchedSubjects.some((interestsSubject) => {
       return interestsSubject.name == subject.name;
     });
 
     if (isAlreadySelected) {
-      setInterestSubjects(
-        interestSubjects.filter(
+      setSearchedSubjects(
+        searchedSubjects.filter(
           (interestsSubject) => interestsSubject.name != subject.name
         )
       );
     } else {
       let tempSubject;
       getSubject(subject.idsubject).then((response) =>
-        setInterestSubjects([...interestSubjects, response])
+        setSearchedSubjects([...searchedSubjects, response])
       );
     }
   };
@@ -115,7 +111,7 @@ export default function SearchSubject({
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        interestSubjects.find(
+                        searchedSubjects.find(
                           (interestSubject) =>
                             interestSubject.name === subject.name
                         )
