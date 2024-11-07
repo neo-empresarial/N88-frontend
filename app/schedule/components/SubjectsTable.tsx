@@ -2,18 +2,7 @@
 
 import { useState } from "react";
 import { useSubjects } from "../providers/subjectsContext";
-
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
 import { ChevronUp, ChevronDown, Trash } from "lucide-react";
-
 import { Checkbox } from "@/components/ui/checkbox";
 
 import {
@@ -23,173 +12,93 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableCaption,
 } from "@/components/ui/table";
 
 import { SubjectsType } from "../types/dataType";
-
 import { useTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
 
 const column_height = "h-5";
 
 function removeLine(subjects: SubjectsType[], subject: SubjectsType) {
   return subjects.filter((s) => s.code !== subject.code);
 }
-export const columns: ColumnDef<SubjectsType>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className={`flex justify-center items-center ${column_height}`}>
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "code",
-    header: "Código",
-    cell: ({ row }) => (
-      <div className={`flex items-center capitalize ${column_height}`}>
-        {row.getValue("code")}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "classcode",
-    header: "Turma",
-    cell: ({ row }) => (
-      <div className={`flex items-center capitalize ${column_height}`}>
-        {row.getValue("classcode")}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "name",
-    header: "Nome da disciplina",
-    cell: ({ row }) => (
-      <div className={`flex items-center capitalize ${column_height}`}>
-        {row.getValue("name")}
-      </div>
-    ),
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      return (
-        <div className={`flex justify-end ${column_height}`}>
-          <ChevronUp className="h-4 m-1" />
-
-          <ChevronDown className="h-4 m-1" />
-          <Trash
-            className="h-4 m-1"
-            onClick={() => {
-              console.log("tem que remover aqui");
-            }}
-          />
-        </div>
-      );
-    },
-  },
-];
 
 export default function SubjectsTable() {
   const [rowSelection, setRowSelection] = useState({});
   const { theme } = useTheme();
-
-  // const { setSelectedSubject } = useContext(SelectedSubjectContext);
-  // const { setOnFocusSubject } = useContext(onFocusSubjectContext);
-
-  const {searchedSubjects, setSelectedSubject, setOnFocusSubject } = useSubjects();
-  
-
-  const table = useReactTable<SubjectsType>({
-    data: searchedSubjects,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onRowSelectionChange: setRowSelection,
-    state: {
-      rowSelection,
-    },
-  });
+  const { searchedSubjects, setSelectedSubject, setOnFocusSubject } =
+    useSubjects();
 
   return (
-    <div
-      className="p-3"
-    >
+    <div className="p-3">
       <Table>
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
+          <TableRow>
+            <TableHead className="w-10 flex justify-center items-center">
+              <Checkbox
+                // checked={searchedSubjects.every((row) => row.selected)}
+                // onCheckedChange={(value) => {
+                //   searchedSubjects.forEach((row) => (row.selected = value));
+                //   setRowSelection(
+                //     searchedSubjects.reduce(
+                //       (acc, row, idx) => ({ ...acc, [idx]: value }),
+                //       {}
+                //     )
+                //   );
+                // }}
+                aria-label="Select all"
+              />
+            </TableHead>
+            <TableHead>Código</TableHead>
+            <TableHead>Turma</TableHead>
+            <TableHead>Nome da disciplina</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
         </TableHeader>
         <TableBody>
-          {table?.getRowModel()?.rows?.length ? (
-            table?.getRowModel()?.rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className={
-                  (row.original.color && Array.isArray(row.original.color)
-                    ? theme === "light"
-                      ? `${row.original.color[0]}`
-                      : `${row.original.color[1]}`
-                    : "") +
-                  " " +
-                  "cursor-pointer"
-                }
-                onClick={() => {
-                  setSelectedSubject(row.original);
-                }}
-                onMouseEnter={() => setOnFocusSubject({code: row.original.code})}
-                onMouseLeave={() => setOnFocusSubject({} as any)}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+          {searchedSubjects.map((row, idx) => (
+            <TableRow
+              key={row.code}
+              className={`cursor-pointer ${
+                row.color && Array.isArray(row.color)
+                  ? theme === "light"
+                    ? row.color[0]
+                    : row.color[1]
+                  : ""
+              }`}
+              onClick={() => setSelectedSubject(row)}
+              onMouseEnter={() => setOnFocusSubject({ code: row.code })}
+              onMouseLeave={() => setOnFocusSubject({} as any)}
+            >
+              <TableCell className="w-10 flex justify-center items-center">
+                <Checkbox
+                  // checked={!!rowSelection[idx]}
+                  onCheckedChange={(value) =>
+                    setRowSelection((prev) => ({ ...prev, [idx]: value }))
+                  }
+                  aria-label="Select row"
+                />
+              </TableCell>
+              <TableCell>{row.code}</TableCell>
+              <TableCell>X</TableCell>
+              <TableCell>{row.name}</TableCell>
+              <TableCell className="flex justify-end space-x-2">
+                <Button variant="outline" size="icon">
+                  <ChevronUp className="h-4" />
+                </Button>
+                <Button variant="outline" size="icon">
+                  <ChevronDown className="h-4" />
+                </Button>
+                <Button variant="outline" size="icon">
+                  <Trash
+                    className="h-4"
+                  />
+                </Button>
               </TableCell>
             </TableRow>
-          )}
+          ))}
         </TableBody>
       </Table>
     </div>
