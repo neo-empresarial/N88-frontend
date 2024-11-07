@@ -169,68 +169,71 @@ export default function SelectedSubject() {
   });
 
   return (
-    <div className={`p-3 w-full h-full`}>
-      <div
-        className={
-          (selectedSubject.color
-            ? theme === "light"
-              ? `${selectedSubject.color[0]}`
-              : `${selectedSubject.color[1]}`
-            : "") +
-          " " +
-          "w-full h-full"
-        }
-      >
-        {table.getRowModel().rows?.length ? (
-          <Table>
-            <TableHeader>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
-                      </TableHead>
-                    );
-                  })}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                  className={`${selectedSubject.color}`}
-                  // onMouseEnter={() =>
-                  //   setOnFocusSubjectClass({
-                  //     code: selectedSubject.code,
-                  //     classcode: row.original.classcode,
-                  //   })
-                  // }
-                  // onMouseLeave={() => setOnFocusSubjectClass({} as any)}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <></>
-        )}
-      </div>
+    // <div className={`p-3 w-full h-full`}>
+    //   <div
+    //     className={
+    //       (selectedSubject.color
+    //         ? theme === "light"
+    //           ? `${selectedSubject.color[0]}`
+    //           : `${selectedSubject.color[1]}`
+    //         : "") +
+    //       " " +
+    //       "w-full h-full"
+    //     }
+    //   >
+    //     {table.getRowModel().rows?.length ? (
+    //       <Table>
+    //         <TableHeader>
+    //           {table.getHeaderGroups().map((headerGroup) => (
+    //             <TableRow key={headerGroup.id}>
+    //               {headerGroup.headers.map((header) => {
+    //                 return (
+    //                   <TableHead key={header.id}>
+    //                     {header.isPlaceholder
+    //                       ? null
+    //                       : flexRender(
+    //                           header.column.columnDef.header,
+    //                           header.getContext()
+    //                         )}
+    //                   </TableHead>
+    //                 );
+    //               })}
+    //             </TableRow>
+    //           ))}
+    //         </TableHeader>
+    //         <TableBody>
+    //           {table.getRowModel().rows.map((row) => (
+    //             <TableRow
+    //               key={row.id}
+    //               data-state={row.getIsSelected() && "selected"}
+    //               className={`${selectedSubject.color}`}
+    //               // onMouseEnter={() =>
+    //               //   setOnFocusSubjectClass({
+    //               //     code: selectedSubject.code,
+    //               //     classcode: row.original.classcode,
+    //               //   })
+    //               // }
+    //               // onMouseLeave={() => setOnFocusSubjectClass({} as any)}
+    //             >
+    //               {row.getVisibleCells().map((cell) => (
+    //                 <TableCell key={cell.id}>
+    //                   {flexRender(
+    //                     cell.column.columnDef.cell,
+    //                     cell.getContext()
+    //                   )}
+    //                 </TableCell>
+    //               ))}
+    //             </TableRow>
+    //           ))}
+    //         </TableBody>
+    //       </Table>
+    //     ) : (
+    //       <></>
+    //     )}
+    //   </div>
+    // </div>
+    <div>
+      <h1>{selectedSubject.classes?.map((s) => s.classcode)}</h1>
     </div>
   );
 }
