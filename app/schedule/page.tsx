@@ -22,31 +22,16 @@ export default function SchedulePage() {
   const { getAllSubjects } = useAxios();
   const [subjects, setSubjects] = useState<SubjectsType[]>([]);
   const [isLoadingSubjects, setIsLoadingSubjects] = useState(true);
-  const [interestSubjects, setInterestSubjects] = useState<SubjectsType[]>([]);
-
-  const dataWithColors = interestSubjects.map((subject, index) => {
-    return {
-      ...subject,
-      color: [
-        lightColors[index % lightColors.length],
-        darkColors[index % darkColors.length],
-      ],
-    };
-  });
 
   useEffect(() => {
-    console.log(dataWithColors);
-  }, [dataWithColors]);
-
-  useEffect(() => {
-    getAllSubjects().then((data) => {
+    getAllSubjects().then((data: SubjectsType[]) => {
       setSubjects(data);
       setIsLoadingSubjects(false);
     });
   }, []);
 
   return (
-    <div className="p-10">
+    <div className="p-10 grid gap-2 grid-cols-1 ">
       <SubjectsProvider>
         <SearchSubject subjects={subjects}/>
         <ResizablePanelGroup

@@ -1,4 +1,4 @@
-﻿import { useContext } from "react";
+﻿import { useContext, useEffect } from "react";
 import { createContext, useState } from "react";
 import { SubjectsType } from "../types/dataType";
 
@@ -37,6 +37,9 @@ export function SubjectsProvider({
   const [onFocusSubjectClass, setOnFocusSubjectClass] = useState(
     {} as { code: string; classcode: string }
   );
+
+  useEffect(() => console.log({ searchedSubjects }), [searchedSubjects]);
+  useEffect(() => console.log({ scheduleSubjects }), [scheduleSubjects]);
 
   return (
     <SubjectsContext.Provider

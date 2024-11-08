@@ -33,7 +33,7 @@ export default function SubjectsTable() {
 
   return (
     <div className="p-3">
-      <Table>
+      <Table containerClassname="h-fit max-h-80 overflow-y-auto relative"> {/* Ajustar o max-auto automaticamente para a altura do bloco da tabela */}
         <TableHeader>
           <TableRow>
             <TableHead className="w-10 flex justify-center items-center">

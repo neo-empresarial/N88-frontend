@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ClassesType } from "../types/dataType";
+import { Badge } from "@/components/ui/badge";
 
 export default function SelectedSubject() {
   const [rowSelection, setRowSelection] = useState({});
@@ -25,9 +26,7 @@ export default function SelectedSubject() {
     setScheduleSubjects,
   } = useSubjects();
 
-  async function addOrRemoveClasses(
-    row: ClassesType & { isSelected: string | boolean }
-  ) {
+  const addOrRemoveClasses = (row: ClassesType & {isSelected: boolean | string}) => {
     const subject = scheduleSubjects.find(
       (subject) => subject.code === selectedSubject.code
     );
@@ -35,37 +34,31 @@ export default function SelectedSubject() {
     if (!subject) {
       setScheduleSubjects([
         ...scheduleSubjects,
-        {
-          code: selectedSubject.code,
-          classes: [row.classcode],
-        },
+        { code: selectedSubject.code, classes: [row.classcode] },
       ]);
       return;
     }
 
-    if (!row.isSelected) {
-      const copy = [...scheduleSubjects];
-      const index = copy.findIndex(
-        (subject) => subject.code === selectedSubject.code
-      );
-      copy[index].classes.push(row.classcode);
-      setScheduleSubjects(copy);
+    const updatedSchedule = [...scheduleSubjects];
+    const index = updatedSchedule.findIndex(
+      (subject) => subject.code === selectedSubject.code
+    );
+
+    if (row.isSelected) {
+      updatedSchedule[index].classes.push(row.classcode);
     } else {
-      const copy = [...scheduleSubjects];
-      const index = copy.findIndex(
-        (subject) => subject.code === selectedSubject.code
-      );
-      const classIndex = copy[index].classes.findIndex(
+      const classIndex = updatedSchedule[index].classes.findIndex(
         (classcode) => classcode === row.classcode
       );
-      copy[index].classes.splice(classIndex, 1);
-      setScheduleSubjects(copy);
+      updatedSchedule[index].classes.splice(classIndex, 1);
     }
-  }
+
+    setScheduleSubjects(updatedSchedule);
+  };
 
   return (
-    <div className="p-3">
-      <Table>
+    <div className="p-3 ">
+      <Table containerClassname="h-fit max-h-80 overflow-y-auto relative">
         <TableHeader>
           <TableRow>
             <TableHead className="w-10 flex justify-center items-center">
@@ -85,7 +78,16 @@ export default function SelectedSubject() {
         </TableHeader>
         <TableBody>
           {selectedSubject.classes?.map((row) => (
-            <TableRow key={row.classcode}>
+            <TableRow
+              key={row.classcode}
+              onMouseEnter={() =>
+                setOnFocusSubjectClass({
+                  code: selectedSubject.code,
+                  classcode: row.classcode,
+                })
+              }
+              onMouseLeave={() => setOnFocusSubjectClass({} as any)}
+            >
               <TableCell className="w-10 flex justify-center items-center">
                 <Checkbox
                   // checked={rowSelection[row.classcode] || false}
@@ -94,7 +96,7 @@ export default function SelectedSubject() {
                       ...prev,
                       [row.classcode]: value,
                     }));
-                    addOrRemoveClasses({ ...row, isSelected: value });
+                    return addOrRemoveClasses({ ...row, isSelected: value });
                   }}
                   aria-label={`Select ${row.classcode}`}
                 />
@@ -106,7 +108,11 @@ export default function SelectedSubject() {
                 }`}
               </TableCell>
               <TableCell>
-                {row.professors.map((prof) => prof.name).join(", ")}
+                {row.professors.map((prof) => (
+                  <Badge key={prof.idprofessor} className="m-1">
+                    {prof.name}
+                  </Badge>
+                ))}
               </TableCell>
             </TableRow>
           ))}
