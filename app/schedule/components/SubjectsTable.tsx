@@ -12,7 +12,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableCaption,
 } from "@/components/ui/table";
 
 import { SubjectsType } from "../types/dataType";
@@ -26,28 +25,52 @@ function removeLine(subjects: SubjectsType[], subject: SubjectsType) {
 }
 
 export default function SubjectsTable() {
-  const [rowSelection, setRowSelection] = useState({});
+  const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>({});
   const { theme } = useTheme();
-  const { searchedSubjects, setSelectedSubject, setOnFocusSubject } =
-    useSubjects();
+  const {
+    searchedSubjects,
+    setSelectedSubject,
+    setOnFocusSubject,
+    setSearchedSubjects,
+    setScheduleSubjects,
+    scheduleSubjects,
+  } = useSubjects();
+
+  const removeSubject = (subject: SubjectsType) => {
+    setSearchedSubjects(
+      searchedSubjects.filter((s) => s.code !== subject.code)
+    );
+    setScheduleSubjects(scheduleSubjects.filter((s) => s.code !== subject.code));
+    setSelectedSubject({} as any);
+  };
+
+  const handleSelectAll = (isChecked: boolean) => {
+    const newSelection = searchedSubjects.reduce((acc, row) => {
+      acc[row.code] = isChecked;
+      return acc;
+    }, {} as { [key: string]: boolean });
+    setRowSelection(newSelection);
+  };
+
+  const handleRowSelect = (row: SubjectsType, isChecked: boolean) => {
+    setRowSelection((prev) => ({
+      ...prev,
+      [row.code]: isChecked,
+    }));
+  };
 
   return (
     <div className="p-3">
-      <Table containerClassname="h-fit max-h-80 overflow-y-auto relative"> {/* Ajustar o max-auto automaticamente para a altura do bloco da tabela */}
+      <Table containerClassname="h-fit max-h-80 overflow-y-auto relative">
         <TableHeader>
           <TableRow>
             <TableHead className="w-10 flex justify-center items-center">
               <Checkbox
-                // checked={searchedSubjects.every((row) => row.selected)}
-                // onCheckedChange={(value) => {
-                //   searchedSubjects.forEach((row) => (row.selected = value));
-                //   setRowSelection(
-                //     searchedSubjects.reduce(
-                //       (acc, row, idx) => ({ ...acc, [idx]: value }),
-                //       {}
-                //     )
-                //   );
-                // }}
+                checked={
+                  Object.values(rowSelection).length > 0 &&
+                  Object.values(rowSelection).every((isSelected) => isSelected)
+                }
+                onCheckedChange={(value) => handleSelectAll(!!value)}
                 aria-label="Select all"
               />
             </TableHead>
@@ -58,7 +81,7 @@ export default function SubjectsTable() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {searchedSubjects.map((row, idx) => (
+          {searchedSubjects.map((row) => (
             <TableRow
               key={row.code}
               className={`cursor-pointer ${
@@ -68,22 +91,23 @@ export default function SubjectsTable() {
                     : row.color[1]
                   : ""
               }`}
-              onClick={() => setSelectedSubject(row)}
               onMouseEnter={() => setOnFocusSubject({ code: row.code })}
               onMouseLeave={() => setOnFocusSubject({} as any)}
             >
               <TableCell className="w-10 flex justify-center items-center">
                 <Checkbox
-                  // checked={!!rowSelection[idx]}
-                  onCheckedChange={(value) =>
-                    setRowSelection((prev) => ({ ...prev, [idx]: value }))
-                  }
-                  aria-label="Select row"
+                  checked={rowSelection[row.code] || false}
+                  onCheckedChange={(value) => handleRowSelect(row, value as boolean)}
+                  aria-label={`Select ${row.code}`}
                 />
               </TableCell>
-              <TableCell>{row.code}</TableCell>
-              <TableCell>X</TableCell>
-              <TableCell>{row.name}</TableCell>
+              <TableCell onClick={() => setSelectedSubject(row)}>
+                {row.code}
+              </TableCell>
+              <TableCell onClick={() => setSelectedSubject(row)}>X</TableCell>
+              <TableCell onClick={() => setSelectedSubject(row)}>
+                {row.name}
+              </TableCell>
               <TableCell className="flex justify-end space-x-2">
                 <Button variant="outline" size="icon">
                   <ChevronUp className="h-4" />
@@ -91,10 +115,12 @@ export default function SubjectsTable() {
                 <Button variant="outline" size="icon">
                   <ChevronDown className="h-4" />
                 </Button>
-                <Button variant="outline" size="icon">
-                  <Trash
-                    className="h-4"
-                  />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => removeSubject(row)}
+                >
+                  <Trash className="h-4" />
                 </Button>
               </TableCell>
             </TableRow>

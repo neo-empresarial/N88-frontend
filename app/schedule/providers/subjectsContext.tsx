@@ -40,6 +40,7 @@ export function SubjectsProvider({
 
   useEffect(() => console.log({ searchedSubjects }), [searchedSubjects]);
   useEffect(() => console.log({ scheduleSubjects }), [scheduleSubjects]);
+  useEffect(() => console.log({ onFocusSubject }), [onFocusSubject]);
 
   return (
     <SubjectsContext.Provider

@@ -17,10 +17,18 @@ import { weekDays, timeSlots } from "../constants/week-times-and-days";
 import { SubjectsType } from "../types/dataType";
 import { useTheme } from "next-themes";
 
+export type tableDataType = {
+  time: string;
+  day: string;
+  code: string[];
+  colors: string[];
+  now_color: string;
+};
+
 export default function WeekCalendarComponent() {
-  const [tableData, setTableData] = useState<
-    { [key: string]: string | string[] }[]
-  >(generateTimesAndDays());
+  const [tableData, setTableData] = useState<tableDataType[]>(
+    generateTimesAndDays()
+  );
 
   const { scheduleSubjects, searchedSubjects, onFocusSubject } = useSubjects();
   const { theme } = useTheme();
@@ -37,10 +45,12 @@ export default function WeekCalendarComponent() {
     return dayMapping[index] ?? "";
   }
 
-  function getColorFromSubject(code: string){
+  function getColorFromSubject(code: string) {
     const subject = searchedSubjects.find((subject) => subject.code === code);
-    if (!subject) return "";
-    return subject.color;
+    if (!subject) {
+      return ["", ""];
+    }
+    return subject.color || ["", ""];
   }
 
   function getSchedulesFromSubjectClass(
@@ -57,7 +67,7 @@ export default function WeekCalendarComponent() {
   }
 
   function generateTimesAndDays() {
-    const tableData: { [key: string]: any }[] = [];
+    const tableData: tableDataType[] = [];
     weekDays.forEach((day) => {
       timeSlots.forEach((time) => {
         if (day === "") return;
@@ -65,7 +75,8 @@ export default function WeekCalendarComponent() {
           time: time,
           day: day,
           code: [],
-          color: [],
+          colors: [],
+          now_color: "",
         });
       });
     });
@@ -73,31 +84,33 @@ export default function WeekCalendarComponent() {
   }
 
   function chooseColor(
-    data: { [key: string]: string | string[] } | undefined,
-    theme: string,
+    codes: string[],
+    theme: string | undefined,
     onFocusSubject: { code: string }
   ): string {
-    if (!data) return "";
+    if (!codes.length) return "";
+
+    if (codes.length > 1) return "bg-red-500";
+
+    const code = codes[0];
 
     if (theme === "light") {
-      if (!(data.code === onFocusSubject?.code)) {
-        return data.color[0];
-      } else {
-        return "bg-gray-300 border-2 border-black";
+      if (!(code === onFocusSubject?.code)) {
+        return getColorFromSubject(code)[0];
       }
+      return "bg-gray-300 border-2 border-black";
     } else {
-      if (!(data.code === onFocusSubject?.code)) {
-        return data.color[1];
-      } else {
-        return "bg-gray-600 border-2 border-white";
+      if (!(code === onFocusSubject?.code)) {
+        return getColorFromSubject(code)[1];
       }
+      return "bg-gray-600 border-2 border-white";
     }
   }
 
   function formatSubjectsToTableData(
     subjects: scheduleSubjectsType[],
     searchedSubjects: SubjectsType[]
-  ): { [key: string]: string | string[] }[] {
+  ): tableDataType[] {
     const tableData = generateTimesAndDays();
 
     if (subjects.length === 0) {
@@ -135,21 +148,38 @@ export default function WeekCalendarComponent() {
 
           for (let i = index; i < index + schedule.classesnumber; i++) {
             tableData[i].code.push(subject.code);
-            tableData[i].color.push(getColorFromSubject(subject.code));
+
+            const colors = getColorFromSubject(subject.code);
+            tableData[i].colors = colors;
+
+            tableData[i].now_color = chooseColor(
+              tableData[i].code,
+              theme,
+              onFocusSubject
+            );
           }
         });
       });
     });
 
-    console.log({ tableData });
+    // console.log({ tableData });
 
     return tableData;
   }
 
   useEffect(() => {
     setTableData(formatSubjectsToTableData(scheduleSubjects, searchedSubjects));
-    console.log({ scheduleSubjects });
   }, [scheduleSubjects]);
+
+  useEffect(() => {
+    const copy_of_tableData = [...tableData];
+
+    copy_of_tableData.map((data) => {
+      data.now_color = chooseColor(data.code, theme, onFocusSubject);
+    });
+
+    return setTableData(copy_of_tableData);
+  }, [onFocusSubject]);
 
   return (
     <div className="p-3 max-h-screen">
@@ -177,22 +207,24 @@ export default function WeekCalendarComponent() {
                   <TableCell key={`${day}-${time}`} className="w-24">
                     <div
                       className={
-                        chooseColor(
-                          tableData.find(
-                            (data) => data.time === time && data.day === day
-                          ),
-                          theme || "light",
-                          onFocusSubject
-                        ) +
+                        tableData.find(
+                          (data) => data.time === time && data.day === day
+                        )?.now_color +
                         " " +
                         "w-full flex justify-center items-center h-6 rounded-sm"
                       }
                     >
-                      <div className="text-center font-medium">
-                        {tableData.find(
-                          (data) => data.time === time && data.day === day
-                        )?.code || ""}
-                      </div>
+                      {(tableData.find(
+                        (data) => data.time === time && data.day === day
+                      )?.code?.length ?? 0) > 1 ? (
+                        <div>Conflito</div>
+                      ) : (
+                        <div className="text-center font-medium">
+                          {tableData.find(
+                            (data) => data.time === time && data.day === day
+                          )?.code || ""}
+                        </div>
+                      )}
                     </div>
                   </TableCell>
                 )

@@ -2,23 +2,21 @@
 
 import { useState } from "react";
 import { useSubjects } from "../providers/subjectsContext";
-import { useTheme } from "next-themes";
 import {
   Table,
   TableBody,
-  TableCaption,
-  TableCell,
   TableFooter,
   TableHead,
   TableHeader,
   TableRow,
+  TableCell,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ClassesType } from "../types/dataType";
 import { Badge } from "@/components/ui/badge";
 
 export default function SelectedSubject() {
-  const [rowSelection, setRowSelection] = useState({});
+  const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>({});
   const {
     selectedSubject,
     setOnFocusSubjectClass,
@@ -26,7 +24,7 @@ export default function SelectedSubject() {
     setScheduleSubjects,
   } = useSubjects();
 
-  const addOrRemoveClasses = (row: ClassesType & {isSelected: boolean | string}) => {
+  const addOrRemoveClasses = (row: ClassesType & { isSelected: boolean }) => {
     const subject = scheduleSubjects.find(
       (subject) => subject.code === selectedSubject.code
     );
@@ -56,21 +54,31 @@ export default function SelectedSubject() {
     setScheduleSubjects(updatedSchedule);
   };
 
+  const handleSelectAll = (isChecked: boolean) => {
+    const newSelection = selectedSubject.classes.reduce((acc, row) => {
+      acc[row.classcode] = isChecked;
+      return acc;
+    }, {} as { [key: string]: boolean });
+    setRowSelection(newSelection);
+
+    selectedSubject.classes.forEach((row) => {
+      addOrRemoveClasses({ ...row, isSelected: isChecked });
+    });
+  };
+
+  const handleRowSelect = (row: ClassesType, isChecked: boolean) => {
+    setRowSelection((prev) => ({
+      ...prev,
+      [row.classcode]: isChecked,
+    }));
+    addOrRemoveClasses({ ...row, isSelected: isChecked });
+  };
+
   return (
     <div className="p-3 ">
       <Table containerClassname="h-fit max-h-80 overflow-y-auto relative">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-10 flex justify-center items-center">
-              <Checkbox
-                checked={selectedSubject.classes?.length > 0}
-                onCheckedChange={(value) => {
-                  const allRowsSelected = value ? selectedSubject.classes : [];
-                  setRowSelection(allRowsSelected);
-                }}
-                aria-label="Select all"
-              />
-            </TableHead>
             <TableHead>Código</TableHead>
             <TableHead>Vagas</TableHead>
             <TableHead>Professores</TableHead>
@@ -87,20 +95,10 @@ export default function SelectedSubject() {
                 })
               }
               onMouseLeave={() => setOnFocusSubjectClass({} as any)}
+              className="cursor-pointer"
+              onClick={() => handleRowSelect(row, !rowSelection[row.classcode])}
+              
             >
-              <TableCell className="w-10 flex justify-center items-center">
-                <Checkbox
-                  // checked={rowSelection[row.classcode] || false}
-                  onCheckedChange={(value) => {
-                    setRowSelection((prev) => ({
-                      ...prev,
-                      [row.classcode]: value,
-                    }));
-                    return addOrRemoveClasses({ ...row, isSelected: value });
-                  }}
-                  aria-label={`Select ${row.classcode}`}
-                />
-              </TableCell>
               <TableCell>{row.classcode}</TableCell>
               <TableCell>
                 {`${row.totalvacancies - row.freevacancies}/${

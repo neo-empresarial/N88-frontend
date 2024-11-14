@@ -39,9 +39,18 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
 
   // filter objects based on user input
   const filteredSubjects = useMemo(() => {
-    return subjects.filter((subject) =>
-      subject.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered_subjects = subjects.filter((subject) =>
+      subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    
+    // Change the name to include the code
+    return filtered_subjects.map((subject) => {
+      return {
+        ...subject,
+        name: `${subject.code} - ${subject.name}`,
+      };
+    });
   }, [subjects, searchTerm]);
 
   const paginatedSubjects = filteredSubjects.slice(0, paginationLimit);
@@ -102,13 +111,13 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
         <PopoverContent className="w-[350px] p-0">
           <Command>
             <CommandInput
-              placeholder="Selecione a matéria..."
+              placeholder="Selecione uma matéria..."
               value={searchTerm}
               onValueChange={setSearchTerm}
             />
             <CommandList>
               {filteredSubjects.length === 0 ? (
-                <CommandEmpty>Nenheuma matéria foi encontrada.</CommandEmpty>
+                <CommandEmpty>Nenhuma matéria foi encontrada.</CommandEmpty>
               ) : (
                 <CommandGroup>
                   {paginatedSubjects.map((subject) => (
