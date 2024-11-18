@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSubjects } from "../providers/subjectsContext";
 import {
   Table,
@@ -11,72 +11,89 @@ import {
   TableRow,
   TableCell,
 } from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { ClassesType } from "../types/dataType";
 import { Badge } from "@/components/ui/badge";
+import { ClassesType } from "../types/dataType";
 
 export default function SelectedSubject() {
-  const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>({});
+  const [rowSelection, setRowSelection] = useState<string | null>(null);
   const {
     selectedSubject,
+    onFocusSubjectClass,
     setOnFocusSubjectClass,
     scheduleSubjects,
     setScheduleSubjects,
+    setOnFocusSubject,
   } = useSubjects();
 
-  const addOrRemoveClasses = (row: ClassesType & { isSelected: boolean }) => {
-    const subject = scheduleSubjects.find(
-      (subject) => subject.code === selectedSubject.code
-    );
+  const handleRowSelect = (row: ClassesType) => {
+    const isSelected = rowSelection === row.classcode;
 
-    if (!subject) {
-      setScheduleSubjects([
-        ...scheduleSubjects,
-        { code: selectedSubject.code, classes: [row.classcode] },
-      ]);
-      return;
-    }
-
-    const updatedSchedule = [...scheduleSubjects];
-    const index = updatedSchedule.findIndex(
-      (subject) => subject.code === selectedSubject.code
-    );
-
-    if (row.isSelected) {
-      updatedSchedule[index].classes.push(row.classcode);
+    if (isSelected) {
+      // Deselect the current row
+      setRowSelection(null);
+      removeClass(selectedSubject.code);
     } else {
-      const classIndex = updatedSchedule[index].classes.findIndex(
-        (classcode) => classcode === row.classcode
-      );
-      updatedSchedule[index].classes.splice(classIndex, 1);
+      // Select a new row, replacing the previous selection
+      setRowSelection(row.classcode);
+      addClass({
+        code: selectedSubject.code,
+        class: row.classcode,
+      });
     }
+  };
 
+  const addClass = (row: { code: string; class: string }) => {
+    const updatedSchedule = scheduleSubjects.filter(
+      (subject) => subject.code !== selectedSubject.code
+    );
+
+    setScheduleSubjects([...updatedSchedule, row]);
+  };
+
+  const removeClass = (code: string) => {
+    const updatedSchedule = scheduleSubjects.filter(
+      (subject) => subject.code !== code
+    );
     setScheduleSubjects(updatedSchedule);
   };
 
-  const handleSelectAll = (isChecked: boolean) => {
-    const newSelection = selectedSubject.classes.reduce((acc, row) => {
-      acc[row.classcode] = isChecked;
-      return acc;
-    }, {} as { [key: string]: boolean });
-    setRowSelection(newSelection);
+  useEffect(() => {
+    // Update the row selection when the selected subject changes
+    setRowSelection(
+      scheduleSubjects.filter((s) => s.code === selectedSubject.code)?.[0]
+        ?.class || null
+    );
+  }, [selectedSubject]);
 
-    selectedSubject.classes.forEach((row) => {
-      addOrRemoveClasses({ ...row, isSelected: isChecked });
+  useEffect(() => {
+    if (!onFocusSubjectClass.classcode) {
+      if (rowSelection) {
+        return setScheduleSubjects(
+          scheduleSubjects.map((subject) => {
+            if (subject.code === selectedSubject.code) {
+              return { ...subject, class: rowSelection };
+            }
+            return subject;
+          })
+        );
+      }
+
+      return setScheduleSubjects(
+        scheduleSubjects.filter(
+          (subject) => subject.code !== selectedSubject.code
+        )
+      );
+    }
+
+    return addClass({
+      code: onFocusSubjectClass.code,
+      class: onFocusSubjectClass.classcode,
     });
-  };
-
-  const handleRowSelect = (row: ClassesType, isChecked: boolean) => {
-    setRowSelection((prev) => ({
-      ...prev,
-      [row.classcode]: isChecked,
-    }));
-    addOrRemoveClasses({ ...row, isSelected: isChecked });
-  };
+  }, [onFocusSubjectClass]);
 
   return (
-    <div className="p-3 ">
-      <Table containerClassname="h-fit max-h-80 overflow-y-auto relative">
+    <div className="p-3">
+      <Table containerClassname="h-full max-h-full overflow-y-auto relative">
         <TableHeader>
           <TableRow>
             <TableHead>Código</TableHead>
@@ -88,16 +105,24 @@ export default function SelectedSubject() {
           {selectedSubject.classes?.map((row) => (
             <TableRow
               key={row.classcode}
-              onMouseEnter={() =>
+              onMouseEnter={() => {
                 setOnFocusSubjectClass({
                   code: selectedSubject.code,
                   classcode: row.classcode,
-                })
-              }
-              onMouseLeave={() => setOnFocusSubjectClass({} as any)}
-              className="cursor-pointer"
-              onClick={() => handleRowSelect(row, !rowSelection[row.classcode])}
-              
+                });
+                setOnFocusSubject({ code: selectedSubject.code });
+                return;
+              }}
+              onMouseLeave={() => {
+                setOnFocusSubjectClass({} as any);
+                setOnFocusSubject({} as any);
+                return;
+              }}
+              className={`cursor-pointer ${
+                rowSelection === row.classcode ? "bg-blue-100" : ""
+              }`}
+              onClick={() => handleRowSelect(row)}
+              data-state={rowSelection === row.classcode ? "selected" : ""}
             >
               <TableCell>{row.classcode}</TableCell>
               <TableCell>
@@ -107,7 +132,11 @@ export default function SelectedSubject() {
               </TableCell>
               <TableCell>
                 {row.professors.map((prof) => (
-                  <Badge key={prof.idprofessor} className="m-1">
+                  <Badge
+                    variant="outline"
+                    key={prof.idprofessor}
+                    className="m-1"
+                  >
                     {prof.name}
                   </Badge>
                 ))}

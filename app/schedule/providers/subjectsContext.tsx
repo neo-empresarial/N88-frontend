@@ -4,9 +4,9 @@ import { SubjectsType } from "../types/dataType";
 
 export type scheduleSubjectsType = {
   code: string;
-  classes: [string];
+  class: string;
   color?: string;
-}
+};
 
 export const SubjectsContext = createContext({
   searchedSubjects: [] as SubjectsType[],
@@ -30,7 +30,7 @@ export function SubjectsProvider({
     [] as SubjectsType[]
   );
   const [scheduleSubjects, setScheduleSubjects] = useState(
-    [] as { code: string; classes: [string]; color?: string }[]
+    [] as scheduleSubjectsType[]
   );
   const [selectedSubject, setSelectedSubject] = useState({} as SubjectsType);
   const [onFocusSubject, setOnFocusSubject] = useState({} as { code: string });

@@ -17,6 +17,7 @@ import {
 import { SubjectsType } from "../types/dataType";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const column_height = "h-5";
 
@@ -25,7 +26,9 @@ function removeLine(subjects: SubjectsType[], subject: SubjectsType) {
 }
 
 export default function SubjectsTable() {
-  const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>({});
+  const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>(
+    {}
+  );
   const { theme } = useTheme();
   const {
     searchedSubjects,
@@ -40,7 +43,9 @@ export default function SubjectsTable() {
     setSearchedSubjects(
       searchedSubjects.filter((s) => s.code !== subject.code)
     );
-    setScheduleSubjects(scheduleSubjects.filter((s) => s.code !== subject.code));
+    setScheduleSubjects(
+      scheduleSubjects.filter((s) => s.code !== subject.code)
+    );
     setSelectedSubject({} as any);
   };
 
@@ -84,29 +89,38 @@ export default function SubjectsTable() {
           {searchedSubjects.map((row) => (
             <TableRow
               key={row.code}
-              className={`cursor-pointer ${
-                row.color && Array.isArray(row.color)
-                  ? theme === "light"
-                    ? row.color[0]
-                    : row.color[1]
-                  : ""
-              }`}
+              className={`cursor-pointer`}
               onMouseEnter={() => setOnFocusSubject({ code: row.code })}
               onMouseLeave={() => setOnFocusSubject({} as any)}
             >
               <TableCell className="w-10 flex justify-center items-center">
                 <Checkbox
                   checked={rowSelection[row.code] || false}
-                  onCheckedChange={(value) => handleRowSelect(row, value as boolean)}
+                  onCheckedChange={(value) =>
+                    handleRowSelect(row, value as boolean)
+                  }
                   aria-label={`Select ${row.code}`}
                 />
               </TableCell>
               <TableCell onClick={() => setSelectedSubject(row)}>
                 {row.code}
               </TableCell>
-              <TableCell onClick={() => setSelectedSubject(row)}>X</TableCell>
+              <TableCell onClick={() => setSelectedSubject(row)}>{
+                scheduleSubjects.find((s) => s.code === row.code)?.class || "-"
+                }</TableCell>
               <TableCell onClick={() => setSelectedSubject(row)}>
-                {row.name}
+                <Badge
+                  variant="outline"
+                  className={`${
+                    row.color && Array.isArray(row.color)
+                      ? theme === "light"
+                        ? row.color[0] + " text-black"
+                        : row.color[1] + " text-white"
+                      : ""
+                  }`}
+                >
+                  {row.name}
+                </Badge>
               </TableCell>
               <TableCell className="flex justify-end space-x-2">
                 <Button variant="outline" size="icon">
