@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSubjects } from "../providers/subjectsContext";
 import {
   Table,
@@ -16,6 +16,10 @@ import { ClassesType } from "../types/dataType";
 
 export default function SelectedSubject() {
   const [rowSelection, setRowSelection] = useState<string | null>(null);
+
+  const tableContainerRef = useRef<HTMLDivElement | null>(null);
+  const [maxHeight, setMaxHeight] = useState<string | undefined>(undefined);
+
   const {
     selectedSubject,
     onFocusSubjectClass,
@@ -91,9 +95,39 @@ export default function SelectedSubject() {
     });
   }, [onFocusSubjectClass]);
 
+  useEffect(() => {
+    const updateMaxHeight = () => {
+      if (tableContainerRef.current) {
+        const parentHeight =
+          tableContainerRef.current.getBoundingClientRect().height;
+        setMaxHeight(`${parentHeight}px`);
+      }
+    };
+
+    // Create a ResizeObserver to observe height changes in the parent div
+    const observer = new ResizeObserver(() => {
+      updateMaxHeight();
+    });
+
+    if (tableContainerRef.current) {
+      observer.observe(tableContainerRef.current); // Start observing
+      updateMaxHeight(); // Set initial height
+    }
+
+    // Cleanup the observer on component unmount
+    return () => {
+      if (tableContainerRef.current) {
+        observer.unobserve(tableContainerRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="p-3">
-      <Table containerClassname="h-full max-h-full overflow-y-auto relative">
+    <div ref={tableContainerRef} className="p-3 h-full">
+      <Table
+        containerClassname="h-full overflow-y-auto relative"
+        style={{ maxHeight: maxHeight }} // Apply max-height dynamically
+      >
         <TableHeader>
           <TableRow>
             <TableHead>Código</TableHead>
