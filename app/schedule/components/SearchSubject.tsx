@@ -1,6 +1,6 @@
 ﻿"use client";
 import { SubjectsType } from "../types/dataType";
-import { useState, useEffect, useContext, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 
 import { useSubjects } from "../providers/subjectsContext";
@@ -23,13 +23,13 @@ import {
 
 import useAxios from "@/api/AxiosInstance";
 
+import { lightColors, darkColors } from "../constants/colors";
+
 interface SearchSubjectProps {
   subjects: SubjectsType[];
 }
 
-export default function SearchSubject({
-  subjects,
-}: SearchSubjectProps) {
+export default function SearchSubject({ subjects }: SearchSubjectProps) {
   const { searchedSubjects, setSearchedSubjects } = useSubjects();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
@@ -39,9 +39,18 @@ export default function SearchSubject({
 
   // filter objects based on user input
   const filteredSubjects = useMemo(() => {
-    return subjects.filter((subject) =>
-      subject.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered_subjects = subjects.filter((subject) =>
+      subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      subject.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    
+    // Change the name to include the code
+    return filtered_subjects.map((subject) => {
+      return {
+        ...subject,
+        name: `${subject.code} - ${subject.name}`,
+      };
+    });
   }, [subjects, searchTerm]);
 
   const paginatedSubjects = filteredSubjects.slice(0, paginationLimit);
@@ -62,9 +71,17 @@ export default function SearchSubject({
         )
       );
     } else {
-      let tempSubject;
-      getSubject(subject.idsubject).then((response) =>
-        setSearchedSubjects([...searchedSubjects, response])
+      getSubject(subject.idsubject).then((response: SubjectsType) =>{
+        const index = searchedSubjects.length;
+        const dataWithColors = {
+          ...response,
+          color: [
+            lightColors[index % lightColors.length],
+            darkColors[index % darkColors.length],
+          ],
+        };
+        setSearchedSubjects([...searchedSubjects, dataWithColors])
+      }
       );
     }
   };
@@ -76,68 +93,70 @@ export default function SearchSubject({
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-[350px] justify-between text-slate-400"
-        >
-          {value
-            ? subjects.find((subject) => subject.name === value)?.name
-            : "Selecione a matéria..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-[350px] p-0">
-        <Command>
-          <CommandInput
-            placeholder="Selecione a matéria..."
-            value={searchTerm}
-            onValueChange={setSearchTerm}
-          />
-          <CommandList>
-            {filteredSubjects.length === 0 ? (
-              <CommandEmpty>Nenheuma matéria foi encontrada.</CommandEmpty>
-            ) : (
-              <CommandGroup>
-                {paginatedSubjects.map((subject) => (
-                  <CommandItem
-                    key={subject.name}
-                    value={subject.name}
-                    onSelect={() => handleOnSelect(subject)}
+    <div>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={open}
+            className="w-[350px] justify-between text-slate-400"
+          >
+            {value
+              ? subjects.find((subject) => subject.name === value)?.name
+              : "Selecione a matéria..."}
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[350px] p-0">
+          <Command>
+            <CommandInput
+              placeholder="Selecione uma matéria..."
+              value={searchTerm}
+              onValueChange={setSearchTerm}
+            />
+            <CommandList>
+              {filteredSubjects.length === 0 ? (
+                <CommandEmpty>Nenhuma matéria foi encontrada.</CommandEmpty>
+              ) : (
+                <CommandGroup>
+                  {paginatedSubjects.map((subject) => (
+                    <CommandItem
+                      key={subject.name}
+                      value={subject.name}
+                      onSelect={() => handleOnSelect(subject)}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          searchedSubjects.find(
+                            (interestSubject) =>
+                              interestSubject.name === subject.name
+                          )
+                            ? "opacity-100"
+                            : "opacity-0"
+                        )}
+                      />
+                      {subject.name}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
+              {paginationLimit < filteredSubjects.length && (
+                <div className="p-2 text-center flex">
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={loadMoreItems}
                   >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        searchedSubjects.find(
-                          (interestSubject) =>
-                            interestSubject.name === subject.name
-                        )
-                          ? "opacity-100"
-                          : "opacity-0"
-                      )}
-                    />
-                    {subject.name}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            )}
-            {paginationLimit < filteredSubjects.length && (
-              <div className="p-2 text-center flex">
-                <Button
-                  variant="outline"
-                  className="w-full"
-                  onClick={loadMoreItems}
-                >
-                  Load More
-                </Button>
-              </div>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+                    Load More
+                  </Button>
+                </div>
+              )}
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }

@@ -1,139 +1,242 @@
 ﻿"use client";
 
-// import { useContext } from "react";
-// import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
-
+import { useState, useEffect } from "react";
 import { useSubjects } from "../providers/subjectsContext";
 import { scheduleSubjectsType } from "../providers/subjectsContext";
-
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { weekDays, timeSlots } from "../constants/week-times-and-days";
 import { SubjectsType } from "../types/dataType";
-
 import { useTheme } from "next-themes";
+import { Badge } from "@/components/ui/badge";
 
-function getDayIndex(day: string): number {
-  const dayMapping: { [key: string]: number } = {
-    segunda: 2,
-    terça: 3,
-    quarta: 4,
-    quinta: 5,
-    sexta: 6,
-    sábado: 7,
-  };
-  return dayMapping[day.toLowerCase()] ?? -1; // Returns -1 if no match is found
-}
+export type tableDataType = {
+  time: string;
+  day: string;
+  code: string[];
+  colors: string[];
+  now_color: string;
+};
 
-function getSchedulesFromSubjectClass(code: string, classCode: string) {
-  const { searchedSubjects } = useSubjects();
-
-  const subject = searchedSubjects.find((subject) => subject.code === code);
-
-  if (!subject) return [];
-
-  const classData = subject.classes.find(
-    (classData) => classData.classcode === classCode
+export default function WeekCalendarComponent() {
+  const [tableData, setTableData] = useState<tableDataType[]>(
+    generateTimesAndDays()
   );
 
-  if (!classData) return [];
+  const {
+    scheduleSubjects,
+    searchedSubjects,
+    onFocusSubject,
+    onFocusSubjectClass,
+  } = useSubjects();
+  const { theme } = useTheme();
 
-  return classData.schedules;
-}
+  function getDayNameByIndex(index: string): string {
+    const dayMapping: { [key: string]: string } = {
+      2: "Segunda",
+      3: "Terça",
+      4: "Quarta",
+      5: "Quinta",
+      6: "Sexta",
+      7: "Sábado",
+    };
+    return dayMapping[index] ?? "";
+  }
 
-function formatSubjectsToTableData(subjects: scheduleSubjectsType[]): {
-  tableData: { [key: string]: string | string[] }[];
-  conflicts: { [key: string]: string | string[] }[];
-} {
-  const tableData: { [key: string]: string | string[] }[] = [];
-  const conflicts: { [key: string]: string | string[] }[] = [];
+  function getColorFromSubject(code: string) {
+    const subject = searchedSubjects.find((subject) => subject.code === code);
+    if (!subject) {
+      return ["", ""];
+    }
+    return subject.color || ["", ""];
+  }
 
-  // const { searchedSubjects } = useSubjects();
+  function getSchedulesFromSubjectClass(
+    code: string,
+    classCode: string,
+    searchedSubjects: SubjectsType[]
+  ) {
+    const subject = searchedSubjects.find((subject) => subject.code === code);
+    if (!subject) return [];
+    const classData = subject.classes.find(
+      (classData) => classData.classcode === classCode
+    );
+    return classData ? classData.schedules : [];
+  }
 
-  timeSlots.forEach((time) => {
+  function generateTimesAndDays() {
+    const tableData: tableDataType[] = [];
     weekDays.forEach((day) => {
-      if (day === "") return;
-
-      tableData.push({
-        time: time,
-        day: day,
-        code: [],
-        color: [],
+      timeSlots.forEach((time) => {
+        if (day === "") return;
+        tableData.push({
+          time: time,
+          day: day,
+          code: [],
+          colors: [],
+          now_color: "",
+        });
       });
     });
-  });
+    return tableData;
+  }
 
-  subjects.forEach((subject) => {
-    subject.classes.forEach((classCode) => {
-      const schedules = getSchedulesFromSubjectClass(subject.code, classCode);
+  function isOneOfTheSubjectsClassOnFocus(codes: string[]) {
+    return codes.filter((code) => code === onFocusSubjectClass.code)[0];
+  }
+
+  function chooseColor(
+    codes: string[],
+    theme: string | undefined,
+    onFocusSubject: { code: string }
+  ): string {
+    if (!codes.length) return "";
+
+    let code = "";
+
+    if (codes.length > 1) {
+      const filtered_codes = codes.filter(
+        (code) => code === onFocusSubjectClass.code
+      );
+
+      if (!filtered_codes.length) return "bg-red-500";
+
+      code = filtered_codes[0];
+    } else {
+      code = codes[0];
+    }
+
+    if (theme === "light") {
+      if (!(code === onFocusSubject?.code)) {
+        return getColorFromSubject(code)[0];
+      }
+      return "bg-gray-300 border-2 border-black text-black";
+    } else {
+      if (!(code === onFocusSubject?.code)) {
+        return getColorFromSubject(code)[1];
+      }
+      return "bg-gray-600 border-2 border-white text-white";
+    }
+  }
+
+  function formatSubjectsToTableData(
+    subjects: scheduleSubjectsType[],
+    searchedSubjects: SubjectsType[]
+  ): tableDataType[] {
+    const tableData = generateTimesAndDays();
+
+    if (subjects.length === 0) {
+      console.log("No subjects found");
+      return tableData;
+    }
+
+    subjects.forEach((subject) => {
+      const classCode = subject.class;
+      const schedules = getSchedulesFromSubjectClass(
+        subject.code,
+        classCode,
+        searchedSubjects
+      );
 
       if (!schedules) throw new Error("No schedules found for some reason");
 
       schedules.forEach((schedule) => {
-        const dayIndex = getDayIndex(schedule.weekday);
+        const day = getDayNameByIndex(schedule.weekday);
+        const time =
+          schedule.starttime[0] +
+          schedule.starttime[1] +
+          ":" +
+          schedule.starttime[2] +
+          schedule.starttime[3];
 
-        if (dayIndex === -1) {
-          throw new Error("Invalid day");
+        const index = tableData.findIndex(
+          (data) => data.time === time && data.day === day
+        );
+
+        if (index === -1) {
+          console.log("Index not found");
+          return;
         }
 
-        const timeIndex = timeSlots.indexOf(schedule.starttime);
+        for (let i = index; i < index + schedule.classesnumber; i++) {
+          tableData[i].code.push(subject.code);
 
-        if (timeIndex === -1) {
-          throw new Error("Invalid time");
+          const colors = getColorFromSubject(subject.code);
+          tableData[i].colors = colors;
+
+          tableData[i].now_color = chooseColor(
+            tableData[i].code,
+            theme,
+            onFocusSubject
+          );
         }
-
-        
       });
     });
-  });
 
-  console.log({ tableData });
+    console.log({ tableData });
 
-  return { tableData, conflicts };
-}
-
-function chooseColor(
-  data: { [key: string]: string | string[] } | undefined
-): string {
-  const { theme } = useTheme();
-  // const { onFocusSubject } = useContext(onFocusSubjectContext);
-  const { onFocusSubject } = useSubjects();
-
-  if (!data) return "";
-
-  if (theme === "light") {
-    if (!(data.code === onFocusSubject.code)) {
-      return data.color[0];
-    } else {
-      return "bg-gray-300 border-2 border-black";
-    }
-  } else {
-    if (!(data.code === onFocusSubject.code)) {
-      return data.color[1];
-    } else {
-      return "bg-gray-600 border-2 border-white";
-    }
+    return tableData;
   }
-}
 
-export default function WeekCalendarComponent() {
-  const { scheduleSubjects } = useSubjects();
+  const generateTooltipContent = (code: string[]) => {
+    // Example: Matérias em conflito:
+    // - DAS5120
+    // - MTM3131
 
-  const { tableData, conflicts } = formatSubjectsToTableData(scheduleSubjects);
+    const title = "Matérias em conflito:";
+
+    // Get colors from code:
+    const colors = code.map((c) => getColorFromSubject(c));
+
+    return (
+      <>
+        <p className="text-sm font-semibold tracking-tight">{title}</p>
+        <ul className="ml-6 list-disc [&>li]:mt-2">
+          {code.map((c) => (
+            <li className="font-semibold">
+              <Badge
+                variant="outline"
+                className={`${chooseColor([c], theme, onFocusSubject)}`}
+              >
+                {" "}
+                {c}
+              </Badge>
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  };
+
+  useEffect(() => {
+    setTableData(formatSubjectsToTableData(scheduleSubjects, searchedSubjects));
+  }, [scheduleSubjects, theme]);
+
+  useEffect(() => {
+    const copy_of_tableData = [...tableData];
+
+    copy_of_tableData.map((data) => {
+      data.now_color = chooseColor(data.code, theme, onFocusSubject);
+    });
+
+    return setTableData(copy_of_tableData);
+  }, [onFocusSubject]);
 
   return (
     <div className="p-3 max-h-screen">
       <Table>
-        {/* <TableCaption>Your weekly schedule</TableCaption> */}
         <TableHeader>
           <TableRow>
             {weekDays.map((day) => (
@@ -144,39 +247,64 @@ export default function WeekCalendarComponent() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {timeSlots.map((time) => (
-            <TableRow key={time}>
-              {weekDays.map((day) =>
-                day === "" ? (
-                  <TableCell key={`${day}-${time}`} className="w-24">
-                    <div className="w-full text-center h-6 font-medium text-muted-foreground">
-                      {time}
-                    </div>
-                  </TableCell>
-                ) : (
-                  <TableCell key={`${day}-${time}`} className="w-24">
-                    <div
-                      className={
-                        chooseColor(
-                          tableData.find(
-                            (data) => data.time === time && data.day === day
-                          )
-                        ) +
-                        " " +
-                        "w-full flex justify-center items-center h-6 rounded-sm"
-                      }
-                    >
-                      <div className="text-center font-medium">
-                        {tableData.find(
-                          (data) => data.time === time && data.day === day
-                        )?.code || ""}
+          {timeSlots.map((time) => {
+            return (
+              <TableRow key={time}>
+                {weekDays.map((day) => {
+                  if (day === "") {
+                    return (
+                      <TableCell key={`${day}-${time}`} className="w-24">
+                        <div className="w-full text-center h-6 font-medium text-muted-foreground">
+                          {time}
+                        </div>
+                      </TableCell>
+                    );
+                  }
+
+                  // Pre-filter data for the current time and day
+                  const cellData = tableData.filter(
+                    (data) => data.time === time && data.day === day
+                  )[0];
+                  const hasConflict = cellData.code.length > 1;
+                  const codeToDisplay = isOneOfTheSubjectsClassOnFocus(
+                    cellData.code
+                  )
+                    ? onFocusSubjectClass.code
+                    : cellData.code[0];
+
+                  return (
+                    <TableCell key={`${day}-${time}`} className="w-24">
+                      <div
+                        className={`${
+                          cellData?.now_color || ""
+                        } w-full flex justify-center items-center h-6 rounded-sm`}
+                      >
+                        {hasConflict &&
+                        !isOneOfTheSubjectsClassOnFocus(cellData.code) ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="cursor-pointer w-full h-full flex justify-center items-center text-center">
+                                  Conflito
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                {generateTooltipContent(cellData.code)}
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <div className="text-center font-medium">
+                            {codeToDisplay || ""}
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </TableCell>
-                )
-              )}
-            </TableRow>
-          ))}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

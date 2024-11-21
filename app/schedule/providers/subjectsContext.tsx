@@ -1,12 +1,12 @@
-﻿import { useContext } from "react";
+﻿import { useContext, useEffect } from "react";
 import { createContext, useState } from "react";
 import { SubjectsType } from "../types/dataType";
 
 export type scheduleSubjectsType = {
   code: string;
-  classes: [string];
+  class: string;
   color?: string;
-}
+};
 
 export const SubjectsContext = createContext({
   searchedSubjects: [] as SubjectsType[],
@@ -30,13 +30,17 @@ export function SubjectsProvider({
     [] as SubjectsType[]
   );
   const [scheduleSubjects, setScheduleSubjects] = useState(
-    [] as { code: string; classes: [string]; color?: string }[]
+    [] as scheduleSubjectsType[]
   );
   const [selectedSubject, setSelectedSubject] = useState({} as SubjectsType);
   const [onFocusSubject, setOnFocusSubject] = useState({} as { code: string });
   const [onFocusSubjectClass, setOnFocusSubjectClass] = useState(
     {} as { code: string; classcode: string }
   );
+
+  useEffect(() => console.log({ searchedSubjects }), [searchedSubjects]);
+  useEffect(() => console.log({ scheduleSubjects }), [scheduleSubjects]);
+  useEffect(() => console.log({ onFocusSubject }), [onFocusSubject]);
 
   return (
     <SubjectsContext.Provider
