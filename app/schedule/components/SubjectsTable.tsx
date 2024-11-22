@@ -53,6 +53,11 @@ export default function SubjectsTable() {
       return acc;
     }, {} as { [key: string]: boolean });
     setRowSelection(newSelection);
+    
+    const updatedSchedule = scheduleSubjects.map((subject) => {
+      return { ...subject, activated: isChecked };
+    });
+    setScheduleSubjects(updatedSchedule);
   };
 
   const handleRowSelect = (row: SubjectsType, isChecked: boolean) => {
@@ -60,7 +65,32 @@ export default function SubjectsTable() {
       ...prev,
       [row.code]: isChecked,
     }));
+    
+    const updatedSchedule = scheduleSubjects.map((subject) => {
+      if (subject.code === row.code) {
+        return { ...subject, activated: isChecked };
+      }
+      return subject;
+    });
+
+    setScheduleSubjects(updatedSchedule);
   };
+
+  const reorderSearchedSubjects = (code: string, direction: "up" | "down") => {
+    const index = searchedSubjects.findIndex((s) => s.code === code);
+    if (index === -1) return;
+
+    const updatedSubjects = [...searchedSubjects];
+    const [removed] = updatedSubjects.splice(index, 1);
+
+    if (direction === "up") {
+      updatedSubjects.splice(index - 1, 0, removed);
+    } else {
+      updatedSubjects.splice(index + 1, 0, removed);
+    }
+
+    setSearchedSubjects(updatedSubjects);
+  }
 
   // Sync `rowSelection` with `searchedSubjects`, selecting all rows by default
   useEffect(() => {
@@ -163,10 +193,10 @@ export default function SubjectsTable() {
                 </Badge>
               </TableCell>
               <TableCell className="flex justify-end space-x-2">
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" onClick={() => reorderSearchedSubjects(row.code, 'up')}>
                   <ChevronUp className="h-4" />
                 </Button>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" onClick={() => reorderSearchedSubjects(row.code, 'down')}>
                   <ChevronDown className="h-4" />
                 </Button>
                 <Button

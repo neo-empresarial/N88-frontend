@@ -30,7 +30,12 @@ interface SearchSubjectProps {
 }
 
 export default function SearchSubject({ subjects }: SearchSubjectProps) {
-  const { searchedSubjects, setSearchedSubjects } = useSubjects();
+  const {
+    searchedSubjects,
+    setSearchedSubjects,
+    scheduleSubjects,
+    setScheduleSubjects,
+  } = useSubjects();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const { getSubject } = useAxios();
@@ -39,11 +44,12 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
 
   // filter objects based on user input
   const filteredSubjects = useMemo(() => {
-    const filtered_subjects = subjects.filter((subject) =>
-      subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      subject.code.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered_subjects = subjects.filter(
+      (subject) =>
+        subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        subject.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    
+
     // Change the name to include the code
     return filtered_subjects.map((subject) => {
       return {
@@ -59,30 +65,53 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
     setPaginationLimit((prevLimit) => prevLimit + 20); // increase the limit by 20
   };
 
+  const checkFreeColor = () => {
+    const freelightcolor = lightColors.filter(
+      (color) =>
+        !searchedSubjects.some(
+          (interestsSubject) => interestsSubject.color?.[0] === color
+        )
+    );
+
+    const freedarkcolor = darkColors.filter(
+      (color) =>
+        !searchedSubjects.some(
+          (interestsSubject) => interestsSubject.color?.[1] === color
+        )
+    );
+
+    return [freelightcolor[0], freedarkcolor[0]];
+  }
+
   const handleInterrestSubjects = (subject: SubjectsType) => {
     const isAlreadySelected = searchedSubjects.some((interestsSubject) => {
-      return interestsSubject.name == subject.name;
+      return interestsSubject.code === subject.code;
     });
 
     if (isAlreadySelected) {
       setSearchedSubjects(
         searchedSubjects.filter(
-          (interestsSubject) => interestsSubject.name != subject.name
+          (interestsSubject) => interestsSubject.code !== subject.code
+        )
+      );
+      setScheduleSubjects(
+        scheduleSubjects.filter(
+          (interestsSubject) => interestsSubject.code !== subject.code
         )
       );
     } else {
-      getSubject(subject.idsubject).then((response: SubjectsType) =>{
+      getSubject(subject.idsubject).then((response: SubjectsType) => {
         const index = searchedSubjects.length;
         const dataWithColors = {
           ...response,
-          color: [
-            lightColors[index % lightColors.length],
-            darkColors[index % darkColors.length],
-          ],
+          color: checkFreeColor(),
         };
-        setSearchedSubjects([...searchedSubjects, dataWithColors])
-      }
-      );
+        setSearchedSubjects([...searchedSubjects, dataWithColors]);
+        setScheduleSubjects([
+          ...scheduleSubjects,
+          { code: subject.code, class: "", activated: true },
+        ]);
+      });
     }
   };
 

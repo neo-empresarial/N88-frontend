@@ -3,10 +3,8 @@ import Link from "next/link";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
-import { Button } from "@/components/ui/button";
 import { ThemeProvider } from "@/components/theme-provider";
 import dynamic from "next/dynamic";
-import { MenubarContent } from "@radix-ui/react-menubar";
 
 const ChangeThemeMode = dynamic(() => import("@/components/ChangeThemeMode"), {
   ssr: false,

@@ -143,6 +143,8 @@ export default function WeekCalendarComponent() {
     }
 
     subjects.forEach((subject) => {
+      if (!subject.activated) return;
+
       const classCode = subject.class;
       const schedules = getSchedulesFromSubjectClass(
         subject.code,
@@ -185,7 +187,7 @@ export default function WeekCalendarComponent() {
       });
     });
 
-    console.log({ tableData });
+    // console.log({ tableData });
 
     return tableData;
   }

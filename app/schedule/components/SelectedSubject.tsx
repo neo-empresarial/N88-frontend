@@ -47,11 +47,18 @@ export default function SelectedSubject() {
   };
 
   const addClass = (row: { code: string; class: string }) => {
-    const updatedSchedule = scheduleSubjects.filter(
-      (subject) => subject.code !== selectedSubject.code
-    );
+    // const updatedSchedule = scheduleSubjects.filter(
+    //   (subject) => subject.code !== selectedSubject.code
+    // );
 
-    setScheduleSubjects([...updatedSchedule, row]);
+    const updatedSchedule = scheduleSubjects.map((subject) => {
+      if (subject.code === selectedSubject.code) {
+        return { ...subject, class: row.class };
+      }
+      return subject;
+    })
+
+    setScheduleSubjects(updatedSchedule);
   };
 
   const removeClass = (code: string) => {
