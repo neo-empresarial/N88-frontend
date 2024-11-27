@@ -35,6 +35,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
     setSearchedSubjects,
     scheduleSubjects,
     setScheduleSubjects,
+    setSelectedSubject,
   } = useSubjects();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
@@ -49,6 +50,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
         subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         subject.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    setSelectedSubject;
 
     // Change the name to include the code
     return filtered_subjects.map((subject) => {
@@ -81,7 +83,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
     );
 
     return [freelightcolor[0], freedarkcolor[0]];
-  }
+  };
 
   const handleInterrestSubjects = (subject: SubjectsType) => {
     const isAlreadySelected = searchedSubjects.some((interestsSubject) => {
@@ -101,7 +103,6 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
       );
     } else {
       getSubject(subject.idsubject).then((response: SubjectsType) => {
-        const index = searchedSubjects.length;
         const dataWithColors = {
           ...response,
           color: checkFreeColor(),
@@ -111,6 +112,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
           ...scheduleSubjects,
           { code: subject.code, class: "", activated: true },
         ]);
+        return setSelectedSubject(dataWithColors);
       });
     }
   };
@@ -129,7 +131,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-[350px] justify-between text-slate-400"
+            className="w-1/3 justify-between text-slate-400"
           >
             {value
               ? subjects.find((subject) => subject.name === value)?.name
@@ -137,7 +139,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[350px] p-0">
+        <PopoverContent className="w-full p-0">
           <Command>
             <CommandInput
               placeholder="Selecione uma matéria..."
@@ -160,7 +162,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
                           "mr-2 h-4 w-4",
                           searchedSubjects.find(
                             (interestSubject) =>
-                              interestSubject.name === subject.name
+                              interestSubject.code === subject.code
                           )
                             ? "opacity-100"
                             : "opacity-0"

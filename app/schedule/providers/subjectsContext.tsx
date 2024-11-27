@@ -41,7 +41,8 @@ export function SubjectsProvider({
 
   // useEffect(() => console.log({ searchedSubjects }), [searchedSubjects]);
   useEffect(() => console.log({ scheduleSubjects }), [scheduleSubjects]);
-  // useEffect(() => console.log({ onFocusSubject }), [onFocusSubject]);
+  useEffect(() => console.log({ onFocusSubject }), [onFocusSubject]);
+  useEffect(() => console.log({ onFocusSubjectClass }), [onFocusSubjectClass]);
 
   return (
     <SubjectsContext.Provider

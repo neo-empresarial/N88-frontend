@@ -47,53 +47,53 @@ export default function SelectedSubject() {
   };
 
   const addClass = (row: { code: string; class: string }) => {
-    // const updatedSchedule = scheduleSubjects.filter(
-    //   (subject) => subject.code !== selectedSubject.code
-    // );
-
-    const updatedSchedule = scheduleSubjects.map((subject) => {
-      if (subject.code === selectedSubject.code) {
-        return { ...subject, class: row.class };
-      }
-      return subject;
-    })
-
-    setScheduleSubjects(updatedSchedule);
+    setScheduleSubjects(
+      scheduleSubjects.map((subject) => {
+        if (subject.code === row.code) {
+          return { ...subject, class: row.class };
+        }
+        return subject;
+      })
+    );
   };
 
   const removeClass = (code: string) => {
-    const updatedSchedule = scheduleSubjects.filter(
-      (subject) => subject.code !== code
+    setScheduleSubjects(
+      scheduleSubjects.map((subject) => {
+        if (subject.code === code) {
+          return { ...subject, class: "" };
+        }
+        return subject;
+      })
     );
-    setScheduleSubjects(updatedSchedule);
   };
 
   useEffect(() => {
-    // Update the row selection when the selected subject changes
-    setRowSelection(
+    const isClassSelected =
       scheduleSubjects.filter((s) => s.code === selectedSubject.code)?.[0]
-        ?.class || null
-    );
+        ?.class || null;
+    
+    if (isClassSelected) {
+      return setRowSelection(isClassSelected);
+    }
+
+    // Set the first class as selected by default
+    if (selectedSubject.classes?.length) {
+      setRowSelection(selectedSubject.classes[0].classcode);
+      handleRowSelect(selectedSubject.classes[0]);
+    }
   }, [selectedSubject]);
 
   useEffect(() => {
     if (!onFocusSubjectClass.classcode) {
       if (rowSelection) {
-        return setScheduleSubjects(
-          scheduleSubjects.map((subject) => {
-            if (subject.code === selectedSubject.code) {
-              return { ...subject, class: rowSelection };
-            }
-            return subject;
-          })
-        );
+        return addClass({
+          code: selectedSubject.code,
+          class: rowSelection,
+        });
       }
 
-      return setScheduleSubjects(
-        scheduleSubjects.filter(
-          (subject) => subject.code !== selectedSubject.code
-        )
-      );
+      return removeClass(selectedSubject.code);
     }
 
     return addClass({
@@ -155,8 +155,8 @@ export default function SelectedSubject() {
                 return;
               }}
               onMouseLeave={() => {
-                setOnFocusSubjectClass({} as any);
-                setOnFocusSubject({} as any);
+                setOnFocusSubjectClass({ code: "", classcode: "" });
+                setOnFocusSubject({ code: "" });
                 return;
               }}
               className={`cursor-pointer ${

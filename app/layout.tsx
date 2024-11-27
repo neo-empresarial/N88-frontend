@@ -55,7 +55,7 @@ export default function RootLayout({
                 </MenubarTrigger>
               </MenubarMenu>
               <MenubarMenu>
-                <MenubarTrigger>
+                <MenubarTrigger className="ml-50">
                   <ChangeThemeMode />
                 </MenubarTrigger>
               </MenubarMenu>
