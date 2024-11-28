@@ -21,7 +21,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import useAxios from "@/api/AxiosInstance";
+import useAxios from "@/app/api/AxiosInstance";
 
 import { lightColors, darkColors } from "../constants/colors";
 
