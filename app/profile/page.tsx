@@ -1,7 +1,17 @@
-﻿import { getServerSession } from "next-auth/next"
-import { authOptions } from "../api/auth/[...nextauth]/options"
+﻿"use client";
 
-export default async function Page() {
-  const session = await getServerSession(authOptions)
-  return <pre>{JSON.stringify(session, null, 2)}</pre>
+import { useSession } from "next-auth/react";
+
+export default function Profile() {
+  const { data: session, status } = useSession();
+
+  if (status === "loading") {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div>
+      <pre>{JSON.stringify(session, null, 2)}</pre>
+    </div>
+  );
 }

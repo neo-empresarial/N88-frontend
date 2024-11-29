@@ -4,11 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 export default function GoogleLoginButton(props: { style: string }) {
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/"; // Retrieve the callbackUrl query parameter
+
   return (
     <Button
-      onClick={() => signIn("google")}
+      onClick={() => signIn("google", { callbackUrl })}
       className={`bg-red-500 hover:bg-red-600 text-white + ${props.style}`}
     >
       <IconBrandGoogle className="h-5 w-5" />

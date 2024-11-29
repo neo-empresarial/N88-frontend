@@ -14,5 +14,10 @@ export const authOptions: NextAuthOptions = {
     error: "/auth/error",
     verifyRequest: "/auth/verify-request",
     // newUser: null
-  }
+  },
+  callbacks: {
+    async redirect({ url, baseUrl }) {
+      return url.startsWith(baseUrl) ? url : baseUrl;
+    },
+  },
 }

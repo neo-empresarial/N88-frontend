@@ -4,11 +4,12 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import { ThemeProvider } from "@/components/theme-provider";
-import dynamic from "next/dynamic";
 
-const ChangeThemeMode = dynamic(() => import("@/components/ChangeThemeMode"), {
-  ssr: false,
-});
+// const ProfileOptions = dynamic(() => import("@/components/ProfileOptions"), {
+//   ssr: false,
+// });
+
+import ProfileOptions from "@/components/ProfileOptions";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -56,10 +57,9 @@ export default function RootLayout({
                   </MenubarTrigger>
                 </MenubarMenu>
               </div>
-              {/* Right-aligned ChangeThemeMode */}
               <MenubarMenu>
                 <MenubarTrigger className="ml-auto">
-                  <ChangeThemeMode />
+                  <ProfileOptions />
                 </MenubarTrigger>
               </MenubarMenu>
             </Menubar>
