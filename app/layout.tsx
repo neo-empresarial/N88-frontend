@@ -38,24 +38,27 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <div className="flex flex-col h-full">
-            <Menubar>
+            <Menubar className="flex justify-between items-center">
+              <div className="flex space-x-4">
+                <MenubarMenu>
+                  <MenubarTrigger>
+                    <Link href={"/"}>Home</Link>
+                  </MenubarTrigger>
+                </MenubarMenu>
+                <MenubarMenu>
+                  <MenubarTrigger>
+                    <Link href={"/schedule"}>Matérias</Link>
+                  </MenubarTrigger>
+                </MenubarMenu>
+                <MenubarMenu>
+                  <MenubarTrigger>
+                    <Link href={"/professors"}>Professores</Link>
+                  </MenubarTrigger>
+                </MenubarMenu>
+              </div>
+              {/* Right-aligned ChangeThemeMode */}
               <MenubarMenu>
-                <MenubarTrigger>
-                  <Link href={"/"}>Home</Link>
-                </MenubarTrigger>
-              </MenubarMenu>
-              <MenubarMenu>
-                <MenubarTrigger>
-                  <Link href={"/schedule"}>Matérias</Link>
-                </MenubarTrigger>
-              </MenubarMenu>
-              <MenubarMenu>
-                <MenubarTrigger>
-                  <Link href={"/professors"}>Professores</Link>
-                </MenubarTrigger>
-              </MenubarMenu>
-              <MenubarMenu>
-                <MenubarTrigger className="ml-50">
+                <MenubarTrigger className="ml-auto">
                   <ChangeThemeMode />
                 </MenubarTrigger>
               </MenubarMenu>
