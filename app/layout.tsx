@@ -5,11 +5,8 @@ import "./globals.css";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import { ThemeProvider } from "@/components/theme-provider";
 
-// const ProfileOptions = dynamic(() => import("@/components/ProfileOptions"), {
-//   ssr: false,
-// });
+import ProfileOptions from "@/app/profile/ProfileOptions";
 
-import ProfileOptions from "@/components/ProfileOptions";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",

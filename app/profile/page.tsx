@@ -1,13 +1,11 @@
-﻿"use client";
+﻿import { useState } from "react";
 
-import { useSession } from "next-auth/react";
+import useAxios from "@/app/api/AxiosInstance";
 
-export default function Profile() {
-  const { data: session, status } = useSession();
+import { getSession } from "@/lib/session";
 
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
+export default async function Profile() {
+  const session = await getSession();
 
   return (
     <div>

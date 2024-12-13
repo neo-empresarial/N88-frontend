@@ -1,12 +1,14 @@
 ﻿"use client";
 
-import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function LogoutButton() {
+  const router = useRouter();
+
   return (
     <button
-      onClick={() => signOut({ callbackUrl: "/" })}
+      onClick={() => router.push("/api/auth/signout")}
       className="flex items-center cursor-pointer w-full text-red-500"
     >
       <LogOut className="w-5" />

@@ -94,12 +94,36 @@ const useAxios = () => {
     }
   }
 
-  const getCheckUserExtraInfo = async (id: number) => {
+  const getCheckUserExtraInfo = async (email: string) => {
     try {
-      const response = await axiosPublicInstace.get(`/${id}/check_extra_info`);
+      const response = await axiosPublicInstace.get('/users/check_extra_info', {
+        params: {
+          email,
+        }
+      });
       return response.data;
     } catch (error) {
       throw error
+    }
+  }
+
+  // Authentication routes
+
+  const register = async (formData: object) => {
+    try {
+      const response = await axiosPublicInstace.post('/auth/register', formData);
+      return response;
+    } catch (error) {
+      return error;
+    }
+  }
+
+  const login = async (formData: object) => {
+    try {
+      const response = await axiosPublicInstace.post('/auth/login', formData);
+      return response;
+    } catch (error) {
+      return error;
     }
   }
 
@@ -107,7 +131,9 @@ const useAxios = () => {
     getAllSubjects,
     getFilteredSubjects,
     getSubject,
-    getCheckUserExtraInfo
+    getCheckUserExtraInfo,
+    register,
+    login,
   }
 }
 
