@@ -6,9 +6,20 @@ import { useRouter } from "next/navigation";
 export default function LogoutButton() {
   const router = useRouter();
 
+  const handleSignOut = async () => {
+    const response = await fetch("/api/auth/signout", {
+      method: "GET",
+    });
+
+    if (response.ok) {
+      router.push("/");
+      router.refresh();
+    }
+  };
+
   return (
     <button
-      onClick={() => router.push("/api/auth/signout")}
+      onClick={handleSignOut}
       className="flex items-center cursor-pointer w-full text-red-500"
     >
       <LogOut className="w-5" />

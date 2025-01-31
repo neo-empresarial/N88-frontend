@@ -16,7 +16,7 @@ export default function GoogleLoginButton(props: { style: string }) {
       >
         <IconBrandGoogle className="h-5 w-5" />
         <span className="ml-2">Login com Google</span>
-      </Button>
+      </Button> 
     </div>
   );
 }
