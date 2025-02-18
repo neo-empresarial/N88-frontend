@@ -4,7 +4,7 @@ const useAxios = () => {
   // const router = useRouter();
 
   const axiosPublicInstace = axios.create({
-    baseURL: process.env.DATABASE_URL, // "http://localhost:8000"
+    baseURL: process.env.NEXT_PUBLIC_DATABASE_URL, // "http://localhost:8000"
     headers: {
       'Content-Type': 'application/json',
     },
