@@ -3,22 +3,18 @@ import Link from "next/link";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
-import { Button } from "@/components/ui/button";
 import { ThemeProvider } from "@/components/theme-provider";
-import dynamic from "next/dynamic";
-import { MenubarContent } from "@radix-ui/react-menubar";
 
-const ChangeThemeMode = dynamic(() => import("@/components/ChangeThemeMode"), {
-  ssr: false,
-});
+import ProfileOptions from "@/app/profile/ProfileOptions";
+
 
 const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
+  src: "../fonts/GeistVF.woff",
   variable: "--font-geist-sans",
   weight: "100 900",
 });
 const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
+  src: "../fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
   weight: "100 900",
 });
@@ -33,7 +29,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="en">
       <body
@@ -41,25 +36,27 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <div className="flex flex-col h-full">
-            <Menubar>
+            <Menubar className="flex justify-between items-center">
+              <div className="flex space-x-4">
+                <MenubarMenu>
+                  <MenubarTrigger>
+                    <Link href={"/"}>Home</Link>
+                  </MenubarTrigger>
+                </MenubarMenu>
+                <MenubarMenu>
+                  <MenubarTrigger>
+                    <Link href={"/schedule"}>Matérias</Link>
+                  </MenubarTrigger>
+                </MenubarMenu>
+                <MenubarMenu>
+                  <MenubarTrigger>
+                    <Link href={"/professors"}>Professores</Link>
+                  </MenubarTrigger>
+                </MenubarMenu>
+              </div>
               <MenubarMenu>
-                <MenubarTrigger>
-                  <Link href={"/"}>Home</Link>
-                </MenubarTrigger>
-              </MenubarMenu>
-              <MenubarMenu>
-                <MenubarTrigger>
-                  <Link href={"/schedule"}>Matérias</Link>
-                </MenubarTrigger>
-              </MenubarMenu>
-              <MenubarMenu>
-                <MenubarTrigger>
-                  <Link href={"/professors"}>Professores</Link>
-                </MenubarTrigger>
-              </MenubarMenu>
-              <MenubarMenu>
-                <MenubarTrigger>
-                  <ChangeThemeMode />
+                <MenubarTrigger className="ml-auto">
+                  <ProfileOptions />
                 </MenubarTrigger>
               </MenubarMenu>
             </Menubar>

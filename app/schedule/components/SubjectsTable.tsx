@@ -1,21 +1,8 @@
 ﻿"use client";
 
-import * as React from "react";
-import { useContext } from "react";
-import { SelectedSubjectContext } from "../providers/selectedSubjectContext";
-import { onFocusSubjectContext } from "../providers/onFocusSubjectContext";
-
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { ChevronUp, ChevronDown } from "lucide-react";
-
+import { useState, useEffect, useRef } from "react";
+import { useSubjects } from "../providers/subjectsContext";
+import { ChevronUp, ChevronDown, Trash } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 import {
@@ -28,175 +15,200 @@ import {
 } from "@/components/ui/table";
 
 import { SubjectsType } from "../types/dataType";
-
 import { useTheme } from "next-themes";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
-const column_height = "h-5";
+export default function SubjectsTable() {
+  const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
-export const columns: ColumnDef<SubjectsType>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <div className="flex justify-center">
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      </div>
-    ),
-    cell: ({ row }) => (
-      <div className={`flex justify-center items-center ${column_height}`}>
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "code",
-    header: "Código",
-    cell: ({ row }) => (
-      <div className={`flex items-center capitalize ${column_height}`}>
-        {row.getValue("code")}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "classcode",
-    header: "Turma",
-    cell: ({ row }) => (
-      <div className={`flex items-center capitalize ${column_height}`}>
-        {row.getValue("classcode")}
-      </div>
-    ),
-  },
-  {
-    accessorKey: "name",
-    header: "Nome da disciplina",
-    cell: ({ row }) => (
-      <div className={`flex items-center capitalize ${column_height}`}>
-        {row.getValue("name")}
-      </div>
-    ),
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      return (
-        <div className={`flex justify-end ${column_height}`}>
-          <ChevronUp className="h-4 m-1" />
+  const tableContainerRef = useRef<HTMLDivElement | null>(null);
+  const [maxHeight, setMaxHeight] = useState<string | undefined>(undefined);
 
-          <ChevronDown className="h-4 m-1" />
-
-          {/* <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-12 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Editar</DropdownMenuLabel>
-              <DropdownMenuItem>Mover para cima</DropdownMenuItem>
-              <DropdownMenuItem>Mover para baixo</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem className="text-red-600">
-                Excluir
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu> */}
-        </div>
-      );
-    },
-  },
-];
-
-export default function SubjectsTable({ data }: { data: SubjectsType[] }) {
-  const [rowSelection, setRowSelection] = React.useState({});
   const { theme } = useTheme();
+  const {
+    searchedSubjects,
+    setSelectedSubject,
+    setOnFocusSubject,
+    setSearchedSubjects,
+    setScheduleSubjects,
+    scheduleSubjects,
+  } = useSubjects();
 
-  const { setSelectedSubject } = useContext(SelectedSubjectContext);
-  const { setOnFocusSubject } = useContext(onFocusSubjectContext);
-  
+  const removeSubject = (subject: SubjectsType) => {
+    setSearchedSubjects(
+      searchedSubjects.filter((s) => s.code !== subject.code)
+    );
+    setScheduleSubjects(
+      scheduleSubjects.filter((s) => s.code !== subject.code)
+    );
+    setSelectedSubject({} as any);
+  };
 
-  const table = useReactTable<SubjectsType>({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onRowSelectionChange: setRowSelection,
-    state: {
-      rowSelection,
-    },
-  });
+  const handleSelectAll = (isChecked: boolean) => {
+    const newSelection = searchedSubjects.reduce((acc, row) => {
+      acc[row.code] = isChecked;
+      return acc;
+    }, {} as { [key: string]: boolean });
+    setRowSelection(newSelection);
+    
+    const updatedSchedule = scheduleSubjects.map((subject) => {
+      return { ...subject, activated: isChecked };
+    });
+    setScheduleSubjects(updatedSchedule);
+  };
+
+  const handleRowSelect = (row: SubjectsType, isChecked: boolean) => {
+    setRowSelection((prev) => ({
+      ...prev,
+      [row.code]: isChecked,
+    }));
+    
+    const updatedSchedule = scheduleSubjects.map((subject) => {
+      if (subject.code === row.code) {
+        return { ...subject, activated: isChecked };
+      }
+      return subject;
+    });
+
+    setScheduleSubjects(updatedSchedule);
+  };
+
+  const reorderSearchedSubjects = (code: string, direction: "up" | "down") => {
+    const index = searchedSubjects.findIndex((s) => s.code === code);
+    if (index === -1) return;
+
+    const updatedSubjects = [...searchedSubjects];
+    const [removed] = updatedSubjects.splice(index, 1);
+
+    if (direction === "up") {
+      updatedSubjects.splice(index - 1, 0, removed);
+    } else {
+      updatedSubjects.splice(index + 1, 0, removed);
+    }
+
+    setSearchedSubjects(updatedSubjects);
+  }
+
+  // Sync `rowSelection` with `searchedSubjects`, selecting all rows by default
+  useEffect(() => {
+    const newSelection = searchedSubjects.reduce((acc, row) => {
+      acc[row.code] = true; // Select all by default
+      return acc;
+    }, {} as { [key: string]: boolean });
+
+    setRowSelection(newSelection);
+  }, [searchedSubjects]);
+
+  useEffect(() => {
+    const updateMaxHeight = () => {
+      if (tableContainerRef.current) {
+        const parentHeight =
+          tableContainerRef.current.getBoundingClientRect().height;
+        setMaxHeight(`${parentHeight}px`);
+      }
+    };
+
+    // Create a ResizeObserver to observe height changes in the parent div
+    const observer = new ResizeObserver(() => {
+      updateMaxHeight();
+    });
+
+    if (tableContainerRef.current) {
+      observer.observe(tableContainerRef.current); // Start observing
+      updateMaxHeight(); // Set initial height
+    }
+
+    // Cleanup the observer on component unmount
+    return () => {
+      if (tableContainerRef.current) {
+        observer.unobserve(tableContainerRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <div className="p-3">
-      <Table>
+    <div ref={tableContainerRef} className="p-3 h-full">
+      <Table
+        containerClassname="h-full overflow-y-auto relative"
+        style={{ maxHeight: maxHeight }} // Apply max-height dynamically
+      >
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
+          <TableRow>
+            <TableHead className="w-10 flex justify-center items-center">
+              <Checkbox
+                checked={
+                  Object.values(rowSelection).length === searchedSubjects.length &&
+                  Object.values(rowSelection).every((val) => val) &&
+                  searchedSubjects.length > 0
+                }
+                onCheckedChange={(value) => handleSelectAll(!!value)}
+                aria-label="Select all"
+              />
+            </TableHead>
+            <TableHead>Código</TableHead>
+            <TableHead>Turma</TableHead>
+            <TableHead>Nome da disciplina</TableHead>
+            <TableHead></TableHead>
+          </TableRow>
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-                className={
-                  (row.original.color && Array.isArray(row.original.color)
-                    ? theme === "light"
-                      ? `${row.original.color[0]}`
-                      : `${row.original.color[1]}`
-                    : "") +
-                  " " +
-                  "cursor-pointer"
-                }
-                onClick={() => {
-                  setSelectedSubject(row.original);
-                }}
-                onMouseEnter={() => setOnFocusSubject(row.original)}
-                onMouseLeave={() => setOnFocusSubject({} as SubjectsType)}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
+          {searchedSubjects.map((row) => (
+            <TableRow
+              key={row.code}
+              className={`cursor-pointer`}
+              onMouseEnter={() => setOnFocusSubject({ code: row.code })}
+              onMouseLeave={() => setOnFocusSubject({} as any)}
+            >
+              <TableCell className="w-10 flex justify-center items-center">
+                <Checkbox
+                  checked={rowSelection[row.code] || false}
+                  onCheckedChange={(value) =>
+                    handleRowSelect(row, value as boolean)
+                  }
+                  aria-label={`Select ${row.code}`}
+                />
+              </TableCell>
+              <TableCell onClick={() => setSelectedSubject(row)}>
+                {row.code}
+              </TableCell>
+              <TableCell onClick={() => setSelectedSubject(row)}>
+                {scheduleSubjects.find((s) => s.code === row.code)?.class ||
+                  "-"}
+              </TableCell>
+              <TableCell onClick={() => setSelectedSubject(row)}>
+                <Badge
+                  variant="outline"
+                  className={`${
+                    row.color && Array.isArray(row.color)
+                      ? theme === "light"
+                        ? row.color[0] + " text-black"
+                        : row.color[1] + " text-white"
+                      : ""
+                  }`}
+                >
+                  {row.name}
+                </Badge>
+              </TableCell>
+              <TableCell className="flex justify-end space-x-2">
+                <Button variant="outline" size="icon" onClick={() => reorderSearchedSubjects(row.code, 'up')}>
+                  <ChevronUp className="h-4" />
+                </Button>
+                <Button variant="outline" size="icon" onClick={() => reorderSearchedSubjects(row.code, 'down')}>
+                  <ChevronDown className="h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => removeSubject(row)}
+                >
+                  <Trash className="h-4" />
+                </Button>
               </TableCell>
             </TableRow>
-          )}
+          ))}
         </TableBody>
       </Table>
     </div>

@@ -1,11 +1,11 @@
-
-
 export default function Home() {
   return (
-    <div >
-      <main>
-        
-      </main>
+    <div>
+      <div>
+        <main>
+          This is the home screen and anybody can see it.
+        </main>
+      </div>
     </div>
   );
 }
