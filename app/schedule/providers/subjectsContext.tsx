@@ -6,6 +6,7 @@ export type scheduleSubjectsType = {
   code: string;
   class: string;
   color?: string;
+  activated: boolean;
 };
 
 export const SubjectsContext = createContext({
@@ -38,9 +39,10 @@ export function SubjectsProvider({
     {} as { code: string; classcode: string }
   );
 
-  useEffect(() => console.log({ searchedSubjects }), [searchedSubjects]);
+  // useEffect(() => console.log({ searchedSubjects }), [searchedSubjects]);
   useEffect(() => console.log({ scheduleSubjects }), [scheduleSubjects]);
   useEffect(() => console.log({ onFocusSubject }), [onFocusSubject]);
+  useEffect(() => console.log({ onFocusSubjectClass }), [onFocusSubjectClass]);
 
   return (
     <SubjectsContext.Provider

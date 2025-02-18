@@ -9,14 +9,11 @@ import SelectedSubject from "./components/SelectedSubject";
 import SubjectsTable from "./components/SubjectsTable";
 import WeekCalendarComponent from "./components/WeekCalendar";
 import SearchSubject from "./components/SearchSubject";
-import { lightColors, darkColors } from "./constants/colors";
-import { DataType, SubjectsType } from "./types/dataType";
-
+import { SubjectsType } from "./types/dataType";
 
 import { useEffect, useState } from "react";
-import useAxios from "@/api/AxiosInstance";
+import useAxios from "@/app/api/AxiosInstance";
 import { SubjectsProvider } from "./providers/subjectsContext";
-
 
 export default function SchedulePage() {
   const { getAllSubjects } = useAxios();

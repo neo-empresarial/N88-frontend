@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSubjects } from "../providers/subjectsContext";
 import {
   Table,
@@ -16,6 +16,10 @@ import { ClassesType } from "../types/dataType";
 
 export default function SelectedSubject() {
   const [rowSelection, setRowSelection] = useState<string | null>(null);
+
+  const tableContainerRef = useRef<HTMLDivElement | null>(null);
+  const [maxHeight, setMaxHeight] = useState<string | undefined>(undefined);
+
   const {
     selectedSubject,
     onFocusSubjectClass,
@@ -43,46 +47,53 @@ export default function SelectedSubject() {
   };
 
   const addClass = (row: { code: string; class: string }) => {
-    const updatedSchedule = scheduleSubjects.filter(
-      (subject) => subject.code !== selectedSubject.code
+    setScheduleSubjects(
+      scheduleSubjects.map((subject) => {
+        if (subject.code === row.code) {
+          return { ...subject, class: row.class };
+        }
+        return subject;
+      })
     );
-
-    setScheduleSubjects([...updatedSchedule, row]);
   };
 
   const removeClass = (code: string) => {
-    const updatedSchedule = scheduleSubjects.filter(
-      (subject) => subject.code !== code
+    setScheduleSubjects(
+      scheduleSubjects.map((subject) => {
+        if (subject.code === code) {
+          return { ...subject, class: "" };
+        }
+        return subject;
+      })
     );
-    setScheduleSubjects(updatedSchedule);
   };
 
   useEffect(() => {
-    // Update the row selection when the selected subject changes
-    setRowSelection(
+    const isClassSelected =
       scheduleSubjects.filter((s) => s.code === selectedSubject.code)?.[0]
-        ?.class || null
-    );
+        ?.class || null;
+    
+    if (isClassSelected) {
+      return setRowSelection(isClassSelected);
+    }
+
+    // Set the first class as selected by default
+    if (selectedSubject.classes?.length) {
+      setRowSelection(selectedSubject.classes[0].classcode);
+      handleRowSelect(selectedSubject.classes[0]);
+    }
   }, [selectedSubject]);
 
   useEffect(() => {
     if (!onFocusSubjectClass.classcode) {
       if (rowSelection) {
-        return setScheduleSubjects(
-          scheduleSubjects.map((subject) => {
-            if (subject.code === selectedSubject.code) {
-              return { ...subject, class: rowSelection };
-            }
-            return subject;
-          })
-        );
+        return addClass({
+          code: selectedSubject.code,
+          class: rowSelection,
+        });
       }
 
-      return setScheduleSubjects(
-        scheduleSubjects.filter(
-          (subject) => subject.code !== selectedSubject.code
-        )
-      );
+      return removeClass(selectedSubject.code);
     }
 
     return addClass({
@@ -91,9 +102,39 @@ export default function SelectedSubject() {
     });
   }, [onFocusSubjectClass]);
 
+  useEffect(() => {
+    const updateMaxHeight = () => {
+      if (tableContainerRef.current) {
+        const parentHeight =
+          tableContainerRef.current.getBoundingClientRect().height;
+        setMaxHeight(`${parentHeight}px`);
+      }
+    };
+
+    // Create a ResizeObserver to observe height changes in the parent div
+    const observer = new ResizeObserver(() => {
+      updateMaxHeight();
+    });
+
+    if (tableContainerRef.current) {
+      observer.observe(tableContainerRef.current); // Start observing
+      updateMaxHeight(); // Set initial height
+    }
+
+    // Cleanup the observer on component unmount
+    return () => {
+      if (tableContainerRef.current) {
+        observer.unobserve(tableContainerRef.current);
+      }
+    };
+  }, []);
+
   return (
-    <div className="p-3">
-      <Table containerClassname="h-full max-h-full overflow-y-auto relative">
+    <div ref={tableContainerRef} className="p-3 h-full">
+      <Table
+        containerClassname="h-full overflow-y-auto relative"
+        style={{ maxHeight: maxHeight }} // Apply max-height dynamically
+      >
         <TableHeader>
           <TableRow>
             <TableHead>Código</TableHead>
@@ -114,8 +155,8 @@ export default function SelectedSubject() {
                 return;
               }}
               onMouseLeave={() => {
-                setOnFocusSubjectClass({} as any);
-                setOnFocusSubject({} as any);
+                setOnFocusSubjectClass({ code: "", classcode: "" });
+                setOnFocusSubject({ code: "" });
                 return;
               }}
               className={`cursor-pointer ${

@@ -21,7 +21,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import useAxios from "@/api/AxiosInstance";
+import useAxios from "@/app/api/AxiosInstance";
 
 import { lightColors, darkColors } from "../constants/colors";
 
@@ -30,7 +30,13 @@ interface SearchSubjectProps {
 }
 
 export default function SearchSubject({ subjects }: SearchSubjectProps) {
-  const { searchedSubjects, setSearchedSubjects } = useSubjects();
+  const {
+    searchedSubjects,
+    setSearchedSubjects,
+    scheduleSubjects,
+    setScheduleSubjects,
+    setSelectedSubject,
+  } = useSubjects();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const { getSubject } = useAxios();
@@ -39,11 +45,13 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
 
   // filter objects based on user input
   const filteredSubjects = useMemo(() => {
-    const filtered_subjects = subjects.filter((subject) =>
-      subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      subject.code.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered_subjects = subjects.filter(
+      (subject) =>
+        subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        subject.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    
+    setSelectedSubject;
+
     // Change the name to include the code
     return filtered_subjects.map((subject) => {
       return {
@@ -59,30 +67,53 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
     setPaginationLimit((prevLimit) => prevLimit + 20); // increase the limit by 20
   };
 
+  const checkFreeColor = () => {
+    const freelightcolor = lightColors.filter(
+      (color) =>
+        !searchedSubjects.some(
+          (interestsSubject) => interestsSubject.color?.[0] === color
+        )
+    );
+
+    const freedarkcolor = darkColors.filter(
+      (color) =>
+        !searchedSubjects.some(
+          (interestsSubject) => interestsSubject.color?.[1] === color
+        )
+    );
+
+    return [freelightcolor[0], freedarkcolor[0]];
+  };
+
   const handleInterrestSubjects = (subject: SubjectsType) => {
     const isAlreadySelected = searchedSubjects.some((interestsSubject) => {
-      return interestsSubject.name == subject.name;
+      return interestsSubject.code === subject.code;
     });
 
     if (isAlreadySelected) {
       setSearchedSubjects(
         searchedSubjects.filter(
-          (interestsSubject) => interestsSubject.name != subject.name
+          (interestsSubject) => interestsSubject.code !== subject.code
+        )
+      );
+      setScheduleSubjects(
+        scheduleSubjects.filter(
+          (interestsSubject) => interestsSubject.code !== subject.code
         )
       );
     } else {
-      getSubject(subject.idsubject).then((response: SubjectsType) =>{
-        const index = searchedSubjects.length;
+      getSubject(subject.idsubject).then((response: SubjectsType) => {
         const dataWithColors = {
           ...response,
-          color: [
-            lightColors[index % lightColors.length],
-            darkColors[index % darkColors.length],
-          ],
+          color: checkFreeColor(),
         };
-        setSearchedSubjects([...searchedSubjects, dataWithColors])
-      }
-      );
+        setSearchedSubjects([...searchedSubjects, dataWithColors]);
+        setScheduleSubjects([
+          ...scheduleSubjects,
+          { code: subject.code, class: "", activated: true },
+        ]);
+        return setSelectedSubject(dataWithColors);
+      });
     }
   };
 
@@ -100,7 +131,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-[350px] justify-between text-slate-400"
+            className="w-1/3 justify-between text-slate-400"
           >
             {value
               ? subjects.find((subject) => subject.name === value)?.name
@@ -108,7 +139,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[350px] p-0">
+        <PopoverContent className="w-full p-0">
           <Command>
             <CommandInput
               placeholder="Selecione uma matéria..."
@@ -131,7 +162,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
                           "mr-2 h-4 w-4",
                           searchedSubjects.find(
                             (interestSubject) =>
-                              interestSubject.name === subject.name
+                              interestSubject.code === subject.code
                           )
                             ? "opacity-100"
                             : "opacity-0"
