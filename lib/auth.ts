@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import { FormState, SignUpFormSchema, SignInFormSchema } from "./type";
 import useAxios from "@/app/api/AxiosInstance";
 import { createSession } from "./session";
-import { useEffect } from "react";
 
 export async function signUp(state: FormState, formData: FormData): Promise<FormState> {
   const { register } = useAxios();

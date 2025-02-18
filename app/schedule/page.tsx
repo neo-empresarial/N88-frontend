@@ -18,12 +18,12 @@ import { SubjectsProvider } from "./providers/subjectsContext";
 export default function SchedulePage() {
   const { getAllSubjects } = useAxios();
   const [subjects, setSubjects] = useState<SubjectsType[]>([]);
-  const [isLoadingSubjects, setIsLoadingSubjects] = useState(true);
+  // const [isLoadingSubjects, setIsLoadingSubjects] = useState(true);
 
   useEffect(() => {
     getAllSubjects().then((data: SubjectsType[]) => {
       setSubjects(data);
-      setIsLoadingSubjects(false);
+      // setIsLoadingSubjects(false);
     });
   }, []);
 

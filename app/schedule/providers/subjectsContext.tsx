@@ -1,4 +1,4 @@
-﻿import { useContext, useEffect } from "react";
+﻿import React, { useContext, useEffect } from "react";
 import { createContext, useState } from "react";
 import { SubjectsType } from "../types/dataType";
 
@@ -9,17 +9,30 @@ export type scheduleSubjectsType = {
   activated: boolean;
 };
 
-export const SubjectsContext = createContext({
-  searchedSubjects: [] as SubjectsType[],
-  setSearchedSubjects: (subjects: SubjectsType[]) => {},
-  scheduleSubjects: [] as scheduleSubjectsType[],
-  setScheduleSubjects: (subjects: scheduleSubjectsType[]) => {},
+type SubjectsContextType = {
+  searchedSubjects: SubjectsType[];
+  setSearchedSubjects: React.Dispatch<React.SetStateAction<SubjectsType[]>>;
+  scheduleSubjects: scheduleSubjectsType[];
+  setScheduleSubjects: React.Dispatch<React.SetStateAction<scheduleSubjectsType[]>>;
+  selectedSubject: SubjectsType;
+  setSelectedSubject: React.Dispatch<React.SetStateAction<SubjectsType>>;
+  onFocusSubject: { code: string };
+  setOnFocusSubject: React.Dispatch<React.SetStateAction<{ code: string }>>;
+  onFocusSubjectClass: { code: string; classcode: string };
+  setOnFocusSubjectClass: React.Dispatch<React.SetStateAction<{ code: string; classcode: string }>>;
+};
+
+export const SubjectsContext = createContext<SubjectsContextType>({
+  searchedSubjects: [],
+  setSearchedSubjects: () => {},
+  scheduleSubjects: [],
+  setScheduleSubjects: () => {},
   selectedSubject: {} as SubjectsType,
-  setSelectedSubject: (subject: SubjectsType) => {},
-  onFocusSubject: {} as { code: string },
-  setOnFocusSubject: (subject: { code: string }) => {},
-  onFocusSubjectClass: {} as { code: string; classcode: string },
-  setOnFocusSubjectClass: (subject: { code: string; classcode: string }) => {},
+  setSelectedSubject: () => {},
+  onFocusSubject: { code: "" },
+  setOnFocusSubject: () => {},
+  onFocusSubjectClass: { code: "", classcode: "" },
+  setOnFocusSubjectClass: () => {},
 });
 
 export function SubjectsProvider({

@@ -200,14 +200,14 @@ export default function WeekCalendarComponent() {
     const title = "Matérias em conflito:";
 
     // Get colors from code:
-    const colors = code.map((c) => getColorFromSubject(c));
+    // const colors = code.map((c) => getColorFromSubject(c));
 
     return (
       <>
         <p className="text-sm font-semibold tracking-tight">{title}</p>
         <ul className="ml-6 list-disc [&>li]:mt-2">
-          {code.map((c) => (
-            <li className="font-semibold">
+          {code.map((c, index) => (
+            <li key={index} className="font-semibold">
               <Badge
                 variant="outline"
                 className={`${chooseColor([c], theme, onFocusSubject)}`}

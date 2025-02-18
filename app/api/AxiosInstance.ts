@@ -1,28 +1,15 @@
 ﻿import axios from 'axios';
-import { useRouter } from 'next/navigation';
-
-import dayjs from "dayjs";
-import { jwtDecode } from "jwt-decode";
-import { get } from 'http';
 
 const useAxios = () => {
   // const router = useRouter();
 
-  const baseURL = process.env.DATABASE_URL;
-
   const axiosPublicInstace = axios.create({
-    baseURL: "http://localhost:8000",
+    baseURL: process.env.DATABASE_URL, // "http://localhost:8000"
     headers: {
       'Content-Type': 'application/json',
     },
   })
 
-  // const axiosPrivateInstace = axios.create({
-  //   baseURL: baseURL,
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //   },
-  // })
   // axiosPrivateInstace.interceptors.request.use(async (req) => {
   //   // verify the context, and then the localStorage to find the accessToken, if not found, redirect to login
   //   if (!accessToken) {

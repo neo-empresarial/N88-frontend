@@ -1,8 +1,4 @@
-﻿import { useState } from "react";
-
-import useAxios from "@/app/api/AxiosInstance";
-
-import { getSession } from "@/lib/session";
+﻿import { getSession } from "@/lib/session";
 
 export default async function Profile() {
   const session = await getSession();

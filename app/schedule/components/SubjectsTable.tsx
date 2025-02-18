@@ -44,7 +44,7 @@ export default function SubjectsTable() {
     setScheduleSubjects(
       scheduleSubjects.filter((s) => s.code !== subject.code)
     );
-    setSelectedSubject({} as any);
+    setSelectedSubject({} as SubjectsType);
   };
 
   const handleSelectAll = (isChecked: boolean) => {
@@ -160,7 +160,7 @@ export default function SubjectsTable() {
               key={row.code}
               className={`cursor-pointer`}
               onMouseEnter={() => setOnFocusSubject({ code: row.code })}
-              onMouseLeave={() => setOnFocusSubject({} as any)}
+              onMouseLeave={() => setOnFocusSubject({} as { code: string })}
             >
               <TableCell className="w-10 flex justify-center items-center">
                 <Checkbox

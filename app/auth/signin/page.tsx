@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import GoogleLoginButton from "./google-button";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import SignInForm from "./signinForm";
 
 export function SeparatorWithText(props: { text: string; style: string }) {

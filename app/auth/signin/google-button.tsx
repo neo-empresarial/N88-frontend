@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 
 export default function GoogleLoginButton(props: { style: string }) {
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/"; // Retrieve the callbackUrl query parameter
+  // const callbackUrl = searchParams.get("callbackUrl") || "/"; // Retrieve the callbackUrl query parameter
 
   return (
     <div className="w-1/2">

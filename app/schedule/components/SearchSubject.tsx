@@ -50,7 +50,6 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
         subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         subject.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    setSelectedSubject;
 
     // Change the name to include the code
     return filtered_subjects.map((subject) => {
