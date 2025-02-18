@@ -11,7 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import SignInForm from "./signinForm";
 
-export function SeparatorWithText(props: { text: string; style: string }) {
+function SeparatorWithText(props: { text: string; style: string }) {
   return (
     <div className={`flex items-center space-x-4 ${props.style}`}>
       <Separator className="flex-1" />
