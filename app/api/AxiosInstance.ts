@@ -98,7 +98,7 @@ const useAxios = () => {
 
   const register = async (formData: object) => {
     try {
-      const response = await axiosPublicInstace.post('/auth/register', formData);
+      const response = await axiosPublicInstace.post('auth/register', formData);
       return response;
     } catch (error) {
       return error;
@@ -107,7 +107,7 @@ const useAxios = () => {
 
   const login = async (formData: object) => {
     try {
-      const response = await axiosPublicInstace.post('/auth/login', formData);
+      const response = await axiosPublicInstace.post('auth/login', formData);
       return response;
     } catch (error) {
       return error;
