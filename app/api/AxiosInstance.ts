@@ -114,6 +114,17 @@ const useAxios = () => {
     }
   }
 
+  // Feedback form
+
+  const registerFeedback = async (formData: object) => {
+    try {
+      const response = await axiosPublicInstace.post('feedback/register', formData);
+      return response;
+    } catch (error) {
+      return error
+    }
+  }
+
   return {
     getAllSubjects,
     getFilteredSubjects,
@@ -121,6 +132,7 @@ const useAxios = () => {
     getCheckUserExtraInfo,
     register,
     login,
+    registerFeedback,
   }
 }
 
