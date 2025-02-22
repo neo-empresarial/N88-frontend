@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@headlessui/react": "^2.1.10",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.1",
@@ -32,6 +33,7 @@
     "@radix-ui/react-slider": "^1.2.0",
     "@radix-ui/react-slot": "^1.1.0",
     "@radix-ui/react-tooltip": "^1.1.4",
+    "@react-spring/web": "^9.7.5",
     "@tabler/icons-react": "^3.23.0",
     "@tanstack/react-table": "^8.20.5",
     "axios": "^1.7.7",
@@ -41,9 +43,12 @@
     "cookies-next": "^4.2.1",
     "date-fns": "^3.6.0",
     "dayjs": "^1.11.13",
+    "gsap": "^3.12.7",
+    "gsap-trial": "^3.12.7",
     "jose": "^5.9.6",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.446.0",
+    "motion": "^12.4.7",
     "next": "^14.2.14",
     "next-auth": "^4.24.11",
     "next-themes": "^0.3.0",
