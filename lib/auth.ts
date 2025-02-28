@@ -24,7 +24,7 @@ export async function signUp(state: FormState, formData: FormData): Promise<Form
   const response = await register(validationFields.data) as Response;
 
   if (response.status === 201) {
-    return redirect("/auth/signin");
+    return redirect("auth/signin");
   }
 
   return {
