@@ -261,7 +261,7 @@ export default function Home() {
               const isHovered = hoveredItem === item.label;
               let textColorClass = "text-[#898989]";
               if (isHovered) {
-                textColorClass = "text-[#FAFAFA]";
+                textColorClass = "dark:text-[#FAFAFA]";
               } else if (hoveredItem) {
                 textColorClass = "text-[#5a5a5a]";
               }
