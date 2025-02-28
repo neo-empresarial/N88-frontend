@@ -106,7 +106,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
-          className="border border-grey-200 p-10 rounded-xl bg-[#020817] flex flex-col items-center justify-center gap-4 h-full"
+          className="border border-grey-200 p-10 rounded-xl dark:bg-[#020817] flex flex-col items-center justify-center gap-4 h-full"
         >
           <div className="flex gap-2 items-center ">
             <BarChart />
@@ -129,7 +129,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
-          className="border border-grey-200 p-10 rounded-xl bg-[#020817] flex flex-col items-center justify-center gap-4 h-full"
+          className="border border-grey-200 p-10 rounded-xl dark:bg-[#020817] flex flex-col items-center justify-center gap-4 h-full"
         >
           <div className="flex gap-2 items-center ">
             <Save />
@@ -145,13 +145,13 @@ export default function Home() {
           <div className="flex flex-col items-left justify-center">
             <h1 className="text-3xl font-sans">Seu histórico de grades:</h1>
             <div className="flex flex-row gap-2 justify-center items-center mt-5">
-              <p className="text-[#898989] hover:text-[#FAFAFA] transition-colors p-2 bg-gray-800 rounded-md hover:bg-gray-700">
+              <p className="text-[#898989] hover:text-black hover:bg-gray-200 hover:dark:text-[#FAFAFA] transition-colors p-2 dark:bg-gray-800 rounded-md hover:dark:bg-gray-700">
                 2025.1
               </p>
-              <p className="text-[#898989] hover:text-[#FAFAFA] transition-colors p-2 bg-gray-800 rounded-md hover:bg-gray-700">
+              <p className="text-[#898989] hover:text-black hover:bg-gray-200 hover:dark:text-[#FAFAFA] transition-colors p-2 dark:bg-gray-800 rounded-md hover:dark:bg-gray-700">
                 2025.2
               </p>
-              <p className="text-[#898989] hover:text-[#FAFAFA] transition-colors p-2 bg-gray-800 rounded-md hover:bg-gray-700">
+              <p className="text-[#898989] hover:text-black hover:bg-gray-200 hover:dark:text-[#FAFAFA] transition-colors p-2 dark:bg-gray-800 rounded-md hover:dark:bg-gray-700">
                 2026.1
               </p>
             </div>
@@ -161,7 +161,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
-          className="border border-grey-200 p-10 rounded-xl bg-[#020817] flex flex-col items-center justify-center gap-4 h-full w-full m-0"
+          className="border border-grey-200 p-10 rounded-xl dark:bg-[#020817] flex flex-col items-center justify-center gap-4 h-full w-full m-0"
         >
           <div className="flex gap-2 items-center ">
             <Coffee />
@@ -206,7 +206,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
-          className="border border-grey-200 p-10 rounded-xl bg-[#020817] flex flex-col items-center justify-center gap-4 h-full"
+          className="border border-grey-200 p-10 rounded-xl dark:bg-[#020817] flex flex-col items-center justify-center gap-4 h-full"
         >
           <div className="flex gap-2 items-center ">
             <Coffee />
@@ -226,7 +226,7 @@ export default function Home() {
               {people.map((name) => (
                 <div key={name} className="relative group">
                   {/* Name text with right padding so it doesn't overlap the button */}
-                  <p className="pr-12 text-[#898989] group-hover:text-[#FAFAFA] transition-colors">
+                  <p className="pr-12 text-[#898989] group-hover:text-black group-hover:dark:text-[#FAFAFA] transition-colors cursor-pointer">
                     {name}
                   </p>
                 </div>
@@ -251,7 +251,7 @@ export default function Home() {
               transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
               key={displayText}
             >
-              <h1 className="text-4xl text-[#FAFAFA] font-semibold">
+              <h1 className="text-4xl dark:text-[#FAFAFA] font-semibold">
                 {displayText}
               </h1>
             </motion.div>
@@ -294,7 +294,7 @@ export default function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.5, type: "spring", bounce: 0.2 }}
         >
-          <h1 className="text-4xl text-[#FAFAFA] font-sans">
+          <h1 className="text-4xl dark:text-[#FAFAFA] font-sans">
             Faça do MatrUFSC 2.0 cada vez melhor
           </h1>
           <div className="flex flex-col items-center justify-center w-full gap-1">
@@ -334,8 +334,8 @@ export default function Home() {
             <div className="flex items-center gap-2">
               <Image src={logo} alt="grade" width={50} height={50} />
             </div>
-            <div className="flex flex-col">
-              <h1 className="text-2xl">NEO Empresrial</h1>
+            <div className="flex flex-col text-white">
+              <h1 className="text-2xl ">NEO Empresrial</h1>
               <p>Capacitando engenheiros, mudando o futuro.</p>
               <div className="flex gap-2 mt-2">
                 <Instagram />
@@ -344,7 +344,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex flex-row gap-4 p-4">
+          <div className="flex flex-row gap-4 p-4 text-white">
             <Link href="https://neo.certi.org.br/">
               <p>Home</p>
             </Link>
