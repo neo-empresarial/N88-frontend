@@ -19,6 +19,11 @@ import {
 } from "@geist-ui/icons";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
@@ -168,7 +173,34 @@ export default function Home() {
             Deixa a plataforma da forma que mais te agrada, com temas
             personalizados e opções de acessibilidade.
           </p>
-          <p>gif das features</p>
+          <div>
+            <ResizablePanelGroup
+              direction="horizontal"
+              className="max-w-md rounded-lg border md:min-w-[450px]"
+            >
+              <ResizablePanel defaultSize={50}>
+                <div className="flex h-[200px] items-center justify-center p-6">
+                  <span className="font-semibold">Grade</span>
+                </div>
+              </ResizablePanel>
+              <ResizableHandle />
+              <ResizablePanel defaultSize={50}>
+                <ResizablePanelGroup direction="vertical">
+                  <ResizablePanel defaultSize={25}>
+                    <div className="flex h-full items-center justify-center p-6">
+                      <span className="font-semibold">Matérias</span>
+                    </div>
+                  </ResizablePanel>
+                  <ResizableHandle />
+                  <ResizablePanel defaultSize={75}>
+                    <div className="flex h-full items-center justify-center p-6">
+                      <span className="font-semibold">Professores</span>
+                    </div>
+                  </ResizablePanel>
+                </ResizablePanelGroup>
+              </ResizablePanel>
+            </ResizablePanelGroup>
+          </div>
         </motion.div>
         <motion.div
           initial={{ opacity: 0, y: 50 }}
@@ -279,7 +311,7 @@ export default function Home() {
               <p>Contribua com feedback</p>
               <Edit2 />
             </Button>
-            <Link href='https://github.com/neo-empresarial/N88-frontend'>
+            <Link href="https://github.com/neo-empresarial/N88-frontend">
               <Button variant="outline" className="gap-2">
                 <p>Github</p>
                 <Github />
