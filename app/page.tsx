@@ -338,8 +338,12 @@ export default function Home() {
               <h1 className="text-2xl ">NEO Empresrial</h1>
               <p>Capacitando engenheiros, mudando o futuro.</p>
               <div className="flex gap-2 mt-2">
-                <Instagram />
-                <Globe />
+                <Link href="https://www.instagram.com/neo.empresarial/">
+                  <Instagram />
+                </Link>
+                <Link href="https://neo.certi.org.br/">
+                  <Globe />
+                </Link>
               </div>
             </div>
           </div>
