@@ -218,7 +218,7 @@ export default function Home() {
             Compartilhar a grade com outros graduandos nunca foi tão fácil!
             Adicione pessoas na plataforma e veja em tempo real a grade deles.
           </p>
-          <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-row items-center gap-4 h-full">
             <div className="text-2xl font-sans font-semibold">
               <h1>Comparar grade</h1>
             </div>
