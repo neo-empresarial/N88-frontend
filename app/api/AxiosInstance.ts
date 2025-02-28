@@ -116,9 +116,9 @@ const useAxios = () => {
 
   // Feedback form
 
-  const registerFeedback = async (formData: object) => {
+  const registerFeedback = async (formData: { message: string }) => {
     try {
-      const response = await axiosPublicInstace.post('feedback/register', formData);
+      const response = await axiosPublicInstace.post(`feedback?message=${formData.message}`);
       return response;
     } catch (error) {
       return error

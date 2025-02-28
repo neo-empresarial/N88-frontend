@@ -6,7 +6,7 @@ import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import ProfileOptions from "@/app/profile/ProfileOptions";
-import FeedbackForm from "./feedback/FeedbackForm";
+import FeedbackButton from "./feedback/FeedbackButton";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -61,7 +61,7 @@ export default function RootLayout({
               </MenubarMenu>
             </Menubar>
             <div className="flex-grow h-full">{children}</div>
-            <FeedbackForm />
+            <FeedbackButton />
           </div>
         </ThemeProvider>
       </body>

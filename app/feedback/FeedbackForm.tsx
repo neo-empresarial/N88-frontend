@@ -1,17 +1,17 @@
-﻿import FloattingButton from "@/components/floatting-button";
-import { Button } from "@/components/ui/button";
+﻿"use client";
+
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { getSession } from "@/lib/session";
-import { MessageSquare } from "lucide-react";
 import { useFormState } from "react-dom";
 import { sendFeedback } from "./useFeedbackForm";
+import SubmitButton from "@/components/submit-button";
+import { useEffect } from "react";
 
-const FormContent = () => {
+const FeedbackForm = () => {
   const [state, action] = useFormState(sendFeedback, undefined);
 
   return (
-    <form className="grid gap-2 w-full" action={action}>
+    <form className="grid gap-2" action={action}>
       {state?.message && (
         <p className="text-sm text-red-500">{state.message}</p>
       )}
@@ -19,6 +19,9 @@ const FormContent = () => {
       <Label htmlFor="message" className="text-base">
         Seu feedback é muito importante!
       </Label>
+
+      {state?.success && <p className="text-sm text-green-600">Muito obrigado!</p>}
+
       <Textarea
         placeholder="Abra seu coração ❤️"
         id="message"
@@ -29,21 +32,9 @@ const FormContent = () => {
         <p className="text-sm text-red-500">{state.error.message}</p>
       )}
 
-      <Button type="submit">Enviar</Button>
+      <SubmitButton>Enviar feedback</SubmitButton>
     </form>
   );
 };
-
-async function FeedbackForm() {
-  const session = await getSession();
-  return (
-    session && (
-      <FloattingButton
-        icon={<MessageSquare size={25} />}
-        content={<FormContent />}
-      />
-    )
-  );
-}
 
 export default FeedbackForm;

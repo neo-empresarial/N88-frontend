@@ -1,4 +1,5 @@
-﻿import { getSession } from "@/lib/session";
+﻿"use client";
+
 import { z } from "zod";
 
 import useAxios from "../api/AxiosInstance";
@@ -8,6 +9,7 @@ type FormState = {
     message?: string[];
   };
   message?: string;
+  success?: boolean;
 } | undefined;
 
 
@@ -18,7 +20,6 @@ const FeedbackFormSchema: z.ZodObject<{
 });
 
 export async function sendFeedback(state: FormState, formData: FormData): Promise<FormState> {
-  const session = await getSession();
   const { registerFeedback } = useAxios();
 
   const validationFields = FeedbackFormSchema.safeParse({
@@ -33,7 +34,9 @@ export async function sendFeedback(state: FormState, formData: FormData): Promis
 
   const response = await registerFeedback(validationFields.data) as Response;
 
-  if (response.status === 201) return 
+  if (response.status === 201) return {
+    success: true,
+  };
 
   return {
     message: response.statusText,
