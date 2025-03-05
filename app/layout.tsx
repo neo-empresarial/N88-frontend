@@ -8,7 +8,7 @@ import { Infinity } from '@geist-ui/icons'
 
 
 import ProfileOptions from "@/app/profile/ProfileOptions";
-
+import FeedbackButton from "./feedback/FeedbackButton";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -22,8 +22,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "MatrUFSC 2.0",
-  description: "Created by NEO Empresarial",
+  title: "N88",
+  description: "Created by KVZ",
 };
 
 export default function RootLayout({
@@ -67,6 +67,7 @@ export default function RootLayout({
               </MenubarMenu>
             </Menubar>
             <div className="flex-grow h-full">{children}</div>
+            <FeedbackButton />
           </div>
         </ThemeProvider>
       </body>
