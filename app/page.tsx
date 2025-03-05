@@ -25,8 +25,6 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 
-// Define the Home component
-
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   const { scrollYProgress } = useScroll();
