@@ -25,6 +25,8 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 
+// Home page
+
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
   const { scrollYProgress } = useScroll();
@@ -270,6 +272,7 @@ export default function Home() {
                 <span
                   key={item.label}
                   onMouseEnter={() => {
+                    //@ts-ignore
                     setHoveredItem(item.label);
                     setDisplayText(item.text);
                   }}
