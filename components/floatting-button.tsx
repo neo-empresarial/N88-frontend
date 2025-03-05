@@ -8,7 +8,7 @@ interface FloattingButtonProps {
 
 function FloattingButton({ icon, content }: FloattingButtonProps) {
   return (
-    <div className="absolute bottom-10 right-10">
+    <div className="fixed bottom-10 right-10">
       <Popover>
         <PopoverTrigger>
           <Badge className="p-2 rounded-full">{icon}</Badge>
