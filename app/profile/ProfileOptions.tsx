@@ -22,6 +22,7 @@ import LogoutButton from "@/components/logout-button";
 import { getSession } from "@/lib/session";
 
 import { LogIn } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default async function ProfileOptions() {
   const session = await getSession();
@@ -53,22 +54,26 @@ export default async function ProfileOptions() {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="start">
-          <DropdownMenuLabel>Minha conta</DropdownMenuLabel>
-
-          <DropdownMenuSeparator />
-
           {!session?.user ? (
-            <button>
-              <Link
-                href={"/auth/signin"}
-                className="flex items-center cursor-pointer w-full m-2"
-              >
-                <LogIn className="w-5" />
-                <span className="ml-2 text-md">Entrar</span>
-              </Link>
-            </button>
+            <>
+              <DropdownMenuItem>
+                <Button className="w-full">
+                  <Link
+                    href={"/auth/signin"}
+                    className="flex items-center justify-center cursor-pointer w-full"
+                  >
+                    <LogIn className="w-5" />
+                    <span className="ml-2 text-md">Entrar</span>
+                  </Link>
+                </Button>
+              </DropdownMenuItem>
+            </>
           ) : (
             <>
+              <DropdownMenuLabel>Minha conta</DropdownMenuLabel>
+
+              <DropdownMenuSeparator />
+
               <DropdownMenuGroup>
                 <DropdownMenuItem>
                   <Link
@@ -81,23 +86,7 @@ export default async function ProfileOptions() {
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 
-              <DropdownMenuSeparator />
-
-              <DropdownMenuGroup>
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger>
-                    <SunMoon />
-                    <Label className="ml-2">Mudar o tema</Label>
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuPortal>
-                    <DropdownMenuSubContent>
-                      <Theme />
-                    </DropdownMenuSubContent>
-                  </DropdownMenuPortal>
-                </DropdownMenuSub>
-              </DropdownMenuGroup>
-
-              <DropdownMenuSeparator />
+              {/* <DropdownMenuSeparator /> */}
 
               {/* Logout Button */}
               <DropdownMenuGroup>
@@ -107,6 +96,18 @@ export default async function ProfileOptions() {
               </DropdownMenuGroup>
             </>
           )}
+          <DropdownMenuSeparator />
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <SunMoon />
+              <Label className="ml-2">Mudar o tema</Label>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent>
+                <Theme />
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
