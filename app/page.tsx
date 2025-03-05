@@ -272,6 +272,7 @@ export default function Home() {
                 <span
                   key={item.label}
                   onMouseEnter={() => {
+                    //@ts-ignore
                     setHoveredItem(item.label);
                     setDisplayText(item.text);
                   }}
