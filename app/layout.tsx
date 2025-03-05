@@ -37,12 +37,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen`}
       >
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full w-full">
             <Menubar className="flex justify-between items-center h-[10%]">
               <div className="flex space-x-4">
                 <MenubarMenu>
-                  <div className="flex gap-2 items-center ml-6">
-                    <Infinity size={20} />
+                  <div className="text-sm lg:text-base flex gap-2 items-center ml-6">
+                    <Infinity size={15} />
                     MatrUFSC 2.0
                   </div>
                   <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
@@ -54,11 +54,11 @@ export default function RootLayout({
                     <Link href={"/schedule"}>Matérias</Link>
                   </MenubarTrigger>
                 </MenubarMenu>
-                <MenubarMenu>
+                {/* <MenubarMenu>
                   <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
                     <Link href={"/professors"}>Professores</Link>
                   </MenubarTrigger>
-                </MenubarMenu>
+                </MenubarMenu> */}
               </div>
               <MenubarMenu>
                 <MenubarTrigger className="ml-auto">
