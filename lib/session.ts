@@ -36,8 +36,13 @@ export async function createSession(payload: Session) {
 
 export async function getSession() {
   const cookie = cookies().get("session")?.value;
+  const token = cookies().get('token')?.value;
 
   if (!cookie) return null;
+
+  if (token) {
+    return { user: { id: token } } as Session;
+  }
 
   try {
     const { payload } = await jwtVerify(cookie, encodedKey, {
@@ -47,7 +52,7 @@ export async function getSession() {
     return payload as Session;
   } catch (error) {
     console.error(error);
-    redirect("/auth/signin"); 
+    // redirect("/auth/signin"); 
   }
 }
 

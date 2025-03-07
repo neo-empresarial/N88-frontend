@@ -25,10 +25,13 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import useMediaQuery from "./hooks/useMediaQuery";
+import { useRouter } from "next/navigation";
 
 // Home page
 
 export default function Home() {
+  const router = useRouter();
+
   const [isMounted, setIsMounted] = useState(false);
   const { scrollYProgress } = useScroll();
   const [fade, setFade] = useState(0);
@@ -94,8 +97,15 @@ export default function Home() {
   }, [scrollYProgress]);
 
   useEffect(() => {
-    console.log(hoveredItem, "mounted");
-  }, [hoveredItem]);
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+
+    if (token) {
+      localStorage.setItem("token", token);
+      // Optionally remove the token from the URL
+      router.replace("/");
+    }
+  }, []);
 
   const handleMouseEnter = (itemLabel: string, itemText: string) => {
     if (!isSmallScreen) {
