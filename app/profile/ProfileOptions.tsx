@@ -96,7 +96,7 @@ export default async function ProfileOptions() {
               </DropdownMenuGroup>
             </>
           )}
-          <DropdownMenuSeparator />
+          {/* <DropdownMenuSeparator />
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <SunMoon />
@@ -107,7 +107,7 @@ export default async function ProfileOptions() {
                 <Theme />
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
-          </DropdownMenuSub>
+          </DropdownMenuSub> */}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

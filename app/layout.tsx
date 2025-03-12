@@ -4,11 +4,19 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Infinity } from '@geist-ui/icons'
-
+import { Infinity } from "@geist-ui/icons";
 
 import ProfileOptions from "@/app/profile/ProfileOptions";
 import FeedbackButton from "./feedback/FeedbackButton";
+import {
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+} from "@/components/ui/dropdown-menu";
+import Theme from "@/components/Theme";
+import { SunMoon } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -41,30 +49,35 @@ export default function RootLayout({
             <Menubar className="flex justify-between items-center h-[10%]">
               <div className="flex space-x-4">
                 <MenubarMenu>
-                  <div className="text-sm lg:text-base flex gap-2 items-center ml-6">
-                    <Infinity size={15} />
-                    MatrUFSC 2.0
-                  </div>
-                  <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
+                  <Link href={"/"}>
+                    <div className="text-sm lg:text-base flex gap-2 items-center ml-6">
+                      <Infinity size={15} />
+                      MatrUFSC 2.0
+                    </div>
+                  </Link>
+                  {/* <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
                     <Link href={"/"}>Home</Link>
-                  </MenubarTrigger>
+                  </MenubarTrigger> */}
                 </MenubarMenu>
                 <MenubarMenu>
                   <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
                     <Link href={"/schedule"}>Matérias</Link>
                   </MenubarTrigger>
                 </MenubarMenu>
-                {/* <MenubarMenu>
+                <MenubarMenu>
                   <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
                     <Link href={"/professors"}>Professores</Link>
                   </MenubarTrigger>
-                </MenubarMenu> */}
+                </MenubarMenu>
               </div>
-              <MenubarMenu>
-                <MenubarTrigger className="ml-auto">
-                  <ProfileOptions />
-                </MenubarTrigger>
-              </MenubarMenu>
+              <div className="flex gap-2">
+                <MenubarMenu>
+                  <Theme />
+                  <MenubarTrigger className="ml-auto">
+                    <ProfileOptions />
+                  </MenubarTrigger>
+                </MenubarMenu>
+              </div>
             </Menubar>
             <div className="flex-grow h-full">{children}</div>
             <FeedbackButton />
