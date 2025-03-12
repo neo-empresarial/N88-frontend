@@ -6,8 +6,8 @@ import { redirect } from "next/navigation";
 
 export type Session = {
   user: {
-    id: string;
-    name: string;
+    id: string | null;
+    name: string | null;
   },
   // accessToken: string;
   // refreshToken: string;
