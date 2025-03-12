@@ -84,9 +84,22 @@ export default function SubjectsTable() {
     const [removed] = updatedSubjects.splice(index, 1);
 
     if (direction === "up") {
-      updatedSubjects.splice(index - 1, 0, removed);
+      // If it's already the first item, wrap to the end
+      if (index === 0) {
+        updatedSubjects.push(removed);
+      } else {
+        // Otherwise, move it up by one position
+        updatedSubjects.splice(index - 1, 0, removed);
+      }
     } else {
-      updatedSubjects.splice(index + 1, 0, removed);
+      // direction: "down"
+      // If it's already the last item, wrap to the start
+      if (index === searchedSubjects.length - 1) {
+        updatedSubjects.unshift(removed);
+      } else {
+        // Otherwise, move it down by one position
+        updatedSubjects.splice(index + 1, 0, removed);
+      }
     }
 
     setSearchedSubjects(updatedSubjects);
