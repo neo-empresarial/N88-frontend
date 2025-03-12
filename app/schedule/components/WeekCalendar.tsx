@@ -250,8 +250,10 @@ export default function WeekCalendarComponent() {
         </TableHeader>
         <TableBody>
           {timeSlots.map((time) => {
+            const shouldAddGap = time === "11:00" || time === "17:10";
+
             return (
-              <TableRow key={time}>
+              <TableRow key={time}  className={shouldAddGap ? "border-b-4" : ""}>
                 {weekDays.map((day) => {
                   if (day === "") {
                     return (
