@@ -10,7 +10,7 @@ export default function GoogleLoginButton(props: { style: string }) {
   // const callbackUrl = searchParams.get("callbackUrl") || "/"; // Retrieve the callbackUrl query parameter
 
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8000/auth/google/login";
+    window.location.href = process.env.NEXT_PUBLIC_DATABASE_URL + "auth/google/login";
   }
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function GoogleLoginButton(props: { style: string }) {
     if (token) {
       localStorage
         .setItem("token", token)
-        window.location.href = "http://localhost:3000";
+        window.location.href = process.env.NEXT_PUBLIC_FRONTEND_URL!;
     }
   }, []);
 
