@@ -51,14 +51,15 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
 
   const response = await login(validatedFields.data) as any;
 
+
   if (response.status === 201) {
     const responseData = await response.data
-    console.log(responseData)
+    console.log(response)
     await createSession({
       user: {
         id: responseData.id,
         name: responseData.name,
-      }
+      },
     })
     
     redirect("/");

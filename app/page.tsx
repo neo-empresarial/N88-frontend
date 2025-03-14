@@ -25,10 +25,13 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import useMediaQuery from "./hooks/useMediaQuery";
+import { useRouter } from "next/navigation";
 
 // Home page
 
 export default function Home() {
+  const router = useRouter();
+
   const [isMounted, setIsMounted] = useState(false);
   const { scrollYProgress } = useScroll();
   const [fade, setFade] = useState(0);
@@ -53,9 +56,9 @@ export default function Home() {
   ];
 
   const people = [
-    "Gustavo Torres",
-    "Kaique Valentim Souza",
-    "Caio Eduardo Feuser",
+    "Gustavo",
+    "Kaique",
+    "Caio ",
   ];
 
   useEffect(() => {
@@ -94,8 +97,15 @@ export default function Home() {
   }, [scrollYProgress]);
 
   useEffect(() => {
-    console.log(hoveredItem, "mounted");
-  }, [hoveredItem]);
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+
+    if (token) {
+      localStorage.setItem("token", token);
+      // Optionally remove the token from the URL
+      router.replace("/");
+    }
+  }, []);
 
   const handleMouseEnter = (itemLabel: string, itemText: string) => {
     if (!isSmallScreen) {
@@ -137,8 +147,7 @@ export default function Home() {
           transition={{ duration: 1 }}
         >
           <p>
-            Construa sua grade curricular, salve um histórico, avalie a
-            dificuldade das matérias,
+            Construa sua grade curricular, controle seu histórico de dificuldades,
           </p>
           <p>tudo em um mesmo lugar.</p>
         </motion.div>
@@ -283,7 +292,7 @@ export default function Home() {
               {people.map((name) => (
                 <div key={name} className="relative group">
                   {/* Name text with right padding so it doesn't overlap the button */}
-                  <p className="pr-12 text-[#898989] group-hover:text-black group-hover:dark:text-[#FAFAFA] transition-colors cursor-pointer">
+                  <p className="pr-12 text-[#898989]  group-hover:text-black group-hover:dark:text-[#FAFAFA] transition-colors cursor-pointer">
                     {name}
                   </p>
                 </div>
@@ -342,14 +351,14 @@ export default function Home() {
         </motion.div>
       </div>
 
-      <div className="flex flex-col items-center justify-center w-full mt-40 ">
+      <div className="flex flex-col items-center justify-center w-full mt-[8rem] ">
         <motion.div
           className="flex flex-col items-center justify-center w-full mb-10 gap-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.5, type: "spring", bounce: 0.2 }}
         >
-          <h1 className="text-2xl lg:text-4xl dark:text-[#FAFAFA] font-sans">
+          <h1 className="text-xl sm:text-2xl lg:text-4xl dark:text-[#FAFAFA] font-sans">
             Faça do MatrUFSC 2.0 cada vez melhor
           </h1>
           <div className="flex flex-col items-center justify-center w-full gap-1 text-sm lg:text-base text-center">
@@ -378,7 +387,7 @@ export default function Home() {
 
       <div className="flex flex-col items-center justify-center w-full mt-20 bg-black">
         <div>
-          <h1 className="text-lg lg:text-2xl font-light font-sans text-[#898989] p-4">
+          <h1 className="text-xl text-center lg:text-2xl font-light font-sans text-[#898989] p-4">
             Aplicativo desenvolvido e mantido pelo{" "}
             <span className="text-white">NEO Empresarial</span>
           </h1>
