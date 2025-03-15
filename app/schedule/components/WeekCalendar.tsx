@@ -82,6 +82,7 @@ export default function WeekCalendarComponent() {
       let allSchedules: any[] = [];
 
       scheduleSubjects.forEach((subject) => {
+        if (subject.activated === false) return;
         const schedules = getSchedulesFromSubjectClass(
           subject.code,
           subject.class,

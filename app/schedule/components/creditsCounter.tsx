@@ -4,7 +4,7 @@ import { SubjectsType } from "../types/dataType";
 
 const CreditsCounter = () => {
   const {
-    totalCredits
+    totalCredits,
   } = useSubjects();
 
   return (
