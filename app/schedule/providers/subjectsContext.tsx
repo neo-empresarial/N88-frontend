@@ -7,19 +7,26 @@ export type scheduleSubjectsType = {
   class: string;
   color?: string;
   activated: boolean;
+  schedules?: string;
 };
 
 type SubjectsContextType = {
   searchedSubjects: SubjectsType[];
   setSearchedSubjects: React.Dispatch<React.SetStateAction<SubjectsType[]>>;
   scheduleSubjects: scheduleSubjectsType[];
-  setScheduleSubjects: React.Dispatch<React.SetStateAction<scheduleSubjectsType[]>>;
+  setScheduleSubjects: React.Dispatch<
+    React.SetStateAction<scheduleSubjectsType[]>
+  >;
   selectedSubject: SubjectsType;
   setSelectedSubject: React.Dispatch<React.SetStateAction<SubjectsType>>;
   onFocusSubject: { code: string };
   setOnFocusSubject: React.Dispatch<React.SetStateAction<{ code: string }>>;
   onFocusSubjectClass: { code: string; classcode: string };
-  setOnFocusSubjectClass: React.Dispatch<React.SetStateAction<{ code: string; classcode: string }>>;
+  setOnFocusSubjectClass: React.Dispatch<
+    React.SetStateAction<{ code: string; classcode: string }>
+  >;
+  totalCredits: number;
+  setTotalCredits: React.Dispatch<React.SetStateAction<number>>;
 };
 
 export const SubjectsContext = createContext<SubjectsContextType>({
@@ -33,6 +40,8 @@ export const SubjectsContext = createContext<SubjectsContextType>({
   setOnFocusSubject: () => {},
   onFocusSubjectClass: { code: "", classcode: "" },
   setOnFocusSubjectClass: () => {},
+  totalCredits: 0,
+  setTotalCredits: () => {},
 });
 
 export function SubjectsProvider({
@@ -51,11 +60,13 @@ export function SubjectsProvider({
   const [onFocusSubjectClass, setOnFocusSubjectClass] = useState(
     {} as { code: string; classcode: string }
   );
+  const [totalCredits, setTotalCredits] = useState(0);
 
   // useEffect(() => console.log({ searchedSubjects }), [searchedSubjects]);
   useEffect(() => console.log({ scheduleSubjects }), [scheduleSubjects]);
   useEffect(() => console.log({ onFocusSubject }), [onFocusSubject]);
   useEffect(() => console.log({ onFocusSubjectClass }), [onFocusSubjectClass]);
+  useEffect(() => console.log({ selectedSubject }), [selectedSubject]);
 
   return (
     <SubjectsContext.Provider
@@ -70,6 +81,8 @@ export function SubjectsProvider({
         setOnFocusSubject,
         onFocusSubjectClass,
         setOnFocusSubjectClass,
+        totalCredits,
+        setTotalCredits,
       }}
     >
       {children}
