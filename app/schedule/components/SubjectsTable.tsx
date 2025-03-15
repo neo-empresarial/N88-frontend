@@ -163,7 +163,7 @@ export default function SubjectsTable() {
             </TableHead>
             <TableHead>Código</TableHead>
             <TableHead>Turma</TableHead>
-            <TableHead>Nome da disciplina</TableHead>
+            <TableHead>Créditos</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>

@@ -97,6 +97,8 @@ export default function WeekCalendarComponent() {
       }, 0);
 
       setTotalCredits(credits);
+    } else {
+      setTotalCredits(0);
     }
   }
 
