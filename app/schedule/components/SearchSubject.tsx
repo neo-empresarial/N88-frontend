@@ -107,9 +107,10 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
           color: checkFreeColor(),
         };
         setSearchedSubjects([...searchedSubjects, dataWithColors]);
+        console.log('searched:', searchedSubjects);
         setScheduleSubjects([
           ...scheduleSubjects,
-          { code: subject.code, class: "", activated: true },
+          { code: subject.code, class: "", activated: true, schedules: subject.schedules },
         ]);
         return setSelectedSubject(dataWithColors);
       });
@@ -130,7 +131,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-1/3 justify-between text-slate-400"
+            className="w-full justify-between text-slate-400"
           >
             {value
               ? subjects.find((subject) => subject.name === value)?.name

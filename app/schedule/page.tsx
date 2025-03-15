@@ -14,6 +14,7 @@ import { SubjectsType } from "./types/dataType";
 import { useEffect, useState } from "react";
 import useAxios from "@/app/api/AxiosInstance";
 import { SubjectsProvider } from "./providers/subjectsContext";
+import CreditsCounter from "./components/creditsCounter";
 
 export default function SchedulePage() {
   const { getAllSubjects } = useAxios();
@@ -30,7 +31,10 @@ export default function SchedulePage() {
   return (
     <div className="p-10 grid gap-2 grid-cols-1 ">
       <SubjectsProvider>
+        <div className="grid gap-2 grid-cols-2">
         <SearchSubject subjects={subjects}/>
+        <CreditsCounter/>
+        </div>
         <ResizablePanelGroup
           direction="horizontal"
           className="w-screen rounded-lg border md:min-w-[450px]"

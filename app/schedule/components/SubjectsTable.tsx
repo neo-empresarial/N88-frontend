@@ -53,7 +53,7 @@ export default function SubjectsTable() {
       return acc;
     }, {} as { [key: string]: boolean });
     setRowSelection(newSelection);
-    
+
     const updatedSchedule = scheduleSubjects.map((subject) => {
       return { ...subject, activated: isChecked };
     });
@@ -65,7 +65,7 @@ export default function SubjectsTable() {
       ...prev,
       [row.code]: isChecked,
     }));
-    
+
     const updatedSchedule = scheduleSubjects.map((subject) => {
       if (subject.code === row.code) {
         return { ...subject, activated: isChecked };
@@ -103,7 +103,7 @@ export default function SubjectsTable() {
     }
 
     setSearchedSubjects(updatedSubjects);
-  }
+  };
 
   // Sync `rowSelection` with `searchedSubjects`, selecting all rows by default
   useEffect(() => {
@@ -153,7 +153,8 @@ export default function SubjectsTable() {
             <TableHead className="w-10 flex justify-center items-center">
               <Checkbox
                 checked={
-                  Object.values(rowSelection).length === searchedSubjects.length &&
+                  Object.values(rowSelection).length ===
+                    searchedSubjects.length &&
                   Object.values(rowSelection).every((val) => val) &&
                   searchedSubjects.length > 0
                 }
@@ -163,7 +164,7 @@ export default function SubjectsTable() {
             </TableHead>
             <TableHead>Código</TableHead>
             <TableHead>Turma</TableHead>
-            <TableHead>Nome da disciplina</TableHead>
+            <TableHead>Créditos</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
@@ -206,10 +207,18 @@ export default function SubjectsTable() {
                 </Badge>
               </TableCell>
               <TableCell className="flex justify-end space-x-2">
-                <Button variant="outline" size="icon" onClick={() => reorderSearchedSubjects(row.code, 'up')}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => reorderSearchedSubjects(row.code, "up")}
+                >
                   <ChevronUp className="h-4" />
                 </Button>
-                <Button variant="outline" size="icon" onClick={() => reorderSearchedSubjects(row.code, 'down')}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => reorderSearchedSubjects(row.code, "down")}
+                >
                   <ChevronDown className="h-4" />
                 </Button>
                 <Button

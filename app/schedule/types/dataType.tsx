@@ -27,6 +27,7 @@ export type SubjectsType = {
   name: string;
   classes: ClassesType[];
   color?: string[];
+  schedules?: string;
 };
 
 export type DataType = {
