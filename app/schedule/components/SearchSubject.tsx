@@ -138,14 +138,14 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
             <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
+        <PopoverContent className="w-full p-0 ml-10 min-w-[680px]">
           <Command>
             <CommandInput
               placeholder="Selecione uma matéria..."
               value={searchTerm}
               onValueChange={setSearchTerm}
             />
-            <CommandList>
+            <CommandList >
               {filteredSubjects.length === 0 ? (
                 <CommandEmpty>Nenhuma matéria foi encontrada.</CommandEmpty>
               ) : (

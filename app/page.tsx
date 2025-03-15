@@ -4,7 +4,7 @@ import Image from "next/image";
 import grade from "./assets/grade.png";
 import materias from "./assets/materias.png";
 import logo from "./assets/logo-neo.svg";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useScroll } from "motion/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,32 +24,69 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
+import useMediaQuery from "./hooks/useMediaQuery";
+import { useRouter } from "next/navigation";
 
 // Home page
 
 export default function Home() {
+  const router = useRouter();
+
   const [isMounted, setIsMounted] = useState(false);
   const { scrollYProgress } = useScroll();
   const [fade, setFade] = useState(0);
   const [displayText, setDisplayText] = useState("qualquer curso");
-  const [hoveredItem, setHoveredItem] = useState(null);
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
   const defaultText = "qualquer curso";
 
+  const isSmallScreen = useMediaQuery("(max-width: 640px)");
+
+  const indexRef = useRef(0);
+
+  const wasSmallScreenRef = useRef(isSmallScreen);
+
   const items = [
-    { label: "CTC", text: "engenharia" },
-    { label: "CCS", text: "saúde" },
-    { label: "CSE", text: "administração" },
-    { label: "CFH", text: "filosofia" },
-    { label: "CCB", text: "ciências biológicas" },
-    { label: "CCE", text: "expressão" },
+    { id: 1, label: "CTC", text: "engenharia" },
+    { id: 2, label: "CCS", text: "saúde" },
+    { id: 3, label: "CSE", text: "administração" },
+    { id: 4, label: "CFH", text: "filosofia" },
+    { id: 5, label: "CCB", text: "ciências biológicas" },
+    { id: 6, label: "CCE", text: "expressão" },
   ];
 
   const people = [
-    "Gustavo Torres",
-    "Kaique Valentim Souza",
-    "Caio Eduardo Feuser",
+    "Gustavo",
+    "Kaique",
+    "Caio ",
   ];
+
+  useEffect(() => {
+    let intervalId: NodeJS.Timer | null = null;
+
+    if (isSmallScreen) {
+      // Start cycling through items
+      intervalId = setInterval(() => {
+        setHoveredItem(items[indexRef.current].label);
+        setDisplayText(items[indexRef.current].text);
+        indexRef.current = (indexRef.current + 1) % items.length;
+      }, 2000); // e.g. rotate every 2 seconds
+    } else {
+      // On larger screens, revert to default text and rely on hover
+      if (wasSmallScreenRef.current === true) {
+        setHoveredItem(null);
+        setDisplayText(defaultText);
+      }
+    }
+
+    return () => {
+      // Clear interval if we leave small screen or unmount
+      if (intervalId) {
+        //@ts-ignore
+        clearInterval(intervalId);
+      }
+    };
+  }, [isSmallScreen, items, defaultText]);
 
   useEffect(() => {
     // Subscribe to scroll progress
@@ -59,9 +96,34 @@ export default function Home() {
     });
   }, [scrollYProgress]);
 
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get("token");
+
+    if (token) {
+      localStorage.setItem("token", token);
+      // Optionally remove the token from the URL
+      router.replace("/");
+    }
+  }, []);
+
+  const handleMouseEnter = (itemLabel: string, itemText: string) => {
+    if (!isSmallScreen) {
+      setHoveredItem(itemLabel);
+      setDisplayText(itemText);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isSmallScreen) {
+      setHoveredItem(null);
+      setDisplayText(defaultText);
+    }
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen flex-col">
-      <div className="flex flex-col items-center justify-center w-full mt-[10%]">
+      <div className="flex flex-col items-center justify-center w-full lg:mt-[10%] mt-[30%]">
         <motion.div
           className="w-full h-50 flex items-center justify-center flex-col"
           whileInView="visible"
@@ -71,20 +133,21 @@ export default function Home() {
           transition={{ duration: 0.5 }}
         >
           <Badge variant="outline">Development by NEO Empresarial</Badge>
-          <h1 className="text-6xl font-sans font-medium">Uma nova forma </h1>
-          <h1 className="text-6xl font-sans font-medium">
+          <h1 className=" text-4xl md:text-5xl lg:text-6xl font-sans font-medium ">
+            Uma nova forma{" "}
+          </h1>
+          <h1 className=" text-4xl md:text-5xl lg:text-6xl font-sans font-medium sm:text4xl ">
             de montar a sua grade
           </h1>
         </motion.div>
         <motion.div
-          className="flex flex-col items-center justify-center w-full mb-10"
+          className="flex flex-col items-center justify-center w-full mb-10 text-xs sm:text-sm md:text-base lg:text-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
         >
           <p>
-            Construa sua grade curricular, salve um histórico, avalie a
-            dificuldade das matérias,
+            Construa sua grade curricular, controle seu histórico de dificuldades,
           </p>
           <p>tudo em um mesmo lugar.</p>
         </motion.div>
@@ -94,16 +157,17 @@ export default function Home() {
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
         >
-          <Image src={grade} alt="grade" width={500} height={500} />
+          <Image
+            src={grade}
+            alt="grade"
+            width={500}
+            height={500}
+            className="h-auto lg:w-auto w-80"
+          />
         </motion.div>
       </div>
 
-      <div
-        className="grid grid-cols-2 items-center  gap-4 m-20"
-        // style={{
-        //   background: `linear-gradient(to bottom, rgba(179, 179, 204, 0) 0%, rgba(179, 179, 204, ${fade}) 100%)`,
-        // }}
-      >
+      <div className="grid grid-cols-1 gap-4 m-4 md:grid-cols-2 md:m-20">
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -228,7 +292,7 @@ export default function Home() {
               {people.map((name) => (
                 <div key={name} className="relative group">
                   {/* Name text with right padding so it doesn't overlap the button */}
-                  <p className="pr-12 text-[#898989] group-hover:text-black group-hover:dark:text-[#FAFAFA] transition-colors cursor-pointer">
+                  <p className="pr-12 text-[#898989]  group-hover:text-black group-hover:dark:text-[#FAFAFA] transition-colors cursor-pointer">
                     {name}
                   </p>
                 </div>
@@ -240,25 +304,27 @@ export default function Home() {
 
       <div className="flex flex-col items-center justify-center w-full mt-20">
         <motion.div
-          className="flex flex-row items-center justify-center w-full mb-10 gap-20"
+          className="flex flex-col gap-4 w-full mb-10 md:flex-row md:gap-20 md:items-center md:justify-center"
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, type: "spring", bounce: 0.2 }}
         >
-          <div className="flex flex-col items-left">
-            <h1 className="text-4xl text-[#898989]">Monte a sua grade para</h1>
+          <div className="flex flex-col items-center lg:items-left">
+            <h1 className="text-2xl lg:text-4xl text-[#898989]">
+              Monte a sua grade para
+            </h1>
             <motion.div
               initial={{ opacity: 0, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, type: "spring", bounce: 0.4 }}
               key={displayText}
             >
-              <h1 className="text-4xl dark:text-[#FAFAFA] font-semibold">
+              <h1 className="text-2xl lg:text-4xl lg:text-left dark:text-[#FAFAFA] font-semibold">
                 {displayText}
               </h1>
             </motion.div>
           </div>
-          <div className="flex flex-row gap-0">
+          <div className="flex flex-row gap-0 justify-center lg:justify-start">
             {items.map((item) => {
               const isHovered = hoveredItem === item.label;
               let textColorClass = "text-[#898989]";
@@ -272,15 +338,10 @@ export default function Home() {
                 <span
                   key={item.label}
                   onMouseEnter={() => {
-                    //@ts-ignore
-                    setHoveredItem(item.label);
-                    setDisplayText(item.text);
+                    handleMouseEnter(item.label, item.text);
                   }}
-                  onMouseLeave={() => {
-                    setHoveredItem(null);
-                    setDisplayText(defaultText);
-                  }}
-                  className={`text-4xl font-semibold p-2 transition-colors duration-300 ${textColorClass}`}
+                  onMouseLeave={handleMouseLeave}
+                  className={`text-2xl lg:text-4xl font-semibold p-2 transition-colors duration-300 ${textColorClass}`}
                 >
                   {item.label}
                 </span>
@@ -290,17 +351,17 @@ export default function Home() {
         </motion.div>
       </div>
 
-      <div className="flex flex-col items-center justify-center w-full mt-40 ">
+      <div className="flex flex-col items-center justify-center w-full mt-[8rem] ">
         <motion.div
           className="flex flex-col items-center justify-center w-full mb-10 gap-8"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.5, type: "spring", bounce: 0.2 }}
         >
-          <h1 className="text-4xl dark:text-[#FAFAFA] font-sans">
+          <h1 className="text-xl sm:text-2xl lg:text-4xl dark:text-[#FAFAFA] font-sans">
             Faça do MatrUFSC 2.0 cada vez melhor
           </h1>
-          <div className="flex flex-col items-center justify-center w-full gap-1">
+          <div className="flex flex-col items-center justify-center w-full gap-1 text-sm lg:text-base text-center">
             <p className="text-[#898989]">
               A missão da plataforma é estar cada vez mais adaptada a
               necessidade dos estudantes
@@ -326,20 +387,22 @@ export default function Home() {
 
       <div className="flex flex-col items-center justify-center w-full mt-20 bg-black">
         <div>
-          <h1 className="text-2xl font-light font-sans text-[#898989] p-4">
+          <h1 className="text-xl text-center lg:text-2xl font-light font-sans text-[#898989] p-4">
             Aplicativo desenvolvido e mantido pelo{" "}
             <span className="text-white">NEO Empresarial</span>
           </h1>
           <Separator className="" />
         </div>
-        <div className="flex flex-row m-4 justify-between items-center gap-20">
+        <div className="flex flex-col lg:flex-row m-4 lg:justify-between items-center lg:gap-20">
           <div className="flex flex-row items-center justify-between gap-4 p-4">
             <div className="flex items-center gap-2">
               <Image src={logo} alt="grade" width={50} height={50} />
             </div>
             <div className="flex flex-col text-white">
-              <h1 className="text-2xl ">NEO Empresrial</h1>
-              <p>Capacitando engenheiros, mudando o futuro.</p>
+              <h1 className="text-lg lg:text-2xl ">NEO Empresrial</h1>
+              <p className="text-sm">
+                Capacitando engenheiros, mudando o futuro.
+              </p>
               <div className="flex gap-2 mt-2">
                 <Link href="https://www.instagram.com/neo.empresarial/">
                   <Instagram />
@@ -351,7 +414,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex flex-row gap-4 p-4 text-white">
+          <div className="flex flex-row gap-4 p-4 text-white text-xs">
             <Link href="https://neo.certi.org.br/">
               <p>Home</p>
             </Link>
