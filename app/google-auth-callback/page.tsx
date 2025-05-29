@@ -8,12 +8,14 @@ export default function GoogleAuthCallbackPage() {
   const router = useRouter();
   const id = searchParams.get("id");
   const name = searchParams.get("name");
+  const email = searchParams.get("email");
 
   const fetchData = async () => {
     await createSession({
       user: {
         id: id,
         name: name,
+        email: email,
       },
     });
   };

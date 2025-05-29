@@ -1,14 +1,14 @@
-﻿import axios from 'axios';
+﻿import axios from "axios";
 
 const useAxios = () => {
   // const router = useRouter();
 
   const axiosPublicInstace = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_DATABASE_URL, // "http://localhost:8000"
+    baseURL: "http://localhost:8000",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
-  })
+  });
 
   // axiosPrivateInstace.interceptors.request.use(async (req) => {
   //   // verify the context, and then the localStorage to find the accessToken, if not found, redirect to login
@@ -56,7 +56,7 @@ const useAxios = () => {
 
   const getAllSubjects = async () => {
     try {
-      const response = await axiosPublicInstace.get('/subjects');
+      const response = await axiosPublicInstace.get("/subjects");
       return response.data;
     } catch (error) {
       throw error;
@@ -65,65 +65,73 @@ const useAxios = () => {
 
   const getFilteredSubjects = async (query: string) => {
     try {
-      const response = await axiosPublicInstace.get(`/subjects?search=${query}`);
+      const response = await axiosPublicInstace.get(
+        `/subjects?search=${query}`
+      );
       return response.data;
     } catch (error) {
       throw error;
     }
-  }
+  };
 
   const getSubject = async (id: number) => {
     try {
       const response = await axiosPublicInstace.get(`/subjects/${id}`);
       return response.data;
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   const getCheckUserExtraInfo = async (email: string) => {
     try {
-      const response = await axiosPublicInstace.get('/users/check_extra_info', {
+      const response = await axiosPublicInstace.get("/users/check_extra_info", {
         params: {
           email,
-        }
+        },
       });
       return response.data;
     } catch (error) {
-      throw error
+      throw error;
     }
-  }
+  };
 
   // Authentication routes
 
   const register = async (formData: object) => {
     try {
-      const response = await axiosPublicInstace.post('auth/register', formData);
+      const response = await axiosPublicInstace.post("auth/register", formData);
       return response;
     } catch (error) {
       return error;
     }
-  }
+  };
 
   const login = async (formData: object) => {
     try {
-      const response = await axiosPublicInstace.post('auth/login', formData);
+      const response = await axiosPublicInstace.post("auth/login", formData);
+      console.log("Raw login response:", response);
+      console.log("Response data:", response.data);
+      console.log("Response headers:", response.headers);
       return response;
     } catch (error) {
+      console.error("Login error:", error);
       return error;
     }
-  }
+  };
 
   // Feedback form
 
   const registerFeedback = async (formData: { message: string }) => {
     try {
-      const response = await axiosPublicInstace.post(`feedback?message=${formData.message}`);
+      const response = await axiosPublicInstace.post(
+        `feedback?message=${formData.message}`
+      );
       return response;
     } catch (error) {
-      return error
+      return error;
     }
-  }
+  };
 
   return {
     getAllSubjects,
@@ -133,7 +141,7 @@ const useAxios = () => {
     register,
     login,
     registerFeedback,
-  }
-}
+  };
+};
 
 export default useAxios;
