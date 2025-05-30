@@ -22,7 +22,6 @@ export async function POST(request: Request) {
       );
     }
 
-    console.log("Making request to backend with token:", session.accessToken);
     const response = await fetch(`http://localhost:8000/groups`, {
       method: "POST",
       headers: {
@@ -34,7 +33,7 @@ export async function POST(request: Request) {
         name,
         description,
         members,
-        ownerId: session.user.iduser,
+        ownerId: session.user.id,
       }),
     });
 
