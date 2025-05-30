@@ -4,6 +4,7 @@ import { Link, Pencil, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import AddMembersToGroupDialog from "./add-members-to-group-dialog";
 import EditGroupNamePopover from "./edit-group-name-popover";
+import RemoveMembersFromGroupDialog from "./remove-members-from-group-dialog";
 
 const MyGroupsCard = ({ group }: { group: any }) => {
   console.log(group);
@@ -43,6 +44,7 @@ const MyGroupsCard = ({ group }: { group: any }) => {
           </div>
           <div className="flex items-center gap-2 ml-auto">
             <AddMembersToGroupDialog groupId={group.id} />
+            <RemoveMembersFromGroupDialog groupId={group.id} />
           </div>
         </div>
       </div>

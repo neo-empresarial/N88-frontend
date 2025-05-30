@@ -68,7 +68,7 @@ const EditGroupNamePopover = ({ groupId }: { groupId: string }) => {
   return (
     <Popover>
       <PopoverTrigger>
-        <Button variant="outline" size="icon" className="bg-gray-100 dark:bg-gray-800">
+        <Button variant="ghost" size="icon" className="bg-transparent dark:bg-gray-800">
           <Pencil className="w-4 h-4" />
         </Button>
       </PopoverTrigger>
