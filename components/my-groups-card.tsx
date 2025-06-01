@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import AddMembersToGroupDialog from "./add-members-to-group-dialog";
 import EditGroupNamePopover from "./edit-group-name-popover";
 import RemoveMembersFromGroupDialog from "./remove-members-from-group-dialog";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
 
 const MyGroupsCard = ({ group }: { group: any }) => {
   console.log(group);
@@ -35,11 +36,35 @@ const MyGroupsCard = ({ group }: { group: any }) => {
               </div>
             ))}
             {group.members?.length > 3 && (
-              <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-white dark:border-gray-800 flex items-center justify-center">
-                <span className="text-xs font-medium">
-                  +{group.members.length - 3}
-                </span>
-              </div>
+              <HoverCard>
+                <HoverCardTrigger asChild>
+                  <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-white dark:border-gray-800 flex items-center justify-center cursor-pointer">
+                    <span className="text-xs font-medium">
+                      +{group.members.length - 3}
+                    </span>
+                  </div>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-80">
+                  <div className="flex flex-col gap-2">
+                    <h4 className="text-sm font-semibold">Todos os membros</h4>
+                    <div className="flex flex-col gap-2">
+                      {group.members?.map((member: any) => (
+                        <div
+                          key={member.iduser}
+                          className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center">
+                            <span className="text-xs font-medium">
+                              {member.name[0]}
+                            </span>
+                          </div>
+                          <span className="text-sm">{member.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </HoverCardContent>
+              </HoverCard>
             )}
           </div>
           <div className="flex items-center gap-2 ml-auto">

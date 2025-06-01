@@ -28,15 +28,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="h-full">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased h-screen`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full`}
       >
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-            <div className="flex flex-col h-full w-full">
-              <Menubar className="flex justify-between items-center h-[10%]">
-                <div className="flex space-x-4">
+            <div className="flex flex-col min-h-full">
+              <Menubar className="flex justify-between items-center h-16">
+                <div className="flex space-x-4 items-center">
                   <MenubarMenu>
                     <Link href={"/"}>
                       <div className="text-sm lg:text-base flex gap-2 items-center ml-6">
@@ -55,6 +55,11 @@ export default function RootLayout({
                       <Link href={"/professors"}>Professores</Link>
                     </MenubarTrigger>
                   </MenubarMenu>
+                  <MenubarMenu>
+                    <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
+                      <Link href={"/groups"}>Grupos</Link>
+                    </MenubarTrigger>
+                  </MenubarMenu>
                 </div>
                 <div className="flex gap-2">
                   <MenubarMenu>
@@ -65,7 +70,7 @@ export default function RootLayout({
                   </MenubarMenu>
                 </div>
               </Menubar>
-              <div className="flex-grow h-full">{children}</div>
+              <main className="flex-1">{children}</main>
               <FeedbackButton />
             </div>
           </ThemeProvider>
