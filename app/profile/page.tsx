@@ -12,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import MyGroupsCard from "@/components/my-groups-card";
+import { Loader2 } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // const session = {
 //   user: {
@@ -77,10 +79,19 @@ export default function Profile() {
         <div className="flex flex-col gap-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-md">
           <h1 className="text-2xl font-bold">Grupos</h1>
           <div className="flex flex-col gap-2">
-            {groups &&
+            {isLoading ? (
+              <div className="flex justify-center items-center h-full">
+                <div className="space-y-4">
+                  <Skeleton className="h-24 w-full rounded-md bg-gray-200 dark:bg-gray-700" />
+                  <Skeleton className="h-24 w-full rounded-md bg-gray-200 dark:bg-gray-700" />
+                </div>
+              </div>
+            ) : (
+              groups &&
               groups.map((group: any) => (
                 <MyGroupsCard key={group.id} group={group} />
-              ))}
+              ))
+            )}
           </div>
         </div>
       </div>

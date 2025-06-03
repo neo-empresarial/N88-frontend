@@ -28,7 +28,7 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const queryClient = useQueryClient();
-  
+
   const { data: users, isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
@@ -59,35 +59,32 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
     setSelectedUsers(selectedUsers.filter((user) => user.iduser !== userId));
   };
 
-  const handleAddMembers = async () => {
+  const handleSendInvitations = async () => {
     try {
       const session = await getSession();
       if (!session?.accessToken) {
-        throw new Error("No access token found");
+        throw new Error("Not authenticated");
       }
 
-      const memberIds = selectedUsers.map(user => user.iduser);
-      
-      for (const memberId of memberIds) {
-        const response = await fetch(`http://localhost:8000/groups/${groupId}/members/${memberId}`, {
+      const promises = selectedUsers.map((user) =>
+        fetch("/api/notifications", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.accessToken}`,
           },
-          credentials: "include"
-        });
+          body: JSON.stringify({
+            recipientId: user.iduser,
+            groupId: groupId,
+          }),
+        })
+      );
 
-        if (!response.ok) {
-          throw new Error("Failed to add member to group");
-        }
-      }
-
-      toast.success("Membros adicionados com sucesso");
+      await Promise.all(promises);
+      toast.success("Invitations sent successfully");
       setSelectedUsers([]);
-      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
     } catch (error) {
-      toast.error("Falha ao adicionar membros ao grupo");
+      toast.error("Failed to send invitations");
       console.error(error);
     }
   };
@@ -101,8 +98,10 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add Members</DialogTitle>
-          <DialogDescription>Add members to the group</DialogDescription>
+          <DialogTitle>Invite Members</DialogTitle>
+          <DialogDescription>
+            Send invitations to join the group
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <div className="relative">
@@ -137,39 +136,31 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
             )}
           </div>
 
-          <div className="space-y-2">
-            {selectedUsers.map((user) => (
-              <div
-                key={user.iduser}
-                className="flex items-center justify-between p-2 rounded-md"
-              >
-                <div>
-                  <div className="font-medium">{user.name}</div>
-                  <div className="text-sm text-gray-500 text-ellipsis overflow-hidden">
-                    {user.email}
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleRemoveUser(user.iduser)}
+          {selectedUsers.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selectedUsers.map((user) => (
+                <div
+                  key={user.iduser}
+                  className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 px-3 py-1 rounded-full"
                 >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
+                  <span className="text-sm">{user.name}</span>
+                  <button
+                    onClick={() => handleRemoveUser(user.iduser)}
+                    className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           <DialogFooter>
             <Button
-              onClick={handleAddMembers}
-              disabled={selectedUsers.length === 0 || isLoading}
+              onClick={handleSendInvitations}
+              disabled={selectedUsers.length === 0}
             >
-              {isLoading ? (
-                "Adicionando membros..."
-              ) : (
-                "Adicionar membros"
-              )}
+              Send Invitations
             </Button>
           </DialogFooter>
         </div>

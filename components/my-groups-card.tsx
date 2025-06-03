@@ -1,23 +1,67 @@
 "use client";
 
-import { Link, Pencil, Plus } from "lucide-react";
+import { Link, LogOut, Pencil, Plus } from "lucide-react";
 import { Button } from "./ui/button";
 import AddMembersToGroupDialog from "./add-members-to-group-dialog";
 import EditGroupNamePopover from "./edit-group-name-popover";
 import RemoveMembersFromGroupDialog from "./remove-members-from-group-dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { getSession } from "@/lib/session";
+import { useEffect, useState } from "react";
+import LeaveGroupDialog from "./leave-group-dialog";
 
 const MyGroupsCard = ({ group }: { group: any }) => {
-  console.log(group);
+  const queryClient = useQueryClient();
+  const [isOwner, setIsOwner] = useState(false);
+
+  useEffect(() => {
+    const checkOwner = async () => {
+      const session = await getSession();
+      if (session?.user?.id) {
+        setIsOwner(group.createdBy === Number(session.user.id));
+      }
+    };
+    checkOwner();
+  }, [group.createdBy]);
+
+  const handleLeaveGroup = async () => {
+    try {
+      const session = await getSession();
+      if (!session?.accessToken) {
+        throw new Error("Not authenticated");
+      }
+
+      const response = await fetch(`/api/groups/${group.id}/leave`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to leave group");
+      }
+
+      toast.success("Left group successfully");
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+    } catch (error) {
+      toast.error("Failed to leave group");
+      console.error(error);
+    }
+  };
+
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-4 transition-all duration-200 hover:shadow-lg">
+    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 mb-4 transition-all duration-200 hover:shadow-lg">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-xl font-bold text-gray-800 dark:text-white">
               {group.name}
             </h2>
-            <EditGroupNamePopover groupId={group.id} />
+            {isOwner && <EditGroupNamePopover groupId={group.id} />}
           </div>
 
           <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -68,8 +112,14 @@ const MyGroupsCard = ({ group }: { group: any }) => {
             )}
           </div>
           <div className="flex items-center gap-2 ml-auto">
-            <AddMembersToGroupDialog groupId={group.id} />
-            <RemoveMembersFromGroupDialog groupId={group.id} />
+            {isOwner ? (
+              <>
+                <AddMembersToGroupDialog groupId={group.id} />
+                <RemoveMembersFromGroupDialog groupId={group.id} />
+              </>
+            ) : (
+              <LeaveGroupDialog onConfirm={handleLeaveGroup} />
+            )}
           </div>
         </div>
       </div>

@@ -10,6 +10,7 @@ import ProfileOptions from "@/app/profile/ProfileOptions";
 import FeedbackButton from "./feedback/FeedbackButton";
 import Theme from "@/components/Theme";
 import { Toaster } from "@/components/ui/toaster";
+import NotificationsDropdown from "@/components/notifications-dropdown";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -64,6 +65,7 @@ export default function RootLayout({
                 <div className="flex gap-2">
                   <MenubarMenu>
                     <Theme />
+                    <NotificationsDropdown />
                     <MenubarTrigger className="ml-auto">
                       <ProfileOptions />
                     </MenubarTrigger>

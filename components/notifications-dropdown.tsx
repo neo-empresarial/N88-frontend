@@ -1,0 +1,142 @@
+"use client";
+
+import { Bell } from "lucide-react";
+import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+interface Notification {
+  id: number;
+  type: string;
+  status: string;
+  sender: {
+    iduser: number;
+    name: string;
+  };
+  group: {
+    id: number;
+    name: string;
+  };
+  createdAt: string;
+}
+
+const NotificationsDropdown = () => {
+  const queryClient = useQueryClient();
+
+  const { data: notifications, isLoading } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      const response = await fetch("/api/notifications");
+      if (!response.ok) {
+        throw new Error("Failed to fetch notifications");
+      }
+      return response.json();
+    },
+  });
+
+  const respondMutation = useMutation({
+    mutationFn: async ({
+      notificationId,
+      accept,
+    }: {
+      notificationId: number;
+      accept: boolean;
+    }) => {
+      const response = await fetch(
+        `/api/notifications/${notificationId}/respond`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ accept }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to respond to invitation");
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      toast.success("Invitation responded to successfully");
+    },
+    onError: (error) => {
+      toast.error(error.message || "Failed to respond to invitation");
+    },
+  });
+
+  const handleRespond = (notificationId: number, accept: boolean) => {
+    respondMutation.mutate({ notificationId, accept });
+  };
+
+  const pendingNotifications = notifications?.filter(
+    (n: Notification) => n.status === "PENDING"
+  );
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="relative">
+          <Bell className="h-5 w-5" />
+          {pendingNotifications?.length > 0 && (
+            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] text-white flex items-center justify-center">
+              {pendingNotifications.length}
+            </span>
+          )}
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-80">
+        {isLoading ? (
+          <div className="p-4 text-center">Loading...</div>
+        ) : pendingNotifications?.length === 0 ? (
+          <div className="p-4 text-center text-muted-foreground">
+            No new notifications
+          </div>
+        ) : (
+          pendingNotifications?.map((notification: Notification) => (
+            <div key={notification.id} className="p-4 border-b last:border-0">
+              <div className="flex flex-col gap-2">
+                <p className="text-sm">
+                  <span className="font-medium">
+                    {notification.sender.name}
+                  </span>{" "}
+                  invited you to join group{" "}
+                  <span className="font-medium">{notification.group.name}</span>
+                </p>
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => handleRespond(notification.id, true)}
+                    disabled={respondMutation.isPending}
+                  >
+                    Accept
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleRespond(notification.id, false)}
+                    disabled={respondMutation.isPending}
+                  >
+                    Decline
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
+export default NotificationsDropdown;
