@@ -14,19 +14,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import MyGroupsCard from "@/components/my-groups-card";
 import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
-// const session = {
-//   user: {
-//     id: "2",
-//     name: "Gustavo Torres",
-//     email: "gustavo@gmail.com",
-//   },
-//   iat: 1748365008,
-//   exp: 1748969808,
-// };
+import CreateGroupDialog from "@/components/create-group-dialog";
 
 export default function Profile() {
-  
   const useGroups = () => {
     return useQuery({
       queryKey: ["groups"],
@@ -53,8 +43,8 @@ export default function Profile() {
   };
 
   const { data: session } = useQuery({
-    queryKey: ['session'],
-    queryFn: () => getSession()
+    queryKey: ["session"],
+    queryFn: () => getSession(),
   });
 
   const { data: groups, isLoading, error } = useGroups();
@@ -62,7 +52,7 @@ export default function Profile() {
   return (
     <div className="flex flex-col items-center h-screen m-10">
       <div className="grid grid-cols-[30%_70%] gap-4 w-full max-w-7xl">
-        <div className="flex flex-col gap-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-md">
+        <div className="flex flex-col gap-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-md h-fit">
           <div className="flex gap-2 items-center">
             <Avatar>
               <AvatarImage src={session?.user?.avatar} />
@@ -87,10 +77,15 @@ export default function Profile() {
                 </div>
               </div>
             ) : (
-              groups &&
-              groups.map((group: any) => (
-                <MyGroupsCard key={group.id} group={group} />
-              ))
+              <>
+                {groups &&
+                  groups.map((group: any) => (
+                    <MyGroupsCard key={group.id} group={group} />
+                  ))}
+                <div className="flex justify-center">
+                  <CreateGroupDialog />
+                </div>
+              </>
             )}
           </div>
         </div>

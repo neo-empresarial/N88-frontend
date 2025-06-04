@@ -1,6 +1,6 @@
 "use client";
 
-import { Link, LogOut, Pencil, Plus } from "lucide-react";
+import { Link, LogOut, Pencil, Plus, Crown } from "lucide-react";
 import { Button } from "./ui/button";
 import AddMembersToGroupDialog from "./add-members-to-group-dialog";
 import EditGroupNamePopover from "./edit-group-name-popover";
@@ -64,9 +64,14 @@ const MyGroupsCard = ({ group }: { group: any }) => {
             {isOwner && <EditGroupNamePopover groupId={group.id} />}
           </div>
 
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {group.members?.length || 0} membros
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {group.members?.length || 0} membros
+            </span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {isOwner && <Crown className="w-4 h-4" />}
+            </span>
+          </div>
         </div>
         <p className="text-gray-600 dark:text-gray-300">{group.description}</p>
         <div className="flex items-center gap-2 mt-4">

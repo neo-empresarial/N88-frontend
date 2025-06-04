@@ -12,7 +12,7 @@ import {
 } from "./ui/dialog";
 import { DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { X } from "@geist-ui/icons";
 import { toast } from "sonner";
 import { getSession } from "@/lib/session";
@@ -24,12 +24,13 @@ interface User {
 }
 
 const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
+  const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: users, isLoading } = useQuery({
+  const { data: users } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       const response = await fetch("/api/users");
@@ -38,6 +39,41 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
         throw new Error(errorData.error || "Failed to fetch users");
       }
       return response.json();
+    },
+  });
+
+  const { mutate: sendInvitations, isPending } = useMutation({
+    mutationFn: async () => {
+      const session = await getSession();
+      if (!session?.accessToken) {
+        throw new Error("Not authenticated");
+      }
+
+      const promises = selectedUsers.map((user) =>
+        fetch("/api/notifications", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            recipientId: user.iduser,
+            groupId: groupId,
+          }),
+        })
+      );
+
+      await Promise.all(promises);
+    },
+    onSuccess: () => {
+      toast.success("Invitations sent successfully");
+      setSelectedUsers([]);
+      setSearchTerm("");
+      setIsOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    },
+    onError: (error) => {
+      toast.error("Failed to send invitations");
+      console.error(error);
     },
   });
 
@@ -59,38 +95,13 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
     setSelectedUsers(selectedUsers.filter((user) => user.iduser !== userId));
   };
 
-  const handleSendInvitations = async () => {
-    try {
-      const session = await getSession();
-      if (!session?.accessToken) {
-        throw new Error("Not authenticated");
-      }
-
-      const promises = selectedUsers.map((user) =>
-        fetch("/api/notifications", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            recipientId: user.iduser,
-            groupId: groupId,
-          }),
-        })
-      );
-
-      await Promise.all(promises);
-      toast.success("Invitations sent successfully");
-      setSelectedUsers([]);
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
-    } catch (error) {
-      toast.error("Failed to send invitations");
-      console.error(error);
-    }
+  const handleSendInvitations = () => {
+    if (selectedUsers.length === 0) return;
+    sendInvitations();
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger>
         <Button variant="outline" size="icon">
           <Plus className="w-4 h-4" />
@@ -114,6 +125,7 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
                 setShowSuggestions(true);
               }}
               onFocus={() => setShowSuggestions(true)}
+              disabled={isPending}
             />
             {showSuggestions && searchTerm && (
               <div className="absolute z-10 w-full mt-1 bg-black border rounded-md shadow-lg max-h-60 overflow-auto">
@@ -147,6 +159,7 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
                   <button
                     onClick={() => handleRemoveUser(user.iduser)}
                     className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                    disabled={isPending}
                   >
                     <X size={14} />
                   </button>
@@ -158,9 +171,16 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
           <DialogFooter>
             <Button
               onClick={handleSendInvitations}
-              disabled={selectedUsers.length === 0}
+              disabled={selectedUsers.length === 0 || isPending}
             >
-              Send Invitations
+              {isPending ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Sending...
+                </div>
+              ) : (
+                "Send Invitations"
+              )}
             </Button>
           </DialogFooter>
         </div>

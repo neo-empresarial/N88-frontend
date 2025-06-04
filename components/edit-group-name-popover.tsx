@@ -1,7 +1,7 @@
 import { Popover, PopoverContent } from "./ui/popover";
 import { Button } from "./ui/button";
 import { PopoverTrigger } from "./ui/popover";
-import { Pencil } from "lucide-react";
+import { Loader2, Pencil } from "lucide-react";
 import { Input } from "./ui/input";
 
 import { useState } from "react";
@@ -43,8 +43,10 @@ const useUpdateGroupName = () => {
 
 const EditGroupNamePopover = ({ groupId }: { groupId: string }) => {
   const [name, setName] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   const queryClient = useQueryClient();
-  const { mutate: updateGroupName } = useUpdateGroupName();
+  const { mutate: updateGroupName, isPending } = useUpdateGroupName();
+
   const handleSave = () => {
     if (name.length > 0) {
       updateGroupName(
@@ -53,32 +55,50 @@ const EditGroupNamePopover = ({ groupId }: { groupId: string }) => {
           onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["groups"] });
             toast.success("Nome do grupo atualizado");
-            setName(""); 
+            setName("");
+            setIsOpen(false);
           },
           onError: (error) => {
             toast.error("Falha ao atualizar o nome do grupo");
-          }
+          },
         }
       );
     } else {
-      toast.error("Group name cannot be empty");
+      toast.error("O nome do grupo não pode ser vazio");
     }
   };
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger>
-        <Button variant="ghost" size="icon" className="bg-transparent dark:bg-gray-800">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="bg-transparent dark:bg-gray-800"
+        >
           <Pencil className="w-4 h-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-72 flex flex-col gap-2">
-        <Input type="text" placeholder="Edit Group Name" value={name} onChange={(e) => setName(e.target.value)} />
+        <Input
+          type="text"
+          placeholder="Atualizar nome do grupo"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          disabled={isPending}
+        />
         <Button
-          className="w-1/3 ml-auto mt-4"
+          className="w-1/3 ml-auto mt-4 bg-blue-500 hover:bg-blue-600"
           onClick={handleSave}
+          disabled={isPending}
         >
-          Save
+          {isPending ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" />
+            </div>
+          ) : (
+            "Atualizar"
+          )}
         </Button>
       </PopoverContent>
     </Popover>

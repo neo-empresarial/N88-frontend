@@ -10,6 +10,7 @@ import {
 } from "./ui/dropdown-menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface Notification {
   id: number;
@@ -83,6 +84,14 @@ const NotificationsDropdown = () => {
     (n: Notification) => n.status === "PENDING"
   );
 
+  const isResponding = (notificationId: number, accept: boolean) => {
+    return (
+      respondMutation.isPending &&
+      respondMutation.variables?.notificationId === notificationId &&
+      respondMutation.variables?.accept === accept
+    );
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -117,17 +126,37 @@ const NotificationsDropdown = () => {
                   <Button
                     size="sm"
                     onClick={() => handleRespond(notification.id, true)}
-                    disabled={respondMutation.isPending}
+                    disabled={
+                      isResponding(notification.id, true) ||
+                      isResponding(notification.id, false)
+                    }
                   >
-                    Accept
+                    {isResponding(notification.id, true) ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Accepting...
+                      </div>
+                    ) : (
+                      "Accept"
+                    )}
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => handleRespond(notification.id, false)}
-                    disabled={respondMutation.isPending}
+                    disabled={
+                      isResponding(notification.id, true) ||
+                      isResponding(notification.id, false)
+                    }
                   >
-                    Decline
+                    {isResponding(notification.id, false) ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Declining...
+                      </div>
+                    ) : (
+                      "Decline"
+                    )}
                   </Button>
                 </div>
               </div>
