@@ -3,7 +3,10 @@ import { SubjectsType } from "../types/dataType";
 import { useState, useMemo } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 
-import { useSubjects } from "../providers/subjectsContext";
+import {
+  scheduleSubjectsType,
+  useSubjects,
+} from "../providers/subjectsContext";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,8 +25,7 @@ import {
 } from "@/components/ui/popover";
 
 import useAxios from "@/app/api/AxiosInstance";
-
-import { lightColors, darkColors } from "../constants/colors";
+import { getUniqueColorPair, releaseColorPair } from "../utils/colorUtils";
 
 interface SearchSubjectProps {
   subjects: SubjectsType[];
@@ -36,12 +38,13 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
     scheduleSubjects,
     setScheduleSubjects,
     setSelectedSubject,
+    selectedSubject,
   } = useSubjects();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const { getSubject } = useAxios();
   const [searchTerm, setSearchTerm] = useState("");
-  const [paginationLimit, setPaginationLimit] = useState(20); // initial limit
+  const [paginationLimit, setPaginationLimit] = useState(20);
 
   // filter objects based on user input
   const filteredSubjects = useMemo(() => {
@@ -63,130 +66,140 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
   const paginatedSubjects = filteredSubjects.slice(0, paginationLimit);
 
   const loadMoreItems = () => {
-    setPaginationLimit((prevLimit) => prevLimit + 20); // increase the limit by 20
+    setPaginationLimit((prevLimit) => prevLimit + 20);
   };
 
-  const checkFreeColor = () => {
-    const freelightcolor = lightColors.filter(
-      (color) =>
-        !searchedSubjects.some(
-          (interestsSubject) => interestsSubject.color?.[0] === color
-        )
+  const handleInterrestSubjects = async (subject: SubjectsType) => {
+    const isAlreadySelected = searchedSubjects.some(
+      (interestsSubject) => interestsSubject.code === subject.code
     );
-
-    const freedarkcolor = darkColors.filter(
-      (color) =>
-        !searchedSubjects.some(
-          (interestsSubject) => interestsSubject.color?.[1] === color
-        )
-    );
-
-    return [freelightcolor[0], freedarkcolor[0]];
-  };
-
-  const handleInterrestSubjects = (subject: SubjectsType) => {
-    const isAlreadySelected = searchedSubjects.some((interestsSubject) => {
-      return interestsSubject.code === subject.code;
-    });
 
     if (isAlreadySelected) {
-      setSearchedSubjects(
-        searchedSubjects.filter(
-          (interestsSubject) => interestsSubject.code !== subject.code
-        )
+      const subjectToRemove = searchedSubjects.find(
+        (s) => s.code === subject.code
       );
-      setScheduleSubjects(
-        scheduleSubjects.filter(
-          (interestsSubject) => interestsSubject.code !== subject.code
-        )
+      if (subjectToRemove?.color) {
+        releaseColorPair(subjectToRemove.color[0], subjectToRemove.color[1]);
+      }
+
+      const newSearchedSubjects = searchedSubjects.filter(
+        (interestsSubject) => interestsSubject.code !== subject.code
       );
+      const newScheduleSubjects = scheduleSubjects.filter(
+        (interestsSubject) => interestsSubject.code !== subject.code
+      );
+
+      console.log("Removing subject:", {
+        code: subject.code,
+        newSearchedSubjects,
+        newScheduleSubjects,
+      });
+
+      setSearchedSubjects(newSearchedSubjects);
+      setScheduleSubjects(newScheduleSubjects);
+      setSelectedSubject({} as SubjectsType);
+      setValue("");
     } else {
-      getSubject(subject.idsubject).then((response: SubjectsType) => {
+      try {
+        const response = await getSubject(subject.idsubject);
         const dataWithColors = {
           ...response,
-          color: checkFreeColor(),
+          color: getUniqueColorPair(),
         };
-        setSearchedSubjects([...searchedSubjects, dataWithColors]);
-        setScheduleSubjects([
-          ...scheduleSubjects,
-          { code: subject.code, class: "", activated: true },
-        ]);
-        return setSelectedSubject(dataWithColors);
-      });
+
+        const newScheduleSubject = {
+          code: dataWithColors.code,
+          class: dataWithColors.class,
+          color: dataWithColors.color,
+          activated: true,
+        };
+
+        const newSearchedSubjects = [...searchedSubjects, dataWithColors];
+        const newScheduleSubjects = [...scheduleSubjects, newScheduleSubject];
+
+        console.log("Adding subject:", {
+          code: subject.code,
+          newSearchedSubjects,
+          newScheduleSubjects,
+        });
+
+        setSearchedSubjects(newSearchedSubjects);
+        setScheduleSubjects(newScheduleSubjects);
+        setSelectedSubject(dataWithColors);
+        setValue(subject.name);
+      } catch (error) {
+        console.error("Error fetching subject:", error);
+      }
     }
   };
 
   const handleOnSelect = (currentSubject: SubjectsType) => {
-    setValue(currentSubject.name === value ? "" : currentSubject.name);
-    setOpen(false);
     handleInterrestSubjects(currentSubject);
+    setOpen(false);
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      setSearchTerm("");
+    }
   };
 
   return (
-    <div>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-1/3 justify-between text-slate-400"
-          >
-            {value
-              ? subjects.find((subject) => subject.name === value)?.name
-              : "Selecione a matéria..."}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0 ml-10 min-w-[680px]">
-          <Command>
-            <CommandInput
-              placeholder="Selecione uma matéria..."
-              value={searchTerm}
-              onValueChange={setSearchTerm}
-            />
-            <CommandList >
-              {filteredSubjects.length === 0 ? (
-                <CommandEmpty>Nenhuma matéria foi encontrada.</CommandEmpty>
-              ) : (
-                <CommandGroup>
-                  {paginatedSubjects.map((subject) => (
-                    <CommandItem
-                      key={subject.name}
-                      value={subject.name}
-                      onSelect={() => handleOnSelect(subject)}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          searchedSubjects.find(
-                            (interestSubject) =>
-                              interestSubject.code === subject.code
-                          )
-                            ? "opacity-100"
-                            : "opacity-0"
-                        )}
-                      />
-                      {subject.name}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-[500px] justify-between"
+        >
+          <div className="truncate">{value || "Select subject..."}</div>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[500px] p-0">
+        <Command>
+          <CommandInput
+            placeholder="Search subject..."
+            value={searchTerm}
+            onValueChange={setSearchTerm}
+          />
+          <CommandList>
+            <CommandEmpty>No subject found.</CommandEmpty>
+            <CommandGroup>
+              {paginatedSubjects.map((subject) => (
+                <CommandItem
+                  key={subject.idsubject}
+                  value={subject.name}
+                  onSelect={() => handleOnSelect(subject)}
+                >
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4",
+                      searchedSubjects.some(
+                        (interestsSubject) =>
+                          interestsSubject.code === subject.code
+                      )
+                        ? "opacity-100"
+                        : "opacity-0"
+                    )}
+                  />
+                  {subject.name}
+                </CommandItem>
+              ))}
+              {filteredSubjects.length > paginationLimit && (
+                <CommandItem
+                  onSelect={loadMoreItems}
+                  className="text-center text-muted-foreground"
+                >
+                  Load more...
+                </CommandItem>
               )}
-              {paginationLimit < filteredSubjects.length && (
-                <div className="p-2 text-center flex">
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={loadMoreItems}
-                  >
-                    Load More
-                  </Button>
-                </div>
-              )}
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-    </div>
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
   );
 }

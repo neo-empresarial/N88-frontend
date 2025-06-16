@@ -65,7 +65,11 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
       await Promise.all(promises);
     },
     onSuccess: () => {
-      toast.success("Invitations sent successfully");
+      toast.success(
+        `Successfully sent ${selectedUsers.length} invitation${
+          selectedUsers.length === 1 ? "" : "s"
+        }`
+      );
       setSelectedUsers([]);
       setSearchTerm("");
       setIsOpen(false);

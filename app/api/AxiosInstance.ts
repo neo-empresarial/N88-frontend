@@ -1,4 +1,10 @@
 ﻿import axios from "axios";
+import { getSession } from "@/lib/session";
+
+const instance = axios.create({
+  baseURL: "http://localhost:8000",
+  withCredentials: true,
+});
 
 const useAxios = () => {
   // const router = useRouter();
@@ -55,28 +61,88 @@ const useAxios = () => {
   // if i want to protect the routes, use axiosPrivateInstance, if not, use axiosPublicInstance
 
   const getAllSubjects = async () => {
+    const session = await getSession();
+    if (!session?.accessToken) {
+      throw new Error("No access token found");
+    }
+
+    const response = await instance.get("/subjects", {
+      headers: {
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+    });
+    return response.data;
+  };
+
+  const getSubjectsByCodes = async (codes: string[]) => {
+    const session = await getSession();
+    if (!session?.accessToken) {
+      throw new Error("No access token found");
+    }
+
     try {
-      const response = await axiosPublicInstace.get("/subjects");
+      console.log("Fetching subjects with codes:", codes);
+      const response = await instance.get(
+        `/subjects/by-codes?codes=${codes.join(",")}`,
+        {
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        },
+      );
+
+      console.log("Response:", response.data);
       return response.data;
     } catch (error) {
+      console.error("Error fetching subjects by codes:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("Response data:", error.response?.data);
+        console.error("Response status:", error.response?.status);
+      }
       throw error;
     }
   };
 
-  const getFilteredSubjects = async (query: string) => {
-    try {
-      const response = await axiosPublicInstace.get(
-        `/subjects?search=${query}`
-      );
-      return response.data;
-    } catch (error) {
-      throw error;
+  const getAllSubjectsWithRelations = async () => {
+    const session = await getSession();
+    if (!session?.accessToken) {
+      throw new Error("No access token found");
     }
+
+    const response = await instance.get("/subjects", {
+      headers: {
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+    });
+    return response.data;
+  };
+
+  const getFilteredSubjects = async (search: string) => {
+    const session = await getSession();
+    if (!session?.accessToken) {
+      throw new Error("No access token found");
+    }
+
+    const response = await instance.get(`/subjects?search=${search}`, {
+      headers: {
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+    });
+    return response.data;
   };
 
   const getSubject = async (id: number) => {
+    const session = await getSession();
+    if (!session?.accessToken) {
+      throw new Error("No access token found");
+    }
+
     try {
-      const response = await axiosPublicInstace.get(`/subjects/${id}`);
+      const response = await axiosPublicInstace.get(`/subjects/${id}`, {
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      });
       return response.data;
     } catch (error) {
       throw error;
@@ -84,10 +150,18 @@ const useAxios = () => {
   };
 
   const getCheckUserExtraInfo = async (email: string) => {
+    const session = await getSession();
+    if (!session?.accessToken) {
+      throw new Error("No access token found");
+    }
+
     try {
       const response = await axiosPublicInstace.get("/users/check_extra_info", {
         params: {
           email,
+        },
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
         },
       });
       return response.data;
@@ -135,6 +209,8 @@ const useAxios = () => {
 
   return {
     getAllSubjects,
+    getSubjectsByCodes,
+    getAllSubjectsWithRelations,
     getFilteredSubjects,
     getSubject,
     getCheckUserExtraInfo,

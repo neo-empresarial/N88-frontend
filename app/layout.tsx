@@ -9,8 +9,10 @@ import Providers from "./providers";
 import ProfileOptions from "@/app/profile/ProfileOptions";
 import FeedbackButton from "./feedback/FeedbackButton";
 import Theme from "@/components/Theme";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 import NotificationsDropdown from "@/components/notifications-dropdown";
+import Image from "next/image";
+import logo from "./assets/logo-neo.svg";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -41,7 +43,7 @@ export default function RootLayout({
                   <MenubarMenu>
                     <Link href={"/"}>
                       <div className="text-sm lg:text-base flex gap-2 items-center ml-6">
-                        <Infinity size={15} />
+                        <Image src={logo} alt="grade" width={20} height={20} />
                         MatrUFSC 2.0
                       </div>
                     </Link>
@@ -62,6 +64,7 @@ export default function RootLayout({
                     </MenubarTrigger>
                   </MenubarMenu>
                 </div>
+
                 <div className="flex gap-2">
                   <MenubarMenu>
                     <Theme />
@@ -77,7 +80,7 @@ export default function RootLayout({
             </div>
           </ThemeProvider>
         </Providers>
-        <Toaster />
+        <Toaster richColors position="bottom-right" />
       </body>
     </html>
   );

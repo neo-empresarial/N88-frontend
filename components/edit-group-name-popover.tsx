@@ -76,7 +76,7 @@ const EditGroupNamePopover = ({ groupId }: { groupId: string }) => {
           size="icon"
           className="bg-transparent dark:bg-gray-800"
         >
-          <Pencil className="w-4 h-4" />
+          <Pencil className="w-4 h-4 text-gray-500 dark:text-gray-400" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-72 flex flex-col gap-2">

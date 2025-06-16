@@ -13,14 +13,23 @@ type SubjectsContextType = {
   searchedSubjects: SubjectsType[];
   setSearchedSubjects: React.Dispatch<React.SetStateAction<SubjectsType[]>>;
   scheduleSubjects: scheduleSubjectsType[];
-  setScheduleSubjects: React.Dispatch<React.SetStateAction<scheduleSubjectsType[]>>;
+  setScheduleSubjects: React.Dispatch<
+    React.SetStateAction<scheduleSubjectsType[]>
+  >;
   selectedSubject: SubjectsType;
   setSelectedSubject: React.Dispatch<React.SetStateAction<SubjectsType>>;
   onFocusSubject: { code: string };
   setOnFocusSubject: React.Dispatch<React.SetStateAction<{ code: string }>>;
   onFocusSubjectClass: { code: string; classcode: string };
-  setOnFocusSubjectClass: React.Dispatch<React.SetStateAction<{ code: string; classcode: string }>>;
+  setOnFocusSubjectClass: React.Dispatch<
+    React.SetStateAction<{ code: string; classcode: string }>
+  >;
+  currentScheduleId: number | null;
+  setCurrentScheduleId: React.Dispatch<React.SetStateAction<number | null>>;
 };
+
+const STORAGE_KEY = "schedule_subjects";
+const SEARCHED_SUBJECTS_KEY = "searched_subjects";
 
 export const SubjectsContext = createContext<SubjectsContextType>({
   searchedSubjects: [],
@@ -33,6 +42,8 @@ export const SubjectsContext = createContext<SubjectsContextType>({
   setOnFocusSubject: () => {},
   onFocusSubjectClass: { code: "", classcode: "" },
   setOnFocusSubjectClass: () => {},
+  currentScheduleId: null,
+  setCurrentScheduleId: () => {},
 });
 
 export function SubjectsProvider({
@@ -40,22 +51,95 @@ export function SubjectsProvider({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [searchedSubjects, setSearchedSubjects] = useState(
-    [] as SubjectsType[]
+  // Load initial state from localStorage
+  const [searchedSubjects, setSearchedSubjects] = useState<SubjectsType[]>(
+    () => {
+      try {
+        if (typeof window !== "undefined") {
+          const savedSubjects = localStorage.getItem(SEARCHED_SUBJECTS_KEY);
+          console.log(
+            "Loading searched subjects from localStorage:",
+            savedSubjects
+          );
+          return savedSubjects ? JSON.parse(savedSubjects) : [];
+        }
+      } catch (error) {
+        console.error(
+          "Error loading searched subjects from localStorage:",
+          error
+        );
+      }
+      return [];
+    }
   );
-  const [scheduleSubjects, setScheduleSubjects] = useState(
-    [] as scheduleSubjectsType[]
-  );
+
+  const [scheduleSubjects, setScheduleSubjects] = useState<
+    scheduleSubjectsType[]
+  >(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const savedSubjects = localStorage.getItem(STORAGE_KEY);
+        console.log(
+          "Loading schedule subjects from localStorage:",
+          savedSubjects
+        );
+        return savedSubjects ? JSON.parse(savedSubjects) : [];
+      }
+    } catch (error) {
+      console.error(
+        "Error loading schedule subjects from localStorage:",
+        error
+      );
+    }
+    return [];
+  });
+
   const [selectedSubject, setSelectedSubject] = useState({} as SubjectsType);
   const [onFocusSubject, setOnFocusSubject] = useState({} as { code: string });
   const [onFocusSubjectClass, setOnFocusSubjectClass] = useState(
     {} as { code: string; classcode: string }
   );
+  const [currentScheduleId, setCurrentScheduleId] = useState<number | null>(
+    null
+  );
 
-  // useEffect(() => console.log({ searchedSubjects }), [searchedSubjects]);
-  useEffect(() => console.log({ scheduleSubjects }), [scheduleSubjects]);
-  useEffect(() => console.log({ onFocusSubject }), [onFocusSubject]);
-  useEffect(() => console.log({ onFocusSubjectClass }), [onFocusSubjectClass]);
+  // Save scheduleSubjects to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined" && scheduleSubjects.length > 0) {
+        console.log(
+          "Saving schedule subjects to localStorage:",
+          scheduleSubjects
+        );
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleSubjects));
+      }
+    } catch (error) {
+      console.error("Error saving schedule subjects to localStorage:", error);
+    }
+  }, [scheduleSubjects]);
+
+  // Save searchedSubjects to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined" && searchedSubjects.length > 0) {
+        console.log(
+          "Saving searched subjects to localStorage:",
+          searchedSubjects
+        );
+        localStorage.setItem(
+          SEARCHED_SUBJECTS_KEY,
+          JSON.stringify(searchedSubjects)
+        );
+      }
+    } catch (error) {
+      console.error("Error saving searched subjects to localStorage:", error);
+    }
+  }, [searchedSubjects]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log("Current schedule subjects:", scheduleSubjects);
+  }, [scheduleSubjects]);
 
   return (
     <SubjectsContext.Provider
@@ -70,6 +154,8 @@ export function SubjectsProvider({
         setOnFocusSubject,
         onFocusSubjectClass,
         setOnFocusSubjectClass,
+        currentScheduleId,
+        setCurrentScheduleId,
       }}
     >
       {children}
