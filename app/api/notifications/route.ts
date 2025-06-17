@@ -4,11 +4,13 @@ import { getSession } from "@/lib/session";
 export async function GET() {
   try {
     const session = await getSession();
+    console.log("Session in notifications GET:", session);
 
     if (!session?.accessToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    console.log("Fetching notifications from backend...");
     const response = await fetch(`http://localhost:8000/notifications`, {
       headers: {
         Authorization: `Bearer ${session.accessToken}`,
@@ -17,10 +19,12 @@ export async function GET() {
 
     if (!response.ok) {
       const error = await response.json();
+      console.error("Backend error:", error);
       throw new Error(error.message || "Failed to fetch notifications");
     }
 
     const data = await response.json();
+    console.log("Backend notifications response:", data);
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error fetching notifications:", error);

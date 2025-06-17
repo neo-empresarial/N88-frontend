@@ -11,6 +11,8 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { getSession } from "@/lib/session";
+import { useEffect, useState } from "react";
 
 interface Notification {
   id: number;
@@ -29,16 +31,35 @@ interface Notification {
 
 const NotificationsDropdown = () => {
   const queryClient = useQueryClient();
+  const [userId, setUserId] = useState<number | null>(null);
 
-  const { data: notifications, isLoading } = useQuery({
-    queryKey: ["notifications"],
+  useEffect(() => {
+    const checkSession = async () => {
+      const session = await getSession();
+      if (session?.user?.id) {
+        setUserId(Number(session.user.id));
+      }
+    };
+    checkSession();
+  }, []);
+
+  const {
+    data: notifications,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["notifications", userId],
     queryFn: async () => {
+      console.log("Fetching notifications for user:", userId);
       const response = await fetch("/api/notifications");
       if (!response.ok) {
         throw new Error("Failed to fetch notifications");
       }
-      return response.json();
+      const data = await response.json();
+      console.log("Notifications received:", data);
+      return data;
     },
+    enabled: !!userId,
   });
 
   const respondMutation = useMutation({
@@ -67,7 +88,7 @@ const NotificationsDropdown = () => {
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
       queryClient.invalidateQueries({ queryKey: ["groups"] });
       toast.success("Invitation responded to successfully");
     },
@@ -83,6 +104,9 @@ const NotificationsDropdown = () => {
   const pendingNotifications = notifications?.filter(
     (n: Notification) => n.status === "PENDING"
   );
+
+  console.log("All notifications:", notifications);
+  console.log("Pending notifications:", pendingNotifications);
 
   const isResponding = (notificationId: number, accept: boolean) => {
     return (
@@ -105,6 +129,16 @@ const NotificationsDropdown = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80">
+        <div className="p-2 border-b">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => refetch()}
+            className="w-full"
+          >
+            Refresh Notifications
+          </Button>
+        </div>
         {isLoading ? (
           <div className="p-4 text-center">Loading...</div>
         ) : pendingNotifications?.length === 0 ? (

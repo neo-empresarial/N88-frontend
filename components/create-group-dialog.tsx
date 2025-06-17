@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
@@ -49,6 +49,7 @@ const CreateGroupDialog = () => {
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -88,10 +89,14 @@ const CreateGroupDialog = () => {
       return response.json();
     },
     onSuccess: () => {
-      toast.success("Grupo criado com sucesso!");
+      toast.success(
+        "Grupo criado com sucesso! Convites enviados para os membros selecionados."
+      );
       setOpen(false);
       form.reset();
       setSelectedUsers([]);
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
       router.refresh();
     },
     onError: (error: Error) => {
@@ -119,7 +124,7 @@ const CreateGroupDialog = () => {
 
   const onSubmit = async (data: FormData) => {
     if (selectedUsers.length === 0) {
-      toast.error("Adicione pelo menos um membro ao grupo");
+      toast.error("Selecione pelo menos um usuário para convidar");
       return;
     }
 
@@ -141,7 +146,8 @@ const CreateGroupDialog = () => {
         <DialogHeader>
           <DialogTitle>Criar grupo de estudos</DialogTitle>
           <DialogDescription>
-            Crie um grupo de estudos para compartilhar com seus amigos
+            Crie um grupo de estudos e convide seus amigos. Eles receberão um
+            convite para aceitar ou recusar.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -173,7 +179,7 @@ const CreateGroupDialog = () => {
               )}
             />
             <div>
-              <FormLabel>Adicionar membros</FormLabel>
+              <FormLabel>Convidar membros</FormLabel>
               <FormControl>
                 <div className="relative">
                   <Input
@@ -210,7 +216,8 @@ const CreateGroupDialog = () => {
                 </div>
               </FormControl>
               <FormDescription>
-                Busque e adicione membros ao grupo
+                Busque e convide membros para o grupo. Eles receberão um convite
+                e poderão aceitar ou recusar.
               </FormDescription>
               <div className="mt-2 space-y-2">
                 {selectedUsers.map((user) => (
