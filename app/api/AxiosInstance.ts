@@ -135,26 +135,39 @@ const useAxios = () => {
 
   const getSubject = async (id: number) => {
     const session = await getSession();
+    console.log("Debug - Session in getSubject:", session);
+    console.log("Debug - Access token exists:", !!session?.accessToken);
+
     if (!session?.accessToken) {
       // Redirect to login if no session
       if (typeof window !== "undefined") {
+        console.log("Debug - No access token, redirecting to login");
         window.location.href = "/auth/signin";
       }
       throw new Error("No access token found - please log in");
     }
 
     try {
+      console.log("Debug - Making request to:", `/subjects/${id}`);
+      console.log(
+        "Debug - Authorization header:",
+        `Bearer ${session.accessToken.substring(0, 20)}...`
+      );
+
       const response = await instance.get(`/subjects/${id}`, {
         headers: {
           Authorization: `Bearer ${session.accessToken}`,
         },
       });
+      console.log("Debug - Request successful:", response.status);
       return response.data;
     } catch (error) {
+      console.log("Debug - Request failed:", error);
       // If we get a 401, redirect to login
       if (error && typeof error === "object" && "response" in error) {
         const axiosError = error as any;
         if (axiosError.response?.status === 401) {
+          console.log("Debug - 401 error, redirecting to login");
           if (typeof window !== "undefined") {
             window.location.href = "/auth/signin";
           }

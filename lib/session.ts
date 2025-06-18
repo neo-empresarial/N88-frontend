@@ -20,7 +20,6 @@ const encodedKey = new TextEncoder().encode(secretKey);
 export async function createSession(payload: Session) {
   const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-
   // Ensure the payload matches the expected structure
   const sessionPayload = {
     user: {
@@ -31,7 +30,6 @@ export async function createSession(payload: Session) {
     accessToken: payload.accessToken,
     refreshToken: payload.refreshToken,
   };
-
 
   const session = await new SignJWT(sessionPayload)
     .setProtectedHeader({ alg: "HS256" })
@@ -60,6 +58,8 @@ export async function getSession() {
   const cookie = cookies().get("session")?.value;
   const accessToken = cookies().get("access_token")?.value;
 
+  console.log("Debug - Session cookie exists:", !!cookie);
+  console.log("Debug - Access token cookie exists:", !!accessToken);
 
   if (!cookie) return null;
 
@@ -74,6 +74,12 @@ export async function getSession() {
     if (accessToken) {
       session.accessToken = accessToken;
     }
+
+    console.log("Debug - Session retrieved successfully:", {
+      userId: session.user?.id,
+      userEmail: session.user?.email,
+      hasAccessToken: !!session.accessToken,
+    });
 
     return session;
   } catch (error) {
