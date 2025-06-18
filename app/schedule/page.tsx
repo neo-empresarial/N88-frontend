@@ -11,6 +11,7 @@ import WeekCalendarComponent from "./components/WeekCalendar";
 import SearchSubject from "./components/SearchSubject";
 import SaveScheduleDialog from "./components/SaveScheduleDialog";
 import SavedSchedulesDialog from "./components/SavedSchedulesDialog";
+import ReceivedSharedSchedulesDialog from "./components/ReceivedSharedSchedulesDialog";
 import { SubjectsType } from "./types/dataType";
 
 import { useEffect, useState } from "react";
@@ -35,6 +36,7 @@ export default function SchedulePage() {
           <div className="flex gap-2">
             <SaveScheduleDialog />
             <SavedSchedulesDialog />
+            <ReceivedSharedSchedulesDialog />
           </div>
         </div>
         <ResizablePanelGroup

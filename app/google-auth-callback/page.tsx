@@ -9,14 +9,24 @@ export default function GoogleAuthCallbackPage() {
   const id = searchParams.get("id");
   const name = searchParams.get("name");
   const email = searchParams.get("email");
+  const accessToken = searchParams.get("accessToken");
+  const refreshToken = searchParams.get("refreshToken");
 
   const fetchData = async () => {
+    if (!id || !name || !email || !accessToken || !refreshToken) {
+      console.error("Missing required parameters for Google auth callback");
+      router.push("/auth/login");
+      return;
+    }
+
     await createSession({
       user: {
-        id: id,
+        id: parseInt(id, 10),
         name: name,
         email: email,
       },
+      accessToken,
+      refreshToken,
     });
   };
 

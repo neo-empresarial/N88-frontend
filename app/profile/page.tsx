@@ -55,7 +55,6 @@ export default function Profile() {
         <div className="flex flex-col gap-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-md h-fit">
           <div className="flex gap-2 items-center">
             <Avatar>
-              <AvatarImage src={session?.user?.avatar} />
               <AvatarFallback className="bg-gray-500 dark:bg-gray-700">
                 {session?.user?.name?.charAt(0)}
               </AvatarFallback>

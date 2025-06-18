@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useSavedSchedulesQuery } from "@/app/hooks/useSavedSchedules";
-import { Loader2, List, Trash2, Loader } from "lucide-react";
+import { Loader2, List, Trash2, Loader, Share2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -34,11 +34,16 @@ import { toast } from "sonner";
 import useAxios from "@/app/api/AxiosInstance";
 import { SubjectsType } from "../types/dataType";
 import { getUniqueColorPair, resetColorUsage } from "../utils/colorUtils";
+import ShareScheduleDialog from "./ShareScheduleDialog";
 
 export default function SavedSchedulesDialog() {
   const [open, setOpen] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<number | null>(null);
   const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [scheduleToShare, setScheduleToShare] = useState<SavedSchedule | null>(
+    null
+  );
   const [loadingScheduleId, setLoadingScheduleId] = useState<number | null>(
     null
   );
@@ -51,6 +56,11 @@ export default function SavedSchedulesDialog() {
   const handleDelete = (id: number) => {
     setSelectedSchedule(id);
     setShowDeleteAlert(true);
+  };
+
+  const handleShare = (schedule: SavedSchedule) => {
+    setScheduleToShare(schedule);
+    setShowShareDialog(true);
   };
 
   const confirmDelete = () => {
@@ -227,6 +237,19 @@ export default function SavedSchedulesDialog() {
                               : "Load"}
                           </Button>
                           <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleShare(schedule)}
+                            disabled={
+                              isDeleting ||
+                              loadingScheduleId === schedule.idsavedschedule
+                            }
+                            className="h-8"
+                          >
+                            <Share2 className="h-4 w-4 mr-1" />
+                            Share
+                          </Button>
+                          <Button
                             variant="ghost"
                             size="icon"
                             onClick={() =>
@@ -271,6 +294,14 @@ export default function SavedSchedulesDialog() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {scheduleToShare && (
+        <ShareScheduleDialog
+          schedule={scheduleToShare}
+          open={showShareDialog}
+          onOpenChange={setShowShareDialog}
+        />
+      )}
     </>
   );
 }
