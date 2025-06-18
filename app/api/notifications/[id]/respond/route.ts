@@ -22,8 +22,10 @@ export async function POST(
       );
     }
 
+    const backendUrl =
+      process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DATABASE_URL}notifications/${params.id}/respond`,
+      `${backendUrl}notifications/${params.id}/respond`,
       {
         method: "POST",
         headers: {

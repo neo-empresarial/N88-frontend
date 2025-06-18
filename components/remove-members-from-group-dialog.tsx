@@ -15,7 +15,13 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { Trash2, UserMinus } from "lucide-react";
 import { getGroup } from "@/lib/api";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 interface User {
   iduser: number;
@@ -42,13 +48,15 @@ const RemoveMembersFromGroupDialog = ({ groupId }: { groupId: number }) => {
 
       for (const user of selectedUsers) {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_DATABASE_URL}groups/${groupId}/members/${user.iduser}`,
+          `${
+            process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/"
+          }groups/${groupId}/members/${user.iduser}`,
           {
             method: "DELETE",
             headers: {
+              "Content-Type": "application/json",
               Authorization: `Bearer ${session.accessToken}`,
             },
-            credentials: "include",
           }
         );
 
@@ -97,7 +105,10 @@ const RemoveMembersFromGroupDialog = ({ groupId }: { groupId: number }) => {
               </SelectTrigger>
               <SelectContent>
                 {group?.members?.map((member: User) => (
-                  <SelectItem key={member.iduser} value={member.iduser.toString()}>
+                  <SelectItem
+                    key={member.iduser}
+                    value={member.iduser.toString()}
+                  >
                     {member.name} ({member.email})
                   </SelectItem>
                 ))}
@@ -105,7 +116,9 @@ const RemoveMembersFromGroupDialog = ({ groupId }: { groupId: number }) => {
             </Select>
 
             <div className="mt-4">
-              <h3 className="text-sm font-medium mb-2">Membros selecionados:</h3>
+              <h3 className="text-sm font-medium mb-2">
+                Membros selecionados:
+              </h3>
               <div className="space-y-2">
                 {selectedUsers.map((user) => (
                   <div

@@ -19,12 +19,17 @@ const Groups = () => {
           throw new Error("No access token found");
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}groups`, {
-          headers: {
-            Authorization: `Bearer ${session.accessToken}`,
-          },
-          credentials: "include",
-        });
+        const response = await fetch(
+          `${
+            process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/"
+          }groups`,
+          {
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`,
+            },
+            credentials: "include",
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Failed to fetch groups");

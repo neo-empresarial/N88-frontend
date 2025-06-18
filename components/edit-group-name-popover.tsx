@@ -22,15 +22,20 @@ const useUpdateGroupName = () => {
         throw new Error("No access token found");
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}groups/${groupId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-        body: JSON.stringify({ name }),
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/"
+        }groups/${groupId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+          body: JSON.stringify({ name }),
+          credentials: "include",
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to update group name");

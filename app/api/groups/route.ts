@@ -22,7 +22,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}groups`, {
+    const backendUrl =
+      process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+    const response = await fetch(`${backendUrl}groups`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

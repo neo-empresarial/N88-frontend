@@ -12,8 +12,10 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const backendUrl =
+      process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DATABASE_URL}groups/${params.id}/members/${params.userId}`,
+      `${backendUrl}groups/${params.id}/members/${params.userId}`,
       {
         method: "DELETE",
         headers: {

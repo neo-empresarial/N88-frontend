@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_DATABASE_URL;
+    const backendUrl =
+      process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
 
     if (!backendUrl) {
       return NextResponse.json(
@@ -11,7 +12,7 @@ export async function GET() {
       );
     }
 
-    const response = await fetch(`${backendUrl}/users/`, {
+    const response = await fetch(`${backendUrl}users/`, {
       headers: {
         "Content-Type": "application/json",
       },

@@ -9,7 +9,9 @@ export async function GET() {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}notifications`, {
+    const backendUrl =
+      process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+    const response = await fetch(`${backendUrl}notifications`, {
       headers: {
         Authorization: `Bearer ${session.accessToken}`,
       },
@@ -51,7 +53,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}notifications/invite`, {
+    const backendUrl =
+      process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+    const response = await fetch(`${backendUrl}notifications/invite`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

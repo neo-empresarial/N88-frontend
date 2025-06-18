@@ -2,7 +2,7 @@
 import { getSession } from "@/lib/session";
 
 const instance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_DATABASE_URL,
+  baseURL: process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/",
   withCredentials: true,
 });
 
@@ -10,7 +10,7 @@ const useAxios = () => {
   // const router = useRouter();
 
   const axiosPublicInstace = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_DATABASE_URL,
+    baseURL: process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/",
     headers: {
       "Content-Type": "application/json",
     },
@@ -66,12 +66,17 @@ const useAxios = () => {
       throw new Error("No access token found");
     }
 
-    const response = await instance.get("/subjects", {
+    const response = await fetch(`http://localhost:8000/subjects`, {
       headers: {
         Authorization: `Bearer ${session.accessToken}`,
       },
     });
-    return response.data;
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch subjects: ${response.statusText}`);
+    }
+
+    return response.json();
   };
 
   const getSubjectsByCodes = async (codes: string[]) => {
@@ -87,14 +92,13 @@ const useAxios = () => {
           headers: {
             Authorization: `Bearer ${session.accessToken}`,
           },
-        },
+        }
       );
 
       return response.data;
     } catch (error) {
       console.error("Error fetching subjects by codes:", error);
       if (axios.isAxiosError(error)) {
-
       }
       throw error;
     }

@@ -12,16 +12,15 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DATABASE_URL}groups/${params.id}/leave`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json", 
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      }
-    );
+    const backendUrl =
+      process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+    const response = await fetch(`${backendUrl}groups/${params.id}/leave`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+    });
 
     if (!response.ok) {
       const error = await response.json();

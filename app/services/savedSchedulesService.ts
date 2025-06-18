@@ -33,6 +33,11 @@ const handleApiError = async (response: Response) => {
   return response.json();
 };
 
+// Helper function to get the backend URL with fallback
+const getBackendUrl = () => {
+  return process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+};
+
 export const useSavedSchedules = () => {
   const getSavedSchedules = async () => {
     const session = await getSession();
@@ -40,24 +45,23 @@ export const useSavedSchedules = () => {
       throw new Error("No access token found");
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}saved-schedules`, {
+    const response = await fetch(`${getBackendUrl()}saved-schedules`, {
       headers: {
         Authorization: `Bearer ${session.accessToken}`,
       },
-      credentials: "include", // This will send the cookies
+      credentials: "include",
     });
 
     return handleApiError(response);
   };
 
   const createSavedSchedule = async (data: CreateSavedScheduleDto) => {
-
     const session = await getSession();
     if (!session?.accessToken) {
       throw new Error("No access token found");
     }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}saved-schedules`, {
+    const response = await fetch(`${getBackendUrl()}saved-schedules`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -74,24 +78,20 @@ export const useSavedSchedules = () => {
     id: number,
     data: CreateSavedScheduleDto
   ) => {
-
     const session = await getSession();
     if (!session?.accessToken) {
       throw new Error("No access token found");
     }
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DATABASE_URL}saved-schedules/${id}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-        credentials: "include", // This will send the cookies
-        body: JSON.stringify(data),
-      }
-    );
+    const response = await fetch(`${getBackendUrl()}saved-schedules/${id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+      credentials: "include", // This will send the cookies
+      body: JSON.stringify(data),
+    });
 
     return handleApiError(response);
   };
@@ -102,16 +102,13 @@ export const useSavedSchedules = () => {
       throw new Error("No access token found");
     }
 
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_DATABASE_URL}saved-schedules/${id}`,
-      {
-        method: "DELETE",
-        credentials: "include", // This will send the cookies
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-      }
-    );
+    const response = await fetch(`${getBackendUrl()}saved-schedules/${id}`, {
+      method: "DELETE",
+      credentials: "include", // This will send the cookies
+      headers: {
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+    });
 
     if (!response.ok) {
       throw new Error("Failed to delete saved schedule");

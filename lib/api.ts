@@ -6,7 +6,9 @@ export async function getGroup(groupId: number) {
     throw new Error("No access token found");
   }
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}groups/${groupId}`, {
+  const backendUrl =
+    process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+  const response = await fetch(`${backendUrl}groups/${groupId}`, {
     headers: {
       Authorization: `Bearer ${session.accessToken}`,
     },

@@ -57,10 +57,7 @@ export function SubjectsProvider({
       try {
         if (typeof window !== "undefined") {
           const savedSubjects = localStorage.getItem(SEARCHED_SUBJECTS_KEY);
-          console.log(
-            "Loading searched subjects from localStorage:",
-            savedSubjects
-          );
+
           return savedSubjects ? JSON.parse(savedSubjects) : [];
         }
       } catch (error) {
@@ -79,10 +76,7 @@ export function SubjectsProvider({
     try {
       if (typeof window !== "undefined") {
         const savedSubjects = localStorage.getItem(STORAGE_KEY);
-        console.log(
-          "Loading schedule subjects from localStorage:",
-          savedSubjects
-        );
+
         return savedSubjects ? JSON.parse(savedSubjects) : [];
       }
     } catch (error) {
@@ -103,14 +97,10 @@ export function SubjectsProvider({
     null
   );
 
-  // Save scheduleSubjects to localStorage whenever it changes
   useEffect(() => {
     try {
       if (typeof window !== "undefined" && scheduleSubjects.length > 0) {
-        console.log(
-          "Saving schedule subjects to localStorage:",
-          scheduleSubjects
-        );
+
         localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleSubjects));
       }
     } catch (error) {
@@ -118,7 +108,6 @@ export function SubjectsProvider({
     }
   }, [scheduleSubjects]);
 
-  // Save searchedSubjects to localStorage whenever it changes
   useEffect(() => {
     try {
       if (typeof window !== "undefined" && searchedSubjects.length > 0) {

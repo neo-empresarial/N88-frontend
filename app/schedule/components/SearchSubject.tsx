@@ -48,7 +48,10 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
 
   // filter objects based on user input
   const filteredSubjects = useMemo(() => {
-    const filtered_subjects = subjects.filter(
+    // Ensure subjects is always an array
+    const subjectsArray = subjects || [];
+
+    const filtered_subjects = subjectsArray.filter(
       (subject) =>
         subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         subject.code.toLowerCase().includes(searchTerm.toLowerCase())
