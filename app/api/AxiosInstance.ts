@@ -66,11 +66,16 @@ const useAxios = () => {
       throw new Error("No access token found");
     }
 
-    const response = await instance.get(`${process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/"}subjects`, {
-      headers: {
-        Authorization: `Bearer ${session.accessToken}`,
-      },
-    });
+    const response = await instance.get(
+      `${
+        process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/"
+      }subjects`,
+      {
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      }
+    );
 
     return response.data;
   };
@@ -131,17 +136,31 @@ const useAxios = () => {
   const getSubject = async (id: number) => {
     const session = await getSession();
     if (!session?.accessToken) {
-      throw new Error("No access token found");
+      // Redirect to login if no session
+      if (typeof window !== "undefined") {
+        window.location.href = "/auth/signin";
+      }
+      throw new Error("No access token found - please log in");
     }
 
     try {
-      const response = await axiosPublicInstace.get(`/subjects/${id}`, {
+      const response = await instance.get(`/subjects/${id}`, {
         headers: {
           Authorization: `Bearer ${session.accessToken}`,
         },
       });
       return response.data;
     } catch (error) {
+      // If we get a 401, redirect to login
+      if (error && typeof error === "object" && "response" in error) {
+        const axiosError = error as any;
+        if (axiosError.response?.status === 401) {
+          if (typeof window !== "undefined") {
+            window.location.href = "/auth/signin";
+          }
+          throw new Error("Session expired - please log in again");
+        }
+      }
       throw error;
     }
   };
