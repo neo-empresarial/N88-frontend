@@ -4,14 +4,12 @@ import { getSession } from "@/lib/session";
 export async function GET() {
   try {
     const session = await getSession();
-    console.log("Session in notifications GET:", session);
 
     if (!session?.accessToken) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    console.log("Fetching notifications from backend...");
-    const response = await fetch(`http://localhost:8000/notifications`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}notifications`, {
       headers: {
         Authorization: `Bearer ${session.accessToken}`,
       },
@@ -53,7 +51,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const response = await fetch(`http://localhost:8000/notifications/invite`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}notifications/invite`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const backendUrl = "http://localhost:8000";
+    const backendUrl = process.env.NEXT_PUBLIC_DATABASE_URL;
 
     if (!backendUrl) {
       return NextResponse.json(
@@ -23,7 +23,6 @@ export async function GET() {
     }
 
     const data = await response.json();
-    console.log(data);
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error fetching users:", error);

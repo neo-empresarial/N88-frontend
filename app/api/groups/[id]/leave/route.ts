@@ -13,11 +13,11 @@ export async function POST(
     }
 
     const response = await fetch(
-      `http://localhost:8000/groups/${params.id}/leave`,
+      `${process.env.NEXT_PUBLIC_DATABASE_URL}groups/${params.id}/leave`,
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json", 
           Authorization: `Bearer ${session.accessToken}`,
         },
       }

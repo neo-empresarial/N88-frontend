@@ -2,7 +2,7 @@
 import { getSession } from "@/lib/session";
 
 const instance = axios.create({
-  baseURL: "http://localhost:8000",
+  baseURL: process.env.NEXT_PUBLIC_DATABASE_URL,
   withCredentials: true,
 });
 
@@ -10,7 +10,7 @@ const useAxios = () => {
   // const router = useRouter();
 
   const axiosPublicInstace = axios.create({
-    baseURL: "http://localhost:8000",
+    baseURL: process.env.NEXT_PUBLIC_DATABASE_URL,
     headers: {
       "Content-Type": "application/json",
     },
@@ -81,7 +81,6 @@ const useAxios = () => {
     }
 
     try {
-      console.log("Fetching subjects with codes:", codes);
       const response = await instance.get(
         `/subjects/by-codes?codes=${codes.join(",")}`,
         {
@@ -91,13 +90,11 @@ const useAxios = () => {
         },
       );
 
-      console.log("Response:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error fetching subjects by codes:", error);
       if (axios.isAxiosError(error)) {
-        console.error("Response data:", error.response?.data);
-        console.error("Response status:", error.response?.status);
+
       }
       throw error;
     }
@@ -184,9 +181,7 @@ const useAxios = () => {
   const login = async (formData: object) => {
     try {
       const response = await axiosPublicInstace.post("auth/login", formData);
-      console.log("Raw login response:", response);
-      console.log("Response data:", response.data);
-      console.log("Response headers:", response.headers);
+
       return response;
     } catch (error) {
       console.error("Login error:", error);

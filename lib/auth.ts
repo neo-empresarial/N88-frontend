@@ -56,20 +56,16 @@ export async function signIn(
   }
 
   const response = (await login(validatedFields.data)) as any;
-  console.log("Response:", response);
 
   if (response.status === 201) {
     const responseData = response.data;
-    console.log("Full login response:", response);
-    console.log("Login response data:", responseData);
+
 
     // Extract tokens from response
     const accessToken = responseData.access_token || responseData.accessToken;
     const refreshToken =
       responseData.refresh_token || responseData.refreshToken;
 
-    console.log("Access token:", accessToken);
-    console.log("Refresh token:", refreshToken);
 
     if (!accessToken) {
       console.error("No access token found in response");

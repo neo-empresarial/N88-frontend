@@ -40,7 +40,7 @@ export const useSavedSchedules = () => {
       throw new Error("No access token found");
     }
 
-    const response = await fetch("http://localhost:8000/saved-schedules", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}saved-schedules`, {
       headers: {
         Authorization: `Bearer ${session.accessToken}`,
       },
@@ -51,14 +51,13 @@ export const useSavedSchedules = () => {
   };
 
   const createSavedSchedule = async (data: CreateSavedScheduleDto) => {
-    console.log("Creating saved schedule with data:", data);
 
     const session = await getSession();
     if (!session?.accessToken) {
       throw new Error("No access token found");
     }
 
-    const response = await fetch("http://localhost:8000/saved-schedules", {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}saved-schedules`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -75,7 +74,6 @@ export const useSavedSchedules = () => {
     id: number,
     data: CreateSavedScheduleDto
   ) => {
-    console.log("Updating saved schedule:", { id, data });
 
     const session = await getSession();
     if (!session?.accessToken) {
@@ -83,7 +81,7 @@ export const useSavedSchedules = () => {
     }
 
     const response = await fetch(
-      `http://localhost:8000/saved-schedules/${id}`,
+      `${process.env.NEXT_PUBLIC_DATABASE_URL}saved-schedules/${id}`,
       {
         method: "PATCH",
         headers: {
@@ -105,7 +103,7 @@ export const useSavedSchedules = () => {
     }
 
     const response = await fetch(
-      `http://localhost:8000/saved-schedules/${id}`,
+      `${process.env.NEXT_PUBLIC_DATABASE_URL}saved-schedules/${id}`,
       {
         method: "DELETE",
         credentials: "include", // This will send the cookies

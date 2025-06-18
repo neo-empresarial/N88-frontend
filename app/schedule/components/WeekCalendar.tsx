@@ -138,7 +138,6 @@ export default function WeekCalendarComponent() {
     const tableData = generateTimesAndDays();
 
     if (subjects.length === 0) {
-      console.log("No subjects found");
       return tableData;
     }
 
@@ -187,7 +186,6 @@ export default function WeekCalendarComponent() {
       });
     });
 
-    // console.log({ tableData });
 
     return tableData;
   }

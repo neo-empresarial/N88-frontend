@@ -43,7 +43,6 @@ interface Group {
   }[];
 }
 
-// Helper function to construct URLs without double slashes
 const buildUrl = (endpoint: string) => {
   const baseUrl =
     process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";

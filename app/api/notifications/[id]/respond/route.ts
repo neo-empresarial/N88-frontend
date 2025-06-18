@@ -23,7 +23,7 @@ export async function POST(
     }
 
     const response = await fetch(
-      `http://localhost:8000/notifications/${params.id}/respond`,
+      `${process.env.NEXT_PUBLIC_DATABASE_URL}notifications/${params.id}/respond`,
       {
         method: "POST",
         headers: {

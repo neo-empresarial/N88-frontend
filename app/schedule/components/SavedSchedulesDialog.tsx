@@ -77,7 +77,6 @@ export default function SavedSchedulesDialog() {
 
     try {
       setLoadingScheduleId(schedule.idsavedschedule);
-      console.log("Starting to load schedule:", schedule.title);
 
       // Reset color usage before loading new schedule
       resetColorUsage();
@@ -86,12 +85,9 @@ export default function SavedSchedulesDialog() {
       setCurrentScheduleId(schedule.idsavedschedule);
 
       // Get only the subjects needed for this schedule
-      console.log("Fetching subjects for schedule...");
       const subjectCodes = schedule.items.map((item) => item.subjectCode);
-      console.log("Subject codes to fetch:", subjectCodes);
 
       const subjects = await getSubjectsByCodes(subjectCodes);
-      console.log("Fetched subjects:", subjects.length);
 
       if (!subjects || subjects.length === 0) {
         throw new Error("No subjects found for the schedule");
@@ -109,10 +105,6 @@ export default function SavedSchedulesDialog() {
         color: getUniqueColorPair(),
       }));
 
-      console.log("Prepared data:", {
-        scheduleItems: scheduleItems.length,
-        subjectsToLoad: subjectsToLoad.length,
-      });
 
       // Update the UI
       setSearchedSubjects(subjectsToLoad);
@@ -128,21 +120,9 @@ export default function SavedSchedulesDialog() {
       );
       setCurrentScheduleId(null);
     } finally {
-      console.log("Finishing load operation");
       setLoadingScheduleId(null);
     }
   };
-
-  // Add effect to monitor loading state
-  useEffect(() => {
-    console.log("Loading state changed:", loadingScheduleId);
-  }, [loadingScheduleId]);
-
-  // Add effect to monitor dialog state
-  useEffect(() => {
-    console.log("Dialog state changed:", open);
-  }, [open]);
-
   // Helper function to get random colors for subjects
   const getRandomColor = () => {
     const lightColors = [

@@ -13,7 +13,7 @@ export async function DELETE(
     }
 
     const response = await fetch(
-      `http://localhost:8000/groups/${params.id}/members/${params.userId}`,
+      `${process.env.NEXT_PUBLIC_DATABASE_URL}groups/${params.id}/members/${params.userId}`,
       {
         method: "DELETE",
         headers: {

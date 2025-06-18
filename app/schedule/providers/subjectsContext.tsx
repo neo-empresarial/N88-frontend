@@ -136,11 +136,6 @@ export function SubjectsProvider({
     }
   }, [searchedSubjects]);
 
-  // Debug logging
-  useEffect(() => {
-    console.log("Current schedule subjects:", scheduleSubjects);
-  }, [scheduleSubjects]);
-
   return (
     <SubjectsContext.Provider
       value={{

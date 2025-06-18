@@ -50,13 +50,11 @@ const NotificationsDropdown = () => {
   } = useQuery({
     queryKey: ["notifications", userId],
     queryFn: async () => {
-      console.log("Fetching notifications for user:", userId);
       const response = await fetch("/api/notifications");
       if (!response.ok) {
         throw new Error("Failed to fetch notifications");
       }
       const data = await response.json();
-      console.log("Notifications received:", data);
       return data;
     },
     enabled: !!userId,
@@ -105,8 +103,7 @@ const NotificationsDropdown = () => {
     (n: Notification) => n.status === "PENDING"
   );
 
-  console.log("All notifications:", notifications);
-  console.log("Pending notifications:", pendingNotifications);
+
 
   const isResponding = (notificationId: number, accept: boolean) => {
     return (

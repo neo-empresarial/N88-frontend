@@ -22,7 +22,7 @@ const useUpdateGroupName = () => {
         throw new Error("No access token found");
       }
 
-      const response = await fetch(`http://localhost:8000/groups/${groupId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_DATABASE_URL}groups/${groupId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
