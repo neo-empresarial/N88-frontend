@@ -45,7 +45,7 @@ interface Group {
 
 const buildUrl = (endpoint: string) => {
   const baseUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+    process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000";
   return `${baseUrl.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
 };
 

@@ -66,17 +66,13 @@ const useAxios = () => {
       throw new Error("No access token found");
     }
 
-    const response = await fetch(`http://localhost:8000/subjects`, {
+    const response = await instance.get(`${process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/"}subjects`, {
       headers: {
         Authorization: `Bearer ${session.accessToken}`,
       },
     });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch subjects: ${response.statusText}`);
-    }
-
-    return response.json();
+    return response.data;
   };
 
   const getSubjectsByCodes = async (codes: string[]) => {
