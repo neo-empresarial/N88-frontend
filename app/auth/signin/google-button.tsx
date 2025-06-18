@@ -16,7 +16,6 @@ export default function GoogleLoginButton(props: { style: string }) {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
-    console.log(urlParams);
     if (token) {
       localStorage
         .setItem("token", token)
