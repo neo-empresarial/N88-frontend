@@ -10,7 +10,6 @@ export default async function middleware(req: NextRequest) {
   const session = await getSession();
 
   if (!session || !session.user) {
-    // Redirect to login if no session
     return NextResponse.redirect(new URL("/auth/signin", req.nextUrl));
   }
 
@@ -18,10 +17,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    "/schedule/:path*",
-    "/professors/:path*",
-    "/profile/:path*",
-    "/groups/:path*",
-  ],
+  matcher: ["/schedule", "/professors", "/profile"],
 };
