@@ -7,6 +7,7 @@ export type scheduleSubjectsType = {
   class: string;
   color?: string;
   activated: boolean;
+  schedules?: string;
 };
 
 type SubjectsContextType = {
@@ -26,6 +27,7 @@ type SubjectsContextType = {
   >;
   currentScheduleId: number | null;
   setCurrentScheduleId: React.Dispatch<React.SetStateAction<number | null>>;
+
 };
 
 const STORAGE_KEY = "schedule_subjects";
@@ -44,6 +46,7 @@ export const SubjectsContext = createContext<SubjectsContextType>({
   setOnFocusSubjectClass: () => {},
   currentScheduleId: null,
   setCurrentScheduleId: () => {},
+
 });
 
 export function SubjectsProvider({
@@ -125,6 +128,7 @@ export function SubjectsProvider({
     }
   }, [searchedSubjects]);
 
+
   return (
     <SubjectsContext.Provider
       value={{
@@ -140,6 +144,7 @@ export function SubjectsProvider({
         setOnFocusSubjectClass,
         currentScheduleId,
         setCurrentScheduleId,
+
       }}
     >
       {children}

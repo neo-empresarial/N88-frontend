@@ -40,6 +40,7 @@ export default function WeekCalendarComponent() {
     searchedSubjects,
     onFocusSubject,
     onFocusSubjectClass,
+    setTotalCredits
   } = useSubjects();
   const { theme } = useTheme();
 
@@ -74,6 +75,32 @@ export default function WeekCalendarComponent() {
       (classData) => classData.classcode === classCode
     );
     return classData ? classData.schedules : [];
+  }
+
+  function calculateTotalCredits() {
+    if (scheduleSubjects.length > 0) {
+      let allSchedules: any[] = [];
+
+      scheduleSubjects.forEach((subject) => {
+        if (subject.activated === false) return;
+        const schedules = getSchedulesFromSubjectClass(
+          subject.code,
+          subject.class,
+          searchedSubjects
+        );
+        allSchedules = [...allSchedules, ...schedules];
+      });
+
+      console.log('allSchedules:', allSchedules);
+
+      const credits = allSchedules.reduce((acc, schedule) => {
+        return acc + schedule.classesnumber;
+      }, 0);
+
+      setTotalCredits(credits);
+    } else {
+      setTotalCredits(0);
+    }
   }
 
   function generateTimesAndDays() {
@@ -223,6 +250,7 @@ export default function WeekCalendarComponent() {
   useEffect(() => {
     setTableData(formatSubjectsToTableData(scheduleSubjects, searchedSubjects));
   }, [scheduleSubjects, theme, searchedSubjects]);
+
 
   useEffect(() => {
     const copy_of_tableData = [...tableData];
