@@ -25,9 +25,13 @@ type SubjectsContextType = {
   setOnFocusSubjectClass: React.Dispatch<
     React.SetStateAction<{ code: string; classcode: string }>
   >;
-  totalCredits: number;
-  setTotalCredits: React.Dispatch<React.SetStateAction<number>>;
+  currentScheduleId: number | null;
+  setCurrentScheduleId: React.Dispatch<React.SetStateAction<number | null>>;
+
 };
+
+const STORAGE_KEY = "schedule_subjects";
+const SEARCHED_SUBJECTS_KEY = "searched_subjects";
 
 export const SubjectsContext = createContext<SubjectsContextType>({
   searchedSubjects: [],
@@ -40,8 +44,9 @@ export const SubjectsContext = createContext<SubjectsContextType>({
   setOnFocusSubject: () => {},
   onFocusSubjectClass: { code: "", classcode: "" },
   setOnFocusSubjectClass: () => {},
-  totalCredits: 0,
-  setTotalCredits: () => {},
+  currentScheduleId: null,
+  setCurrentScheduleId: () => {},
+
 });
 
 export function SubjectsProvider({
@@ -49,24 +54,80 @@ export function SubjectsProvider({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const [searchedSubjects, setSearchedSubjects] = useState(
-    [] as SubjectsType[]
+  // Load initial state from localStorage
+  const [searchedSubjects, setSearchedSubjects] = useState<SubjectsType[]>(
+    () => {
+      try {
+        if (typeof window !== "undefined") {
+          const savedSubjects = localStorage.getItem(SEARCHED_SUBJECTS_KEY);
+
+          return savedSubjects ? JSON.parse(savedSubjects) : [];
+        }
+      } catch (error) {
+        console.error(
+          "Error loading searched subjects from localStorage:",
+          error
+        );
+      }
+      return [];
+    }
   );
-  const [scheduleSubjects, setScheduleSubjects] = useState(
-    [] as scheduleSubjectsType[]
-  );
+
+  const [scheduleSubjects, setScheduleSubjects] = useState<
+    scheduleSubjectsType[]
+  >(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const savedSubjects = localStorage.getItem(STORAGE_KEY);
+
+        return savedSubjects ? JSON.parse(savedSubjects) : [];
+      }
+    } catch (error) {
+      console.error(
+        "Error loading schedule subjects from localStorage:",
+        error
+      );
+    }
+    return [];
+  });
+
   const [selectedSubject, setSelectedSubject] = useState({} as SubjectsType);
   const [onFocusSubject, setOnFocusSubject] = useState({} as { code: string });
   const [onFocusSubjectClass, setOnFocusSubjectClass] = useState(
     {} as { code: string; classcode: string }
   );
-  const [totalCredits, setTotalCredits] = useState(0);
+  const [currentScheduleId, setCurrentScheduleId] = useState<number | null>(
+    null
+  );
 
-  // useEffect(() => console.log({ searchedSubjects }), [searchedSubjects]);
-  useEffect(() => console.log({ scheduleSubjects }), [scheduleSubjects]);
-  useEffect(() => console.log({ onFocusSubject }), [onFocusSubject]);
-  useEffect(() => console.log({ onFocusSubjectClass }), [onFocusSubjectClass]);
-  useEffect(() => console.log({ selectedSubject }), [selectedSubject]);
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined" && scheduleSubjects.length > 0) {
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleSubjects));
+      }
+    } catch (error) {
+      console.error("Error saving schedule subjects to localStorage:", error);
+    }
+  }, [scheduleSubjects]);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined" && searchedSubjects.length > 0) {
+        console.log(
+          "Saving searched subjects to localStorage:",
+          searchedSubjects
+        );
+        localStorage.setItem(
+          SEARCHED_SUBJECTS_KEY,
+          JSON.stringify(searchedSubjects)
+        );
+      }
+    } catch (error) {
+      console.error("Error saving searched subjects to localStorage:", error);
+    }
+  }, [searchedSubjects]);
+
 
   return (
     <SubjectsContext.Provider
@@ -81,8 +142,9 @@ export function SubjectsProvider({
         setOnFocusSubject,
         onFocusSubjectClass,
         setOnFocusSubjectClass,
-        totalCredits,
-        setTotalCredits,
+        currentScheduleId,
+        setCurrentScheduleId,
+
       }}
     >
       {children}

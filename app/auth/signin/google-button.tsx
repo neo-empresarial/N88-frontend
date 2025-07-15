@@ -10,17 +10,17 @@ export default function GoogleLoginButton(props: { style: string }) {
   // const callbackUrl = searchParams.get("callbackUrl") || "/"; // Retrieve the callbackUrl query parameter
 
   const handleGoogleLogin = () => {
-    window.location.href = process.env.NEXT_PUBLIC_DATABASE_URL + "auth/google/login";
-  }
+    window.location.href =
+      (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/") +
+      "auth/google/login";
+  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get("token");
-    console.log(urlParams);
     if (token) {
-      localStorage
-        .setItem("token", token)
-        window.location.href = process.env.NEXT_PUBLIC_FRONTEND_URL!;
+      localStorage.setItem("token", token);
+      window.location.href = process.env.NEXT_PUBLIC_FRONTEND_URL!;
     }
   }, []);
 
@@ -32,7 +32,7 @@ export default function GoogleLoginButton(props: { style: string }) {
       >
         <IconBrandGoogle className="h-5 w-5" />
         <span className="ml-2">Login com Google</span>
-      </Button> 
+      </Button>
     </div>
   );
 }

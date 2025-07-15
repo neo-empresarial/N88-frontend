@@ -9,6 +9,9 @@ import SelectedSubject from "./components/SelectedSubject";
 import SubjectsTable from "./components/SubjectsTable";
 import WeekCalendarComponent from "./components/WeekCalendar";
 import SearchSubject from "./components/SearchSubject";
+import SaveScheduleDialog from "./components/SaveScheduleDialog";
+import SavedSchedulesDialog from "./components/SavedSchedulesDialog";
+import ReceivedSharedSchedulesDialog from "./components/ReceivedSharedSchedulesDialog";
 import { SubjectsType } from "./types/dataType";
 
 import { useEffect, useState } from "react";
@@ -19,21 +22,24 @@ import CreditsCounter from "./components/creditsCounter";
 export default function SchedulePage() {
   const { getAllSubjects } = useAxios();
   const [subjects, setSubjects] = useState<SubjectsType[]>([]);
-  // const [isLoadingSubjects, setIsLoadingSubjects] = useState(true);
 
   useEffect(() => {
     getAllSubjects().then((data: SubjectsType[]) => {
       setSubjects(data);
-      // setIsLoadingSubjects(false);
     });
   }, []);
 
   return (
     <div className="p-10 grid gap-2 grid-cols-1 ">
       <SubjectsProvider>
-        <div className="grid gap-2 grid-cols-2">
-        <SearchSubject subjects={subjects}/>
-        <CreditsCounter/>
+        <div className="flex items-center gap-4 mb-4">
+          <SearchSubject subjects={subjects} />
+          <div className="flex gap-2">
+            <SaveScheduleDialog />
+            <SavedSchedulesDialog />
+            <ReceivedSharedSchedulesDialog />
+          </div>
+
         </div>
         <ResizablePanelGroup
           direction="horizontal"
@@ -42,7 +48,7 @@ export default function SchedulePage() {
           <ResizablePanel defaultSize={50}>
             <ResizablePanelGroup direction="vertical">
               <ResizablePanel defaultSize={50}>
-                <SubjectsTable/>
+                <SubjectsTable />
               </ResizablePanel>
               <ResizableHandle />
               <ResizablePanel defaultSize={50}>
@@ -54,7 +60,7 @@ export default function SchedulePage() {
           <ResizableHandle />
 
           <ResizablePanel defaultSize={50}>
-            <WeekCalendarComponent/>
+            <WeekCalendarComponent />
           </ResizablePanel>
 
           <ResizableHandle />
@@ -63,7 +69,3 @@ export default function SchedulePage() {
     </div>
   );
 }
-
-// export default async function SchedulePageWithProvider() {
-//   return <SelectedSubjectContext children={<SchedulePage />} />;
-// }

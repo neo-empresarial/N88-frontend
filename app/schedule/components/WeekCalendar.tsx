@@ -165,7 +165,6 @@ export default function WeekCalendarComponent() {
     const tableData = generateTimesAndDays();
 
     if (subjects.length === 0) {
-      console.log("No subjects found");
       return tableData;
     }
 
@@ -214,7 +213,6 @@ export default function WeekCalendarComponent() {
       });
     });
 
-    // console.log({ tableData });
 
     return tableData;
   }
@@ -251,8 +249,8 @@ export default function WeekCalendarComponent() {
 
   useEffect(() => {
     setTableData(formatSubjectsToTableData(scheduleSubjects, searchedSubjects));
-    calculateTotalCredits();
-  }, [scheduleSubjects, theme]);
+  }, [scheduleSubjects, theme, searchedSubjects]);
+
 
   useEffect(() => {
     const copy_of_tableData = [...tableData];
@@ -281,7 +279,7 @@ export default function WeekCalendarComponent() {
             const shouldAddGap = time === "11:00" || time === "17:10";
 
             return (
-              <TableRow key={time}  className={shouldAddGap ? "border-b-4" : ""}>
+              <TableRow key={time} className={shouldAddGap ? "border-b-4" : ""}>
                 {weekDays.map((day) => {
                   if (day === "") {
                     return (

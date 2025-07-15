@@ -5,7 +5,10 @@ import { FormState, SignUpFormSchema, SignInFormSchema } from "./type";
 import useAxios from "@/app/api/AxiosInstance";
 import { createSession } from "./session";
 
-export async function signUp(state: FormState, formData: FormData): Promise<FormState> {
+export async function signUp(
+  state: FormState,
+  formData: FormData
+): Promise<FormState> {
   const { register } = useAxios();
 
   const validationFields = SignUpFormSchema.safeParse({
@@ -21,7 +24,7 @@ export async function signUp(state: FormState, formData: FormData): Promise<Form
     };
   }
 
-  const response = await register(validationFields.data) as Response;
+  const response = (await register(validationFields.data)) as Response;
 
   if (response.status === 201) {
     return redirect("auth/signin");
@@ -29,13 +32,16 @@ export async function signUp(state: FormState, formData: FormData): Promise<Form
 
   return {
     message:
-      response.status === 409 ?
-        "Esse email já está em uso. Tente outro."
+      response.status === 409
+        ? "Esse email já está em uso. Tente outro."
         : response.statusText,
-  }
+  };
 }
 
-export async function signIn(state: FormState, formData: FormData): Promise<FormState> {
+export async function signIn(
+  state: FormState,
+  formData: FormData
+): Promise<FormState> {
   const { login } = useAxios();
 
   const validatedFields = SignInFormSchema.safeParse({
@@ -49,24 +55,40 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
     };
   }
 
-  const response = await login(validatedFields.data) as any;
-
+  const response = (await login(validatedFields.data)) as any;
 
   if (response.status === 201) {
-    const responseData = await response.data
-    console.log(response)
+    const responseData = response.data;
+    const accessToken = responseData.access_token || responseData.accessToken;
+    const refreshToken =
+      responseData.refresh_token || responseData.refreshToken;
+
+    if (!accessToken) {
+      // handle error
+    }
+
+    // Store in localStorage for API calls
+    if (typeof window !== "undefined") {
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      // Optionally store user info
+      localStorage.setItem("user", JSON.stringify(responseData.user));
+    }
+
+    // Create session for ProfileOptions and other server components
     await createSession({
-      user: {
-        id: responseData.id,
-        name: responseData.name,
-      },
-    })
-    
+      user: responseData.user,
+      accessToken,
+      refreshToken,
+    });
+
     redirect("/");
   }
 
   return {
-    message: 
-      response.status === 401 ? "Email ou senha incorretos" : response.statusText,
-  }
+    message:
+      response.status === 401
+        ? "Email ou senha incorretos"
+        : response.statusText,
+  };
 }

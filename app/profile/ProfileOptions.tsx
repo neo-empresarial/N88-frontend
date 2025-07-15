@@ -23,6 +23,7 @@ import { getSession } from "@/lib/session";
 
 import { LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Users } from "@geist-ui/icons";
 
 export default async function ProfileOptions() {
   const session = await getSession();
@@ -82,6 +83,16 @@ export default async function ProfileOptions() {
                   >
                     <User className="w-5" />
                     <span className="ml-2">Perfil</span>
+                  </Link>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem>
+                  <Link
+                    href={"/groups"}
+                    className="flex items-center cursor-pointer w-full"
+                  >
+                    <Users className="w-5" />
+                    <span className="ml-2">Grupos</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
