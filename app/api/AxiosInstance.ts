@@ -2,7 +2,7 @@
 import { getSession } from "@/lib/session";
 
 const instance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/",
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/",
   withCredentials: true,
 });
 
@@ -10,7 +10,7 @@ const useAxios = () => {
   // const router = useRouter();
 
   const axiosPublicInstace = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/",
+    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/",
     headers: {
       "Content-Type": "application/json",
     },
@@ -61,18 +61,22 @@ const useAxios = () => {
   // if i want to protect the routes, use axiosPrivateInstance, if not, use axiosPublicInstance
 
   const getAllSubjects = async () => {
-    const session = await getSession();
-    if (!session?.accessToken) {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+
+    if (!token) {
       throw new Error("No access token found");
     }
 
     const response = await instance.get(
       `${
-        process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/"
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
       }subjects`,
       {
         headers: {
-          Authorization: `Bearer ${session.accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
       }
     );
@@ -81,8 +85,12 @@ const useAxios = () => {
   };
 
   const getSubjectsByCodes = async (codes: string[]) => {
-    const session = await getSession();
-    if (!session?.accessToken) {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+
+    if (!token) {
       throw new Error("No access token found");
     }
 
@@ -91,7 +99,7 @@ const useAxios = () => {
         `/subjects/by-codes?codes=${codes.join(",")}`,
         {
           headers: {
-            Authorization: `Bearer ${session.accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -106,39 +114,57 @@ const useAxios = () => {
   };
 
   const getAllSubjectsWithRelations = async () => {
-    const session = await getSession();
-    if (!session?.accessToken) {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+
+    if (!token) {
       throw new Error("No access token found");
     }
 
     const response = await instance.get("/subjects", {
       headers: {
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
   };
 
   const getFilteredSubjects = async (search: string) => {
-    const session = await getSession();
-    if (!session?.accessToken) {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+
+    if (!token) {
       throw new Error("No access token found");
     }
 
     const response = await instance.get(`/subjects?search=${search}`, {
       headers: {
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
   };
 
   const getSubject = async (id: number) => {
-    const session = await getSession();
-    console.log("Debug - Session in getSubject:", session);
-    console.log("Debug - Access token exists:", !!session?.accessToken);
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
 
-    if (!session?.accessToken) {
+    console.log(
+      "Debug - Token retrieved:",
+      token ? "Token exists" : "No token"
+    );
+    console.log(
+      "Debug - Token value:",
+      token ? token.substring(0, 20) + "..." : "null"
+    );
+
+    if (!token) {
       // Redirect to login if no session
       if (typeof window !== "undefined") {
         console.log("Debug - No access token, redirecting to login");
@@ -151,12 +177,12 @@ const useAxios = () => {
       console.log("Debug - Making request to:", `/subjects/${id}`);
       console.log(
         "Debug - Authorization header:",
-        `Bearer ${session.accessToken.substring(0, 20)}...`
+        `Bearer ${token.substring(0, 20)}...`
       );
 
       const response = await instance.get(`/subjects/${id}`, {
         headers: {
-          Authorization: `Bearer ${session.accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       console.log("Debug - Request successful:", response.status);
@@ -179,8 +205,12 @@ const useAxios = () => {
   };
 
   const getCheckUserExtraInfo = async (email: string) => {
-    const session = await getSession();
-    if (!session?.accessToken) {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+
+    if (!token) {
       throw new Error("No access token found");
     }
 
@@ -190,7 +220,7 @@ const useAxios = () => {
           email,
         },
         headers: {
-          Authorization: `Bearer ${session.accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       return response.data;

@@ -50,7 +50,19 @@ const NotificationsDropdown = () => {
   } = useQuery({
     queryKey: ["notifications", userId],
     queryFn: async () => {
-      const response = await fetch("/api/notifications");
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("accessToken")
+          : null;
+      if (!token) {
+        throw new Error("No access token found");
+      }
+
+      const response = await fetch("/api/notifications", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch notifications");
       }
@@ -68,12 +80,21 @@ const NotificationsDropdown = () => {
       notificationId: number;
       accept: boolean;
     }) => {
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("accessToken")
+          : null;
+      if (!token) {
+        throw new Error("No access token found");
+      }
+
       const response = await fetch(
         `/api/notifications/${notificationId}/respond`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ accept }),
         }
@@ -102,8 +123,6 @@ const NotificationsDropdown = () => {
   const pendingNotifications = notifications?.filter(
     (n: Notification) => n.status === "PENDING"
   );
-
-
 
   const isResponding = (notificationId: number, accept: boolean) => {
     return (

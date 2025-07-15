@@ -19,6 +19,16 @@ export default function GoogleAuthCallbackPage() {
       return;
     }
 
+    // Store in localStorage for API calls
+    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem("refreshToken", refreshToken);
+    localStorage.setItem("user", JSON.stringify({
+      id: parseInt(id, 10),
+      name: name,
+      email: email,
+    }));
+
+    // Create session for ProfileOptions and other server components
     await createSession({
       user: {
         id: parseInt(id, 10),

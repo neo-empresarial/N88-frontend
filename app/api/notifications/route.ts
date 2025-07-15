@@ -1,19 +1,22 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/session";
+import { headers } from "next/headers";
 
 export async function GET() {
   try {
-    const session = await getSession();
+    const headersList = await headers();
+    const authorization = headersList.get("authorization");
 
-    if (!session?.accessToken) {
+    if (!authorization || !authorization.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const token = authorization.replace("Bearer ", "");
+
     const backendUrl =
-      process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
     const response = await fetch(`${backendUrl}notifications`, {
       headers: {
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -37,11 +40,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const session = await getSession();
+    const headersList = await headers();
+    const authorization = headersList.get("authorization");
 
-    if (!session?.accessToken) {
+    if (!authorization || !authorization.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const token = authorization.replace("Bearer ", "");
 
     const body = await request.json();
     const { recipientId, groupId } = body;
@@ -54,12 +60,12 @@ export async function POST(request: Request) {
     }
 
     const backendUrl =
-      process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
     const response = await fetch(`${backendUrl}notifications/invite`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ recipientId, groupId }),
     });

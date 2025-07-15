@@ -58,9 +58,6 @@ export async function getSession() {
   const cookie = cookies().get("session")?.value;
   const accessToken = cookies().get("access_token")?.value;
 
-  console.log("Debug - Session cookie exists:", !!cookie);
-  console.log("Debug - Access token cookie exists:", !!accessToken);
-
   if (!cookie) return null;
 
   try {
@@ -74,12 +71,6 @@ export async function getSession() {
     if (accessToken) {
       session.accessToken = accessToken;
     }
-
-    console.log("Debug - Session retrieved successfully:", {
-      userId: session.user?.id,
-      userEmail: session.user?.email,
-      hasAccessToken: !!session.accessToken,
-    });
 
     return session;
   } catch (error) {

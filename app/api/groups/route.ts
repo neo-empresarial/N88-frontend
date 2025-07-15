@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { getSession } from "@/lib/session";
+import { headers } from "next/headers";
 
 export async function POST(request: Request) {
   try {
-    const session = await getSession();
-    console.log("Session in groups route:", session);
+    const headersList = await headers();
+    const authorization = headersList.get("authorization");
 
-    if (!session?.accessToken) {
-      console.log("No access token found in session");
+    if (!authorization || !authorization.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const token = authorization.replace("Bearer ", "");
 
     const body = await request.json();
     const { name, description, members } = body;
@@ -23,19 +23,20 @@ export async function POST(request: Request) {
     }
 
     const backendUrl =
-      process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
     const response = await fetch(`${backendUrl}groups`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${token}`,
       },
       credentials: "include",
       body: JSON.stringify({
         name,
         description,
         members,
-        ownerId: session.user.id,
+        // Note: You'll need to get the user ID from the token or pass it in the request
+        ownerId: 0, // This needs to be fixed - get from token or request body
       }),
     });
 
