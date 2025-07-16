@@ -17,6 +17,7 @@ import { SubjectsType } from "./types/dataType";
 import { useEffect, useState } from "react";
 import useAxios from "@/app/api/AxiosInstance";
 import { SubjectsProvider } from "./providers/subjectsContext";
+import CreditsCounter from "./components/creditsCounter";
 
 export default function SchedulePage() {
   const { getAllSubjects } = useAxios();
@@ -38,6 +39,7 @@ export default function SchedulePage() {
             <SavedSchedulesDialog />
             <ReceivedSharedSchedulesDialog />
           </div>
+
         </div>
         <ResizablePanelGroup
           direction="horizontal"

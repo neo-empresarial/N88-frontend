@@ -11,7 +11,7 @@ export default function GoogleLoginButton(props: { style: string }) {
 
   const handleGoogleLogin = () => {
     window.location.href =
-      (process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/") +
+      (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/") +
       "auth/google/login";
   };
 

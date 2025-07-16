@@ -73,10 +73,19 @@ const CreateGroupDialog = () => {
 
   const createGroupMutation = useMutation({
     mutationFn: async (data: FormData & { members: number[] }) => {
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("accessToken")
+          : null;
+      if (!token) {
+        throw new Error("No access token found");
+      }
+
       const response = await fetch("/api/groups", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });

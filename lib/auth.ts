@@ -59,24 +59,25 @@ export async function signIn(
 
   if (response.status === 201) {
     const responseData = response.data;
-
-
-    // Extract tokens from response
     const accessToken = responseData.access_token || responseData.accessToken;
     const refreshToken =
       responseData.refresh_token || responseData.refreshToken;
 
-
     if (!accessToken) {
-      console.error("No access token found in response");
-      return {
-        message: "Authentication failed: No access token received",
-      };
+      // handle error
     }
 
-    // Access the nested user data correctly
+    // Store in localStorage for API calls
+    if (typeof window !== "undefined") {
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      // Optionally store user info
+      localStorage.setItem("user", JSON.stringify(responseData.user));
+    }
+
+    // Create session for ProfileOptions and other server components
     await createSession({
-      user: responseData.user, // The user data is already in the correct structure
+      user: responseData.user,
       accessToken,
       refreshToken,
     });

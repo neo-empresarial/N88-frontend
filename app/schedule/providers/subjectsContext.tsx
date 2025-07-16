@@ -1,5 +1,4 @@
-﻿import React, { useContext, useEffect } from "react";
-import { createContext, useState } from "react";
+﻿import React, { useContext, useEffect, createContext, useState } from "react";
 import { SubjectsType } from "../types/dataType";
 
 export type scheduleSubjectsType = {
@@ -7,6 +6,7 @@ export type scheduleSubjectsType = {
   class: string;
   color?: string;
   activated: boolean;
+  schedules?: string;
 };
 
 type SubjectsContextType = {
@@ -26,6 +26,8 @@ type SubjectsContextType = {
   >;
   currentScheduleId: number | null;
   setCurrentScheduleId: React.Dispatch<React.SetStateAction<number | null>>;
+  totalCredits: number;
+  setTotalCredits: React.Dispatch<React.SetStateAction<number>>;
 };
 
 const STORAGE_KEY = "schedule_subjects";
@@ -44,6 +46,8 @@ export const SubjectsContext = createContext<SubjectsContextType>({
   setOnFocusSubjectClass: () => {},
   currentScheduleId: null,
   setCurrentScheduleId: () => {},
+  totalCredits: 0,
+  setTotalCredits: () => {},
 });
 
 export function SubjectsProvider({
@@ -57,7 +61,6 @@ export function SubjectsProvider({
       try {
         if (typeof window !== "undefined") {
           const savedSubjects = localStorage.getItem(SEARCHED_SUBJECTS_KEY);
-
           return savedSubjects ? JSON.parse(savedSubjects) : [];
         }
       } catch (error) {
@@ -76,7 +79,6 @@ export function SubjectsProvider({
     try {
       if (typeof window !== "undefined") {
         const savedSubjects = localStorage.getItem(STORAGE_KEY);
-
         return savedSubjects ? JSON.parse(savedSubjects) : [];
       }
     } catch (error) {
@@ -96,11 +98,11 @@ export function SubjectsProvider({
   const [currentScheduleId, setCurrentScheduleId] = useState<number | null>(
     null
   );
+  const [totalCredits, setTotalCredits] = useState<number>(0);
 
   useEffect(() => {
     try {
       if (typeof window !== "undefined" && scheduleSubjects.length > 0) {
-
         localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleSubjects));
       }
     } catch (error) {
@@ -111,10 +113,6 @@ export function SubjectsProvider({
   useEffect(() => {
     try {
       if (typeof window !== "undefined" && searchedSubjects.length > 0) {
-        console.log(
-          "Saving searched subjects to localStorage:",
-          searchedSubjects
-        );
         localStorage.setItem(
           SEARCHED_SUBJECTS_KEY,
           JSON.stringify(searchedSubjects)
@@ -140,6 +138,8 @@ export function SubjectsProvider({
         setOnFocusSubjectClass,
         currentScheduleId,
         setCurrentScheduleId,
+        totalCredits,
+        setTotalCredits,
       }}
     >
       {children}
@@ -149,10 +149,8 @@ export function SubjectsProvider({
 
 export function useSubjects() {
   const context = useContext(SubjectsContext);
-
   if (!context) {
     throw new Error("useSubjects must be used within a SubjectsProvider");
   }
-
   return context;
 }

@@ -24,7 +24,7 @@ const useUpdateGroupName = () => {
 
       const response = await fetch(
         `${
-          process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/"
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
         }groups/${groupId}`,
         {
           method: "PATCH",

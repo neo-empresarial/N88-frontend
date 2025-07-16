@@ -44,9 +44,12 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
 
   const { mutate: sendInvitations, isPending } = useMutation({
     mutationFn: async () => {
-      const session = await getSession();
-      if (!session?.accessToken) {
-        throw new Error("Not authenticated");
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("accessToken")
+          : null;
+      if (!token) {
+        throw new Error("No access token found");
       }
 
       const promises = selectedUsers.map((user) =>
@@ -54,6 +57,7 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             recipientId: user.iduser,

@@ -1,18 +1,15 @@
-import { getSession } from "./session";
-
 export async function getGroup(groupId: number) {
-  const session = await getSession();
-  if (!session?.accessToken) {
+  const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
+  if (!token) {
     throw new Error("No access token found");
   }
 
   const backendUrl =
-    process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
   const response = await fetch(`${backendUrl}groups/${groupId}`, {
     headers: {
-      Authorization: `Bearer ${session.accessToken}`,
+      Authorization: `Bearer ${token}`,
     },
-    credentials: "include",
   });
 
   if (!response.ok) {

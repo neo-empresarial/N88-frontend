@@ -28,16 +28,19 @@ const MyGroupsCard = ({ group }: { group: any }) => {
 
   const handleLeaveGroup = async () => {
     try {
-      const session = await getSession();
-      if (!session?.accessToken) {
-        throw new Error("Not authenticated");
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("accessToken")
+          : null;
+      if (!token) {
+        throw new Error("No access token found");
       }
 
       const response = await fetch(`/api/groups/${group.id}/leave`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session.accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 

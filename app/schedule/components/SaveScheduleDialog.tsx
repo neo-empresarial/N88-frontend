@@ -17,6 +17,7 @@ import { useSubjects } from "../providers/subjectsContext";
 import { Save, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { SavedSchedule } from "@/app/services/savedSchedulesService";
+import { useSavedSchedules } from "@/app/services/savedSchedulesService";
 
 function QuickSaveButton() {
   const { scheduleSubjects, currentScheduleId } = useSubjects();
@@ -139,11 +140,33 @@ function CreateScheduleDialog() {
   );
 }
 
+function TestJwtButton() {
+  const { testJwt } = useSavedSchedules();
+
+  const handleTest = async () => {
+    try {
+      const result = await testJwt();
+      toast.success("JWT test successful!");
+      console.log("JWT test result:", result);
+    } catch (error) {
+      toast.error("JWT test failed!");
+      console.error("JWT test error:", error);
+    }
+  };
+
+  return (
+    <Button variant="outline" onClick={handleTest}>
+      Test JWT
+    </Button>
+  );
+}
+
 export default function SaveScheduleDialog() {
   return (
     <div className="flex gap-2">
       <QuickSaveButton />
       <CreateScheduleDialog />
+      <TestJwtButton />
     </div>
   );
 }

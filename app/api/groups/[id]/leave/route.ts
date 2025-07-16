@@ -1,24 +1,27 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/session";
+import { headers } from "next/headers";
 
 export async function POST(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await getSession();
+    const headersList = await headers();
+    const authorization = headersList.get("authorization");
 
-    if (!session?.accessToken) {
+    if (!authorization || !authorization.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const token = authorization.replace("Bearer ", "");
+
     const backendUrl =
-      process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
     const response = await fetch(`${backendUrl}groups/${params.id}/leave`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 

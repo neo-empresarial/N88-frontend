@@ -1,4 +1,3 @@
-import { getSession } from "@/lib/session";
 import { scheduleSubjectsType } from "../schedule/providers/subjectsContext";
 
 export interface SavedSchedule {
@@ -25,7 +24,16 @@ export interface CreateSavedScheduleDto {
 // Helper function to handle API errors
 const handleApiError = async (response: Response) => {
   if (!response.ok) {
+    console.log("🔍 [FRONTEND] handleApiError - Response not ok");
+    console.log("🔍 [FRONTEND] handleApiError - Status:", response.status);
+    console.log(
+      "🔍 [FRONTEND] handleApiError - Status text:",
+      response.statusText
+    );
+
     const errorData = await response.json().catch(() => ({}));
+    console.log("🔍 [FRONTEND] handleApiError - Error data:", errorData);
+
     throw new Error(
       errorData.message || `HTTP error! status: ${response.status}`
     );
@@ -35,29 +43,35 @@ const handleApiError = async (response: Response) => {
 
 // Helper function to get the backend URL with fallback
 const getBackendUrl = () => {
-  return process.env.NEXT_PUBLIC_DATABASE_URL || "http://localhost:8000/";
+  return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
 };
 
 export const useSavedSchedules = () => {
   const getSavedSchedules = async () => {
-    const session = await getSession();
-    if (!session?.accessToken) {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+    if (!token) {
       throw new Error("No access token found");
     }
 
     const response = await fetch(`${getBackendUrl()}saved-schedules`, {
       headers: {
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include",
     });
 
     return handleApiError(response);
   };
 
   const createSavedSchedule = async (data: CreateSavedScheduleDto) => {
-    const session = await getSession();
-    if (!session?.accessToken) {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+
+    if (!token) {
       throw new Error("No access token found");
     }
 
@@ -65,9 +79,8 @@ export const useSavedSchedules = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include", // This will send the cookies
       body: JSON.stringify(data),
     });
 
@@ -78,8 +91,11 @@ export const useSavedSchedules = () => {
     id: number,
     data: CreateSavedScheduleDto
   ) => {
-    const session = await getSession();
-    if (!session?.accessToken) {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+    if (!token) {
       throw new Error("No access token found");
     }
 
@@ -87,9 +103,8 @@ export const useSavedSchedules = () => {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${token}`,
       },
-      credentials: "include", // This will send the cookies
       body: JSON.stringify(data),
     });
 
@@ -97,16 +112,18 @@ export const useSavedSchedules = () => {
   };
 
   const deleteSavedSchedule = async (id: number) => {
-    const session = await getSession();
-    if (!session?.accessToken) {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+    if (!token) {
       throw new Error("No access token found");
     }
 
     const response = await fetch(`${getBackendUrl()}saved-schedules/${id}`, {
       method: "DELETE",
-      credentials: "include", // This will send the cookies
       headers: {
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -115,10 +132,36 @@ export const useSavedSchedules = () => {
     }
   };
 
+  const testJwt = async () => {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("accessToken")
+        : null;
+
+    if (!token) {
+      throw new Error("No access token found");
+    }
+
+    const response = await fetch(`${getBackendUrl()}auth/test`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    } else {
+      const errorText = await response.text();
+      throw new Error(errorText);
+    }
+  };
+
   return {
     getSavedSchedules,
     createSavedSchedule,
     updateSavedSchedule,
     deleteSavedSchedule,
+    testJwt,
   };
 };

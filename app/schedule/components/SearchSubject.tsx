@@ -133,6 +133,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
       } catch (error) {
         console.error("Error fetching subject:", error);
       }
+
     }
   };
 
@@ -198,6 +199,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
                 >
                   Load more...
                 </CommandItem>
+
               )}
             </CommandGroup>
           </CommandList>
