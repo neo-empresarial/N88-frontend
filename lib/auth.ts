@@ -1,16 +1,103 @@
-﻿"use client";
+﻿"use server";
 
 import { redirect } from "next/navigation";
 import { FormState, SignUpFormSchema, SignInFormSchema } from "./type";
-import useAxios from "@/app/api/AxiosInstance";
 import { createSession } from "./session";
 
+// Esta é uma função do lado do servidor para lidar com chamadas de API.
+async function login(data: any): Promise<any> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  } catch (error) {
+    console.error("Falha na chamada da API de login:", error);
+    return {
+      statusCode: 500,
+      message: "Erro de rede. Verifique sua conexão.",
+    };
+  }
+}
+
+// Esta é uma função do lado do servidor para lidar com chamadas de API.
+async function register(data: any): Promise<any> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    return response.json();
+  } catch (error) {
+    console.error("Falha na chamada da API de registro:", error);
+    return {
+      statusCode: 500,
+      message: "Erro de rede. Verifique sua conexão.",
+    };
+  }
+}
+
+export async function signIn(
+  state: FormState,
+  formData: FormData
+): Promise<FormState> {
+  console.log('1. Server Action "signIn" iniciada.');
+
+  const validatedFields = SignInFormSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  
+  console.log('2. Validação do formulário:', validatedFields.success);
+
+  if (!validatedFields.success) {
+    console.log('3. Falha na validação. Erros:', validatedFields.error.flatten().fieldErrors);
+    return {
+      error: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
+  console.log('4. Dados validados para a API:', validatedFields.data);
+  
+  const response = await login(validatedFields.data);
+
+  console.log('5. Resposta da API recebida. Status:', response.statusCode);
+  console.log('6. Corpo da resposta da API:', response);
+
+  if (response.statusCode === 201) {
+    console.log('7. Login bem-sucedido. Processando tokens.');
+
+    const user = response.user
+
+    // if (!accessToken) {
+    //   console.error('8. Erro: Access token não encontrado na resposta.');
+    //   return { message: "Access token não encontrado na resposta." };
+    // }
+
+    console.log('9. Criando sessão com os seguintes dados:', { user });
+    await createSession({ user });
+
+    console.log('10. Sessão criada. Redirecionando para /.');
+    redirect("/");
+  } else {
+    console.log('11. Erro de login da API. Mensagem:', response.message);
+    return {
+      message:
+        response.statusCode === 401
+          ? "Email ou senha incorretos"
+          : response.message || "Ocorreu um erro no servidor.",
+    };
+  }
+}
+//-------------------------------------------------------------
+// A Server Action signUp, agora refatorada para usar a função de servidor `register`.
 export async function signUp(
   state: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const { register } = useAxios();
-
   const validationFields = SignUpFormSchema.safeParse({
     name: formData.get("name"),
     course: formData.get("course"),
@@ -24,71 +111,18 @@ export async function signUp(
     };
   }
 
-  const response = (await register(validationFields.data)) as Response;
+  // Usa a nova função de servidor `register`
+  const response = await register(validationFields.data);
 
-  if (response.status === 201) {
-    return redirect("auth/signin");
+  if (response.statusCode === 201) {
+    // Em caso de sucesso, redireciona para a página de login para que o usuário faça o acesso.
+    return redirect("signin");
   }
 
   return {
     message:
-      response.status === 409
+      response.statusCode === 409
         ? "Esse email já está em uso. Tente outro."
-        : response.statusText,
-  };
-}
-
-export async function signIn(
-  state: FormState,
-  formData: FormData
-): Promise<FormState> {
-  const { login } = useAxios();
-
-  const validatedFields = SignInFormSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
-
-  if (!validatedFields.success) {
-    return {
-      error: validatedFields.error.flatten().fieldErrors,
-    };
-  }
-
-  const response = (await login(validatedFields.data)) as any;
-
-  if (response.status === 201) {
-    const responseData = response.data;
-    const accessToken = responseData.access_token || responseData.accessToken;
-    const refreshToken =
-      responseData.refresh_token || responseData.refreshToken;
-
-    if (!accessToken) {
-      // handle error
-    }
-
-    // Store in localStorage for API calls
-    if (typeof window !== "undefined") {
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
-      // Optionally store user info
-      localStorage.setItem("user", JSON.stringify(responseData.user));
-    }
-
-    // Create session for ProfileOptions and other server components
-    await createSession({
-      user: responseData.user,
-      accessToken,
-      refreshToken,
-    });
-
-    redirect("/");
-  }
-
-  return {
-    message:
-      response.status === 401
-        ? "Email ou senha incorretos"
-        : response.statusText,
+        : response.message || "Ocorreu um erro no servidor.",
   };
 }
