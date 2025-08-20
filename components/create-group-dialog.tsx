@@ -62,6 +62,7 @@ const CreateGroupDialog = () => {
   const { data: users, isLoading } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
+      // A requisição para buscar usuários também se beneficiará da autenticação de sessão.
       const response = await fetch("/api/users");
       if (!response.ok) {
         const errorData = await response.json();
@@ -72,32 +73,34 @@ const CreateGroupDialog = () => {
   });
 
   const createGroupMutation = useMutation({
+    // Removendo a parte do token do mutationFn. O cookie de sessão
+    // será enviado automaticamente pelo navegador.
     mutationFn: async (data: FormData & { members: number[] }) => {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
-      if (!token) {
-        throw new Error("No access token found");
-      }
-
-      const response = await fetch("/api/groups", {
+      console.log("Dados recebidos na mutation:", data);
+      const backendUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
+      
+      const response = await fetch(`${backendUrl}groups`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
+        credentials: 'include', 
       });
+
+      console.log(response)
 
       if (!response.ok) {
         const error = await response.json();
+        console.error("Erro da API:", error);
         throw new Error(error.message || "Failed to create group");
       }
 
       return response.json();
     },
     onSuccess: () => {
+      console.log("Mutation bem-sucedida. Executando onSuccess.");
       toast.success(
         "Grupo criado com sucesso! Convites enviados para os membros selecionados."
       );
@@ -109,6 +112,7 @@ const CreateGroupDialog = () => {
       router.refresh();
     },
     onError: (error: Error) => {
+      console.error("Erro na mutation:", error);
       toast.error("Erro ao criar grupo");
     },
   });
@@ -137,6 +141,9 @@ const CreateGroupDialog = () => {
       return;
     }
 
+    // A mutação agora recebe apenas os dados.
+    // O cookie de sessão, que contém a informação do token,
+    // será enviado automaticamente pelo navegador.
     createGroupMutation.mutate({
       ...data,
       members: selectedUsers.map((user) => user.iduser),
