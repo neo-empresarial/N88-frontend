@@ -6,12 +6,13 @@ import { redirect } from "next/navigation";
 
 export type Session = {
   user: {
-    id: number;
+    accessToken: string;
+    refreshToken: string;
+    userId: number;
     name: string;
     email: string;
   };
-  accessToken: string;
-  refreshToken: string;
+  
 };
 
 const secretKey = process.env.SESSION_SECRET_KEY!;
@@ -19,16 +20,16 @@ const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function createSession(payload: Session) {
   const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  console.log(`payload: ${payload.user}`)
+  console.log(`payload: ${payload.user.name}`)
   // Ensure the payload matches the expected structure
   const sessionPayload = {
     user: {
-      id: payload.user.id,
+      id: payload.user.userId,
       name: payload.user.name,
       email: payload.user.email,
     },
-    accessToken: payload.accessToken,
-    refreshToken: payload.refreshToken,
+    accessToken: payload.user.accessToken,
+    refreshToken: payload.user.refreshToken,
   };
 
   const session = await new SignJWT(sessionPayload)
@@ -45,7 +46,7 @@ export async function createSession(payload: Session) {
     path: "/",
   });
 
-  cookies().set("access_token", payload.accessToken, {
+  cookies().set("access_token", sessionPayload.accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -57,7 +58,7 @@ export async function createSession(payload: Session) {
 export async function getSession() {
   const cookie = cookies().get("session")?.value;
   const accessToken = cookies().get("access_token")?.value;
-
+  console.log(accessToken)
   if (!cookie) return null;
 
   try {
@@ -69,7 +70,7 @@ export async function getSession() {
 
     // Ensure we have the latest access token
     if (accessToken) {
-      session.accessToken = accessToken;
+      session.user.accessToken = accessToken;
     }
 
     return session;

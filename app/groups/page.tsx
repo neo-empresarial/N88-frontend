@@ -41,7 +41,7 @@ const Groups = () => {
   };
 
   const { data: groups, isLoading, error } = useGroups();
-  console.log(groups);
+
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
       <div className="grid grid-cols-2 gap-2 w-2/3 h-2/3">
