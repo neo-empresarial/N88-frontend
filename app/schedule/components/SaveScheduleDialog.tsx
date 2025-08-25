@@ -56,7 +56,7 @@ function QuickSaveButton() {
       disabled={isCreating || !currentScheduleId}
     >
       <Save className="h-4 w-4" />
-      {isCreating ? "Saving..." : "Save"}
+      {isCreating ? "Saving..." : "Quick Save"}
     </Button>
   );
 }
@@ -123,7 +123,6 @@ function CreateScheduleDialog() {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter schedule description (optional)"
-              className="w-full h-32 resize-none border rounded-md p-2"
             />
           </div>
         </div>
