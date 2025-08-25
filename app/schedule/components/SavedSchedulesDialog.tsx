@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useSavedSchedulesQuery } from "@/app/hooks/useSavedSchedules";
-import { Loader2, List, Trash2, Loader, Share2, Download } from "lucide-react";
+import { Loader2, List, Trash2, Loader, Share2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -210,7 +210,7 @@ export default function SavedSchedulesDialog() {
                             {loadingScheduleId === schedule.idsavedschedule ? (
                               <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                             ) : (
-                              <Download className="h-4 w-4 mr-1" />
+                              <Loader className="h-4 w-4 mr-1" />
                             )}
                             {loadingScheduleId === schedule.idsavedschedule
                               ? "Loading..."
