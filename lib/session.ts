@@ -58,7 +58,7 @@ export async function createSession(payload: Session) {
 export async function getSession() {
   const cookie = cookies().get("session")?.value;
   const accessToken = cookies().get("access_token")?.value;
-  console.log(accessToken)
+  
   if (!cookie) return null;
 
   try {

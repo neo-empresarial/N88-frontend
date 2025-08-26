@@ -59,7 +59,7 @@ const CreateGroupDialog = () => {
     },
   });
 
-  const { data: users, isLoading } = useQuery({
+  const { data: users } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
       // A requisição para buscar usuários também se beneficiará da autenticação de sessão.
@@ -73,8 +73,6 @@ const CreateGroupDialog = () => {
   });
 
   const createGroupMutation = useMutation({
-    // Removendo a parte do token do mutationFn. O cookie de sessão
-    // será enviado automaticamente pelo navegador.
     mutationFn: async (data: FormData & { members: number[] }) => {
       console.log("Dados recebidos na mutation:", data);
       const backendUrl =
@@ -89,7 +87,7 @@ const CreateGroupDialog = () => {
         credentials: 'include', 
       });
 
-      console.log(response)
+
 
       if (!response.ok) {
         const error = await response.json();
