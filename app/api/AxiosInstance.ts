@@ -16,50 +16,6 @@ const useAxios = () => {
     },
   });
 
-  // axiosPrivateInstace.interceptors.request.use(async (req) => {
-  //   // verify the context, and then the localStorage to find the accessToken, if not found, redirect to login
-  //   if (!accessToken) {
-  //     const localAccessToken = localStorage.getItem('access');
-  //     if (!localAccessToken) {
-  //       router.push('/login');
-  //       throw new Error('Unauthorized');
-  //     } else {
-  //       setAcessToken(localAccessToken);
-  //     }
-  //   }
-
-  //   // add the accessToken to the headers
-  //   req.headers.Authorization = `Bearer ${accessToken}`;
-
-  //   // check if access is expired, if so, refresh the token
-  //   const isExpired = dayjs.unix(jwtDecode(accessToken).exp).diff(dayjs()) < 1;
-  //   if (!isExpired) {
-  //     return req
-  //   }
-
-  //   const refreshToken = localStorage.getItem('refresh');
-
-  //   try {
-  //     const response axios.post(
-  //       '/auth/refresh',
-  //       {
-  //         refresh: refreshToken,
-  //       }
-  //     )
-  //   }
-
-  //   localStorage.setItem("access", JSON.stringify(response.data.access));
-  //   localStorage.setItem("refresh", JSON.stringify(response.data.refresh));
-  //   setAccessToken(response.data.access);
-  //   setRefreshToken(response.data.refresh);
-
-  //   if (accessToken) {
-  //     // get the use info and stuff
-  //   }
-  // });
-
-  // if i want to protect the routes, use axiosPrivateInstance, if not, use axiosPublicInstance
-
   const getAllSubjects = async () => {
     const token =
       typeof window !== "undefined"
