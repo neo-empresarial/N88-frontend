@@ -158,19 +158,19 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
           aria-expanded={open}
           className="w-[500px] justify-between"
         >
-          <div className="truncate">{value || "Select subject..."}</div>
+          <div className="truncate">{value || "Selecione uma matéria..."}</div>
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[500px] p-0">
         <Command>
           <CommandInput
-            placeholder="Search subject..."
+            placeholder="Procurar matéria..."
             value={searchTerm}
             onValueChange={setSearchTerm}
           />
           <CommandList>
-            <CommandEmpty>No subject found.</CommandEmpty>
+            <CommandEmpty>Nenhuma matéria encontrada.</CommandEmpty>
             <CommandGroup>
               {paginatedSubjects.map((subject) => (
                 <CommandItem

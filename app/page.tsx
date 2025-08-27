@@ -49,10 +49,11 @@ export default function Home() {
   const items = [
     { id: 1, label: "CTC", text: "engenharia" },
     { id: 2, label: "CCS", text: "saúde" },
-    { id: 3, label: "CSE", text: "socioeconômicas" },
-    { id: 4, label: "CFH", text: "filosofia" },
+    { id: 3, label: "CSE", text: "administração" },
+    { id: 4, label: "CFH", text: "filosofia e humanas" },
     { id: 5, label: "CCB", text: "ciências biológicas" },
     { id: 6, label: "CCE", text: "expressão" },
+    { id: 7, label: "CCJ", text: "jurídicas"}
   ];
 
   const people = [
@@ -132,7 +133,7 @@ export default function Home() {
           animate={{ transform: "translateY(-30px)" }}
           transition={{ duration: 0.5 }}
         >
-          <Badge variant="outline">Development by NEO Empresarial</Badge>
+          <Badge variant="outline">Desenvolvido por NEO Empresarial</Badge>
           <h1 className=" text-4xl md:text-5xl lg:text-6xl font-sans font-medium ">
             Uma nova forma{" "}
           </h1>
@@ -147,9 +148,9 @@ export default function Home() {
           transition={{ duration: 1 }}
         >
           <p>
-            Construa sua grade curricular, controle seu histórico de dificuldades,
+            Construa sua grade curricular, analise e controle o nível de dificuldade,
           </p>
-          <p>tudo em um mesmo lugar.</p>
+          <p>tudo em um mesmo lugar!</p>
         </motion.div>
         <motion.div
           className="flex flex-col items-center justify-center w-full mb-10"
@@ -365,17 +366,13 @@ export default function Home() {
           <div className="flex flex-col items-center justify-center w-full gap-1 text-sm lg:text-base text-center">
             <p className="text-[#898989]">
               A missão da plataforma é estar cada vez mais adaptada a
-              necessidade dos estudantes
+              necessidade de nós estudantes.
             </p>
             <p className="text-[#898989]">
-              Contribua para melhorar cada vez mais a ferramenta
+              Contribua para melhorar cada vez mais a ferramenta!
             </p>
           </div>
           <div className="flex flex-row gap-4">
-            <Button variant="outline" className="gap-2">
-              <p>Contribua com feedback</p>
-              <Edit2 />
-            </Button>
             <Link href="https://github.com/neo-empresarial/N88-frontend">
               <Button variant="outline" className="gap-2">
                 <p>Github</p>
