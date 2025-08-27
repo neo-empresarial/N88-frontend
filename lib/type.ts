@@ -15,10 +15,10 @@ export const SignUpFormSchema: z.ZodObject<{
   email: z.ZodString;
   password: z.ZodString;
 }> = z.object({
-  name: z.string().min(2, { message: "Esse nome tá muito curto em... Deve ter no mínimo 2 caracteres" }).trim(),
+  name: z.string().min(2, { message: "Esse nome está muito curto hein... Deve ter no mínimo 2 caracteres" }).trim(),
   course: z.string().trim(),
-  email: z.string().email({ message: "Esse email não parece ser válido" }).trim(),
-  password: z.string().min(6, { message: "Essa senha tá muito curta em... Deve ter no mínimo 6 caracteres" }).trim(),
+  email: z.string().email({ message: "Esse email não parece ser válido." }).trim(),
+  password: z.string().min(6, { message: "Essa senha está muito curta hein... Ela deve ter no mínimo 6 caracteres!" }).trim(),
 });
 
 export const SignInFormSchema: z.ZodObject<{
@@ -26,5 +26,5 @@ export const SignInFormSchema: z.ZodObject<{
   password: z.ZodString;
 }> = z.object({
   email: z.string().email({ message: "Esse email não parece ser válido" }).trim(),
-  password: z.string().min(6, { message: "Essa senha tá muito curta em... Deve ter no mínimo 6 caracteres" }).trim(),
+  password: z.string().min(6, { message: "Essa senha está muito curta hein... Deve ter no mínimo 6 caracteres!" }).trim(),
 });

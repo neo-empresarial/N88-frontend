@@ -158,14 +158,14 @@ export default function SavedSchedulesDialog() {
         <DialogTrigger asChild>
           <Button variant="outline" className="gap-2">
             <List className="h-4 w-4" />
-            Saved Schedules
+            Grades salvas
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Saved Schedules</DialogTitle>
+            <DialogTitle>Grades salvas</DialogTitle>
             <DialogDescription>
-              View and manage your saved schedules
+              Vizualize e gerencie suas grades salvas
             </DialogDescription>
           </DialogHeader>
           {isLoading ? (
@@ -174,17 +174,17 @@ export default function SavedSchedulesDialog() {
             </div>
           ) : savedSchedules?.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No saved schedules yet
+              Não existem grades salvas
             </div>
           ) : (
             <div className="max-h-[400px] overflow-y-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Subjects</TableHead>
-                    <TableHead className="w-[150px]">Actions</TableHead>
+                    <TableHead>Título</TableHead>
+                    <TableHead>Descrição</TableHead>
+                    <TableHead>Matérias</TableHead>
+                    <TableHead className="w-[150px]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -194,7 +194,7 @@ export default function SavedSchedulesDialog() {
                         {schedule.title}
                       </TableCell>
                       <TableCell>{schedule.description}</TableCell>
-                      <TableCell>{schedule.items.length} subjects</TableCell>
+                      <TableCell>{schedule.items.length} matérias</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
@@ -213,8 +213,8 @@ export default function SavedSchedulesDialog() {
                               <Loader className="h-4 w-4 mr-1" />
                             )}
                             {loadingScheduleId === schedule.idsavedschedule
-                              ? "Loading..."
-                              : "Load"}
+                              ? "Carregando..."
+                              : "Carregado"}
                           </Button>
                           <Button
                             variant="outline"
@@ -259,8 +259,7 @@ export default function SavedSchedulesDialog() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              saved schedule.
+              Essa ação não pode ser desfeita. Isso irá deletar permanentemente a grade salva.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -269,7 +268,7 @@ export default function SavedSchedulesDialog() {
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground"
             >
-              Delete
+              Deletar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -152,7 +152,7 @@ const NotificationsDropdown = () => {
             onClick={() => refetch()}
             className="w-full"
           >
-            Refresh Notifications
+            Atualizar notificações
           </Button>
         </div>
         {isLoading ? (
