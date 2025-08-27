@@ -83,6 +83,8 @@ export const useSavedSchedulesQuery = () => {
     },
   });
 
+  console.log(savedSchedulesQuery.data)
+
   return {
     savedSchedules: savedSchedulesQuery.data,
     isLoading: savedSchedulesQuery.isLoading,

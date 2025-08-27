@@ -66,20 +66,11 @@ export const useSavedSchedules = () => {
   };
 
   const createSavedSchedule = async (data: CreateSavedScheduleDto) => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-
-    if (!token) {
-      throw new Error("No access token found");
-    }
-
     const response = await fetch(`${getBackendUrl()}saved-schedules`, {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(data),
     });
