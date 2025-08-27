@@ -19,7 +19,7 @@ const SignUpForm = () => {
 
         <div>
           <Label htmlFor="name">Nome</Label>
-          <Input id="name" name="name" placeholder="Seu nome aqui" />
+          <Input id="name" name="name" placeholder="Insira seu nome" />
           {state?.error?.name && (
             <p className="text-sm text-red-500">{state.error.name}</p>
           )}
@@ -28,7 +28,7 @@ const SignUpForm = () => {
         <div>
           <Label htmlFor="course">Curso</Label>{" "}
           {/* Depois mudar pra um ComboBox */}
-          <Input id="course" name="course" placeholder="Seu curso aqui" />
+          <Input id="course" name="course" placeholder="Insira seu curso" />
           {state?.error?.course && (
             <p className="text-sm text-red-500">{state.error.course}</p>
           )}
@@ -38,7 +38,7 @@ const SignUpForm = () => {
 
         <div>
           <Label htmlFor="email">Email</Label>
-          <Input id="email" name="email" placeholder="Seu email aqui" />
+          <Input id="email" name="email" placeholder="Insira seu email" />
           {state?.error?.email && (
             <p className="text-sm text-red-500">{state.error.email}</p>
           )}
@@ -46,7 +46,7 @@ const SignUpForm = () => {
 
         <div>
           <Label htmlFor="password">Senha</Label>
-          <Input id="password" name="password" type="password" />
+          <Input id="password" name="password" type="password" placeholder="Insira uma senha"/>
           {state?.error?.password && (
             <p className="text-sm text-red-500">{state.error.password}</p>
           )}
