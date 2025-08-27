@@ -126,7 +126,7 @@ export default function ReceivedSharedSchedulesDialog() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Grade</TableHead>
-                    <TableHead>Compartilhado pory</TableHead>
+                    <TableHead>Compartilhado por</TableHead>
                     <TableHead>Grupo</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Compartilhado no</TableHead>
