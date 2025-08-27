@@ -133,7 +133,7 @@ export default function Home() {
           animate={{ transform: "translateY(-30px)" }}
           transition={{ duration: 0.5 }}
         >
-          <Badge variant="outline">Desenvolvido pelo NEO Empresarial</Badge>
+          <Badge variant="outline">Desenvolvido por NEO Empresarial</Badge>
           <h1 className=" text-4xl md:text-5xl lg:text-6xl font-sans font-medium ">
             Uma nova forma{" "}
           </h1>
