@@ -12,6 +12,7 @@ import {
   Edit2,
   Instagram,
   Globe,
+  AlertTriangle,
   BarChart,
   Save,
   Coffee,
