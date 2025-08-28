@@ -120,10 +120,12 @@ function CreateScheduleDialog() {
             <Label htmlFor="description">Descrição</Label>
             <Textarea
               id="description"
+              maxLength={100}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Insira uma descrição (opcional)"
             />
+            
           </div>
         </div>
         <DialogFooter>

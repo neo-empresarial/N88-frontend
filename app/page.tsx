@@ -189,7 +189,7 @@ export default function Home() {
           <div>
             <div className="flex flex-col items-center justify-center gap-2">
               <h1 className="text-5xl font-sans text-red-400">27%</h1>
-              <p className="">é a taxa média de reprovação da sua grade</p>
+              <p className="">é a taxa média de reprovação da sua grade</p>              
             </div>
           </div>
         </motion.div>
@@ -241,10 +241,11 @@ export default function Home() {
             Deixa a plataforma da forma que mais te agrada, com temas
             personalizados e opções de acessibilidade.
           </p>
-          <div>
+          <div className='w-full h-full p-2'>
             <ResizablePanelGroup
               direction="horizontal"
-              className="max-w-md rounded-lg border md:min-w-[450px]"
+              //className="max-w-md rounded-lg border md:min-w-[450px]"
+              className="rounded-lg border w-full h-full"
             >
               <ResizablePanel defaultSize={50}>
                 <div className="flex h-[200px] items-center justify-center p-6">
