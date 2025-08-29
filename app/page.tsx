@@ -12,6 +12,7 @@ import {
   Edit2,
   Instagram,
   Globe,
+  AlertTriangle,
   BarChart,
   Save,
   Coffee,
@@ -49,7 +50,7 @@ export default function Home() {
   const items = [
     { id: 1, label: "CTC", text: "engenharia" },
     { id: 2, label: "CCS", text: "saúde" },
-    { id: 3, label: "CSE", text: "administração" },
+    { id: 3, label: "CSE", text: "socioeconômicas" },
     { id: 4, label: "CFH", text: "filosofia e humanas" },
     { id: 5, label: "CCB", text: "ciências biológicas" },
     { id: 6, label: "CCE", text: "expressão" },
@@ -177,9 +178,16 @@ export default function Home() {
         >
           <div className="flex gap-2 items-center ">
             <BarChart />
-            <h1 className="text-2xl font-sans font-medium">
+            <h1 className="text-2xl font-sans font-small">
               Calcule a dificuldade da sua grade
             </h1>
+          </div>
+          <div className="flex gap-2 items-center ">
+            <AlertTriangle/>
+            <h1 className="text-xl font-sans font-medium">
+              Em desenvolvimento...
+            </h1>
+            <AlertTriangle/>
           </div>
           <p className="text-[#898989] text-center">
             A plataforma avalia em tempo real a dificuldade da sua grade baseado
