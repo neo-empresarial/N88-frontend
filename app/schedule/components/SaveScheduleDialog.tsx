@@ -142,33 +142,12 @@ function CreateScheduleDialog() {
   );
 }
 
-function TestJwtButton() {
-  const { testJwt } = useSavedSchedules();
-
-  const handleTest = async () => {
-    try {
-      const result = await testJwt();
-      toast.success("Sucesso no teste JWT!");
-      console.log("Resultado do teste JWT:", result);
-    } catch (error) {
-      toast.error("Teste JWT falhou!");
-      console.error("Erro no teste JWT:", error);
-    }
-  };
-
-  return (
-    <Button variant="outline" onClick={handleTest}>
-      Teste JWT
-    </Button>
-  );
-}
 
 export default function SaveScheduleDialog() {
   return (
     <div className="flex gap-2">
       <QuickSaveButton />
       <CreateScheduleDialog />
-      <TestJwtButton />
     </div>
   );
 }
