@@ -2,7 +2,7 @@
 
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+
 
 export type Session = {
   user: {
@@ -20,7 +20,6 @@ const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function createSession(payload: Session) {
   const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  console.log(`payload: ${payload.user.name}`)
   // Ensure the payload matches the expected structure
   const sessionPayload = {
     user: {
@@ -53,6 +52,8 @@ export async function createSession(payload: Session) {
     expires: expiredAt,
     path: "/",
   });
+
+  return sessionPayload.accessToken;
 }
 
 export async function getSession() {

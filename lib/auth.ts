@@ -1,4 +1,4 @@
-﻿"use server";
+﻿"use client";
 
 import { redirect } from "next/navigation";
 import { FormState, SignUpFormSchema, SignInFormSchema } from "./type";
@@ -23,7 +23,7 @@ async function login(data: any) {
   }
 }
 
-async function register(data: any): Promise<any> {
+async function register(data: any){
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`, {
       method: "POST",
@@ -56,11 +56,13 @@ export async function signIn(
   }
   
   const response = await login(validatedFields.data);
-  console.log('response', response)
+  
 
   if (response.status === 201) {
     const user = response.data
-    await createSession({ user });
+    const accessToken = await createSession({ user });
+    localStorage.setItem("accessToken", accessToken);
+    
     redirect("/");
   } else {
     return {
