@@ -40,7 +40,7 @@ function QuickSaveButton() {
       updateSchedule({
         id: existingSchedule.idsavedschedule,
         title: existingSchedule.title,
-        description: existingSchedule.description,
+        description: existingSchedule.description || '',
         scheduleSubjects: scheduleSubjects,
       });
     } else {
