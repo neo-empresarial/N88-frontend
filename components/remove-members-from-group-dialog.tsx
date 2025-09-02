@@ -42,7 +42,7 @@ const RemoveMembersFromGroupDialog = ({ groupId }: { groupId: number }) => {
   const handleRemoveMembers = async () => {
     try {
       const session = await getSession();
-      if (!session?.accessToken) {
+      if (!session?.user.accessToken) {
         throw new Error("No access token found");
       }
 
@@ -55,7 +55,7 @@ const RemoveMembersFromGroupDialog = ({ groupId }: { groupId: number }) => {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${session.accessToken}`,
+              Authorization: `Bearer ${session.user.accessToken}`,
             },
           }
         );

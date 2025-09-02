@@ -28,19 +28,11 @@ const MyGroupsCard = ({ group }: { group: any }) => {
 
   const handleLeaveGroup = async () => {
     try {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
-      if (!token) {
-        throw new Error("No access token found");
-      }
-
       const response = await fetch(`/api/groups/${group.id}/leave`, {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -55,6 +47,7 @@ const MyGroupsCard = ({ group }: { group: any }) => {
       console.error(error);
     }
   };
+
 
   return (
     <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 mb-4 transition-all duration-200 hover:shadow-lg">
