@@ -1,11 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { getSession } from "@/lib/session";
-
-import { Button } from "@/components/ui/button";
-import { Card, CardTitle, CardHeader } from "@/components/ui/card";
-import { Plus, UserPlus, Users } from "@geist-ui/icons";
+import { UserPlus, Users } from "@geist-ui/icons";
 import CreateGroupDialog from "@/components/create-group-dialog";
 import MyGroupsCard from "@/components/my-groups-card";
 
@@ -14,19 +10,11 @@ const Groups = () => {
     return useQuery({
       queryKey: ["groups"],
       queryFn: async () => {
-        const session = await getSession();
-        if (!session?.accessToken) {
-          throw new Error("No access token found");
-        }
-
         const response = await fetch(
           `${
             process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
           }groups`,
           {
-            headers: {
-              Authorization: `Bearer ${session.accessToken}`,
-            },
             credentials: "include",
           }
         );
