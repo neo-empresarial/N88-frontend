@@ -44,20 +44,12 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
 
   const { mutate: sendInvitations, isPending } = useMutation({
     mutationFn: async () => {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
-      if (!token) {
-        throw new Error("No access token found");
-      }
-
       const promises = selectedUsers.map((user) =>
         fetch("/api/notifications", {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             recipientId: user.iduser,
@@ -84,6 +76,7 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
       console.error(error);
     },
   });
+
 
   const filteredUsers =
     users?.filter(

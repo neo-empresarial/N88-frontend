@@ -50,19 +50,11 @@ const handleApiError = async (response: Response) => {
 
 export const useSharedSchedules = () => {
   const shareSchedule = async (data: ShareScheduleDto) => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-    if (!token) {
-      throw new Error("No access token found");
-    }
-
     const response = await fetch(buildUrl("shared-schedules/share"), {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(data),
     });
@@ -71,46 +63,30 @@ export const useSharedSchedules = () => {
   };
 
   const getReceivedSharedSchedules = async () => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-    if (!token) {
-      throw new Error("No access token found");
-    }
-
     const response = await fetch(buildUrl("shared-schedules/received"), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      method: "GET",
+      credentials: "include",
     });
 
     return handleApiError(response);
   };
 
   const getSentSharedSchedules = async () => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-    if (!token) {
-      throw new Error("No access token found");
-    }
-
     const response = await fetch(buildUrl("shared-schedules/sent"), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      method: "GET",
+      credentials: "include",
     });
 
     return handleApiError(response);
   };
 
-  const acceptSharedSchedule = async (data: AcceptSharedScheduleDto) => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-    if (!token) {
-      throw new Error("No access token found");
-    }
 
+  const acceptSharedSchedule = async (data: AcceptSharedScheduleDto) => {
     const response = await fetch(buildUrl("shared-schedules/accept"), {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(data),
     });
@@ -118,17 +94,11 @@ export const useSharedSchedules = () => {
     return handleApiError(response);
   };
 
-  const declineSharedSchedule = async (id: number) => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-    if (!token) {
-      throw new Error("No access token found");
-    }
 
+  const declineSharedSchedule = async (id: number) => {
     const response = await fetch(buildUrl(`shared-schedules/${id}/decline`), {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
 
     if (!response.ok) {

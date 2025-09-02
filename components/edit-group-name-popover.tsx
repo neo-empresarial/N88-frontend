@@ -17,23 +17,17 @@ interface UpdateGroupNameData {
 const useUpdateGroupName = () => {
   return useMutation({
     mutationFn: async ({ groupId, name }: UpdateGroupNameData) => {
-      const session = await getSession();
-      if (!session?.accessToken) {
-        throw new Error("No access token found");
-      }
-
       const response = await fetch(
         `${
           process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
         }groups/${groupId}`,
         {
           method: "PATCH",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.accessToken}`,
           },
           body: JSON.stringify({ name }),
-          credentials: "include",
         }
       );
 
