@@ -51,7 +51,6 @@ const SignUpForm = () => {
           )}
         </div>
 
-        {/* MUDANÇA AQUI: Nova div para o input e o botão */}
         <div>
           <Label htmlFor="password">Senha</Label>
           <div className="relative">
@@ -62,6 +61,7 @@ const SignUpForm = () => {
               placeholder="Insira uma senha"
               className="pr-12"
             />
+          
             <button
               type="button"
               onClick={togglePasswordVisibility}
