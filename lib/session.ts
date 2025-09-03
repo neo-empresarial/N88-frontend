@@ -68,7 +68,6 @@ export async function getSession() {
 
     const session = payload as Session;
 
-    // Ensure we have the latest access token
     if (accessToken) {
       session.user.accessToken = accessToken;
     }

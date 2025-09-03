@@ -1,50 +1,30 @@
 ﻿"use client";
 import { getSession } from "@/lib/session";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import MyGroupsCard from "@/components/my-groups-card";
-import { Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import CreateGroupDialog from "@/components/create-group-dialog";
 
 export default function Profile() {
   const useGroups = () => {
     return useQuery({
-      queryKey: ["groups"],
-      queryFn: async () => {
-        const session = await getSession();
-        if (!session?.accessToken) {
-          throw new Error("No access token found");
+    queryKey: ["groups"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"}groups`,
+        {
+          credentials: "include",
         }
+      );
 
-        const response = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
-          }groups`,
-          {
-            headers: {
-              Authorization: `Bearer ${session.accessToken}`,
-            },
-            credentials: "include",
-          }
-        );
+      if (!response.ok) {
+        throw new Error("Failed to fetch groups");
+      }
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch groups");
-        }
-
-        return response.json();
-      },
-    });
+      return response.json();
+    },
+  });
   };
 
   const { data: session } = useQuery({

@@ -1,5 +1,3 @@
-import { scheduleSubjectsType } from "../schedule/providers/subjectsContext";
-
 export interface SavedSchedule {
   idsavedschedule: number;
   title: string;
@@ -41,29 +39,19 @@ const handleApiError = async (response: Response) => {
   return response.json();
 };
 
-// Helper function to get the backend URL with fallback
 const getBackendUrl = () => {
   return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
 };
 
 export const useSavedSchedules = () => {
   const getSavedSchedules = async () => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-    if (!token) {
-      throw new Error("No access token found");
-    }
+  const response = await fetch(`${getBackendUrl()}saved-schedules`, {
+    method: "GET",
+    credentials: "include",
+  });
 
-    const response = await fetch(`${getBackendUrl()}saved-schedules`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    return handleApiError(response);
-  };
+  return handleApiError(response);
+};
 
   const createSavedSchedule = async (data: CreateSavedScheduleDto) => {
     const response = await fetch(`${getBackendUrl()}saved-schedules`, {
@@ -82,19 +70,11 @@ export const useSavedSchedules = () => {
     id: number,
     data: CreateSavedScheduleDto
   ) => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-    if (!token) {
-      throw new Error("No access token found");
-    }
-
     const response = await fetch(`${getBackendUrl()}saved-schedules/${id}`, {
       method: "PATCH",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify(data),
     });
@@ -103,19 +83,9 @@ export const useSavedSchedules = () => {
   };
 
   const deleteSavedSchedule = async (id: number) => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-    if (!token) {
-      throw new Error("No access token found");
-    }
-
     const response = await fetch(`${getBackendUrl()}saved-schedules/${id}`, {
       method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -123,36 +93,11 @@ export const useSavedSchedules = () => {
     }
   };
 
-  const testJwt = async () => {
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("accessToken")
-        : null;
-
-    if (!token) {
-      throw new Error("No access token found");
-    }
-
-    const response = await fetch(`${getBackendUrl()}auth/test`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data;
-    } else {
-      const errorText = await response.text();
-      throw new Error(errorText);
-    }
-  };
 
   return {
     getSavedSchedules,
     createSavedSchedule,
     updateSavedSchedule,
     deleteSavedSchedule,
-    testJwt,
   };
 };
