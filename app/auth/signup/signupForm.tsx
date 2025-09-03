@@ -5,10 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { signUp } from "@/lib/auth";
+import { useState } from "react";
 import { useFormState } from "react-dom";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 const SignUpForm = () => {
   const [state, action] = useFormState(signUp, undefined);
+  const [showPassword, setShowPassword]=useState(false);
+
+  const togglePasswordVisibility = ()=> {
+    setShowPassword(!showPassword)
+  }
 
   return (
     <form action={action}>
@@ -27,7 +35,6 @@ const SignUpForm = () => {
 
         <div>
           <Label htmlFor="course">Curso</Label>{" "}
-          {/* Depois mudar pra um ComboBox */}
           <Input id="course" name="course" placeholder="Insira seu curso" />
           {state?.error?.course && (
             <p className="text-sm text-red-500">{state.error.course}</p>
@@ -46,12 +53,32 @@ const SignUpForm = () => {
 
         <div>
           <Label htmlFor="password">Senha</Label>
-          <Input id="password" name="password" type="password" placeholder="Insira uma senha"/>
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              placeholder="Insira uma senha"
+              className="pr-12"
+            />
+          
+            <button
+              type="button"
+              onClick={togglePasswordVisibility}
+              className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-gray-400 hover:text-gray-600"
+              aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
+            >
+              {showPassword ? (
+                <FontAwesomeIcon icon={faEyeSlash} />
+              ) : (
+                <FontAwesomeIcon icon={faEye} />
+              )}
+            </button>
+          </div>
           {state?.error?.password && (
             <p className="text-sm text-red-500">{state.error.password}</p>
           )}
         </div>
-
         <SubmitButton> Cadastrar-se </SubmitButton>
       </div>
     </form>
