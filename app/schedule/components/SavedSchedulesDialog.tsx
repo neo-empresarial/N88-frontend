@@ -161,7 +161,7 @@ export default function SavedSchedulesDialog() {
             Grades salvas
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[900px]">
           <DialogHeader>
             <DialogTitle>Grades salvas</DialogTitle>
             <DialogDescription>
@@ -182,7 +182,7 @@ export default function SavedSchedulesDialog() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Título</TableHead>
-                    <TableHead>Descrição</TableHead>
+                    <TableHead className="w-[100px]">Descrição</TableHead>
                     <TableHead>Matérias</TableHead>
                     <TableHead className="w-[150px]">Ações</TableHead>
                   </TableRow>
@@ -193,7 +193,11 @@ export default function SavedSchedulesDialog() {
                       <TableCell className="font-medium">
                         {schedule.title}
                       </TableCell>
-                      <TableCell>{schedule.description}</TableCell>
+                      <TableCell className='w-[100px]'>
+                        <div className="line-clamp-3 break-words whitespace-normal">
+                          {schedule.description}
+                        </div>
+                        </TableCell>
                       <TableCell>{schedule.items.length} matérias</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
