@@ -261,7 +261,7 @@ export default function SavedSchedulesDialog() {
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
               Essa ação não pode ser desfeita. Isso irá deletar permanentemente a grade salva.
             </AlertDialogDescription>
