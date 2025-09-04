@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useSavedSchedulesQuery } from "@/app/hooks/useSavedSchedules";
-import { Loader2, List, Trash2, Loader, Share2 } from "lucide-react";
+import { Loader2, List, Trash2, Loader, Share2, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -161,7 +161,7 @@ export default function SavedSchedulesDialog() {
             Grades salvas
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[900px]">
+        <DialogContent className="sm:max-w-[1000px]">
           <DialogHeader>
             <DialogTitle>Grades salvas</DialogTitle>
             <DialogDescription>
@@ -178,26 +178,26 @@ export default function SavedSchedulesDialog() {
             </div>
           ) : (
             <div className="max-h-[400px] overflow-y-auto">
-              <Table>
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Título</TableHead>
-                    <TableHead className="w-[100px]">Descrição</TableHead>
-                    <TableHead>Matérias</TableHead>
+                    <TableHead className="w-[150px]">Título</TableHead>
+                    <TableHead className="w-[150px]">Descrição</TableHead>
+                    <TableHead className="w-[50px]">Matérias</TableHead>
                     <TableHead className="w-[150px]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {savedSchedules?.map((schedule: SavedSchedule) => (
                     <TableRow key={schedule.idsavedschedule}>
-                      <TableCell className="font-medium">
-                        {schedule.title}
+                      <TableCell className="line-clamp-1 break-words whitespace-normal">
+                          {schedule.title}
                       </TableCell>
-                      <TableCell className='w-[100px]'>
+                      <TableCell className="w-[150px]">
                         <div className="line-clamp-3 break-words whitespace-normal">
                           {schedule.description}
                         </div>
-                        </TableCell>
+                      </TableCell>
                       <TableCell>{schedule.items.length} matérias</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
@@ -205,29 +205,21 @@ export default function SavedSchedulesDialog() {
                             variant="outline"
                             size="sm"
                             onClick={() => handleLoadSchedule(schedule)}
-                            disabled={
-                              loadingScheduleId === schedule.idsavedschedule ||
-                              isDeleting
-                            }
+                            disabled={loadingScheduleId === schedule.idsavedschedule || isDeleting}
                             className="h-8"
                           >
                             {loadingScheduleId === schedule.idsavedschedule ? (
                               <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                             ) : (
-                              <Loader className="h-4 w-4 mr-1" />
+                              <Download className="h-4 w-4 mr-1" />
                             )}
-                            {loadingScheduleId === schedule.idsavedschedule
-                              ? "Carregando..."
-                              : "Carregado"}
+                            {loadingScheduleId === schedule.idsavedschedule ? "Carregando..." : "Baixar"}
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleShare(schedule)}
-                            disabled={
-                              isDeleting ||
-                              loadingScheduleId === schedule.idsavedschedule
-                            }
+                            disabled={isDeleting || loadingScheduleId === schedule.idsavedschedule}
                             className="h-8"
                           >
                             <Share2 className="h-4 w-4 mr-1" />
@@ -236,13 +228,8 @@ export default function SavedSchedulesDialog() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() =>
-                              handleDelete(schedule.idsavedschedule)
-                            }
-                            disabled={
-                              isDeleting ||
-                              loadingScheduleId === schedule.idsavedschedule
-                            }
+                            onClick={() => handleDelete(schedule.idsavedschedule)}
+                            disabled={isDeleting || loadingScheduleId === schedule.idsavedschedule}
                             className="h-8 w-8"
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
