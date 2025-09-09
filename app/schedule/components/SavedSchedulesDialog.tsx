@@ -181,8 +181,8 @@ export default function SavedSchedulesDialog() {
               <Table className="table-fixed">
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[150px]">Título</TableHead>
-                    <TableHead className="w-[150px]">Descrição</TableHead>
+                    <TableHead className="w-[180px]">Título</TableHead>
+                    <TableHead className="w-[180px]">Descrição</TableHead>
                     <TableHead className="w-[50px]">Matérias</TableHead>
                     <TableHead className="w-[150px]">Ações</TableHead>
                   </TableRow>
@@ -190,10 +190,10 @@ export default function SavedSchedulesDialog() {
                 <TableBody>
                   {savedSchedules?.map((schedule: SavedSchedule) => (
                     <TableRow key={schedule.idsavedschedule}>
-                      <TableCell className="line-clamp-1 break-words whitespace-normal">
+                      <TableCell className="line-clamp-2 break-words whitespace-normal">
                           {schedule.title}
                       </TableCell>
-                      <TableCell className="w-[150px]">
+                      <TableCell className="w-[180px]">
                         <div className="line-clamp-3 break-words whitespace-normal">
                           {schedule.description}
                         </div>

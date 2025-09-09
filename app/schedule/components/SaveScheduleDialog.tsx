@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -69,6 +69,23 @@ function CreateScheduleDialog() {
   const { createSchedule, savedSchedules, isCreating } =
     useSavedSchedulesQuery();
 
+  const TITLE_LIMIT = 45;
+  const DESCRIPTION_LIMIT = 100;
+
+  const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= TITLE_LIMIT) {
+      setTitle(value);
+    }
+  };
+
+  const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    if (value.length <= DESCRIPTION_LIMIT) {
+      setDescription(value);
+    }
+  };
+
   const handleSave = () => {
     if (!title.trim()) {
       toast.error("Por favor, insira um título para a grade.");
@@ -112,19 +129,24 @@ function CreateScheduleDialog() {
             <Input
               id="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={handleTitleChange} 
               placeholder="Insira o título da grade"
             />
+            <p className="text-sm text-right text-muted-foreground">
+              {title.length}/{TITLE_LIMIT}
+            </p>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="description">Descrição</Label>
             <Textarea
               id="description"
-              maxLength={100}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={handleDescriptionChange}
               placeholder="Insira uma descrição (opcional)"
             />
+            <p className="text-sm text-right text-muted-foreground">
+              {description.length}/{DESCRIPTION_LIMIT}
+            </p>
             
           </div>
         </div>
