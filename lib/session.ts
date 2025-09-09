@@ -2,13 +2,13 @@
 
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 export type Session = {
   user: {
     id: number;
     name: string;
     email: string;
+    course: string;
   };
   accessToken: string;
   refreshToken: string;
@@ -20,12 +20,12 @@ const encodedKey = new TextEncoder().encode(secretKey);
 export async function createSession(payload: Session) {
   const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-  // Ensure the payload matches the expected structure
   const sessionPayload = {
     user: {
       id: payload.user.id,
       name: payload.user.name,
       email: payload.user.email,
+      course: payload.user.course,
     },
     accessToken: payload.accessToken,
     refreshToken: payload.refreshToken,
@@ -67,7 +67,6 @@ export async function getSession() {
 
     const session = payload as Session;
 
-    // Ensure we have the latest access token
     if (accessToken) {
       session.accessToken = accessToken;
     }
@@ -77,6 +76,32 @@ export async function getSession() {
     console.error("Session verification error:", error);
     return null;
   }
+}
+
+export async function updateUserInSession(updatedUser: any) {
+  console.log("Session - Updating user in session:", updatedUser);
+  
+  const currentSession = await getSession();
+  
+  if (!currentSession) {
+    throw new Error("No session found");
+  }
+
+  console.log("Session - Current session:", currentSession);
+
+  const newSession = {
+    ...currentSession,
+    user: {
+      id: updatedUser.iduser,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      course: updatedUser.course,
+    },
+  };
+
+  console.log("Session - New session:", newSession);
+
+  await createSession(newSession);
 }
 
 export async function deleteSession() {
