@@ -194,7 +194,7 @@ export default function SavedSchedulesDialog() {
                           {schedule.title}
                       </TableCell>
                       <TableCell className="w-[180px]">
-                        <div className="line-clamp-3 break-words whitespace-normal">
+                        <div className="line-clamp-3 break-words">
                           {schedule.description}
                         </div>
                       </TableCell>
