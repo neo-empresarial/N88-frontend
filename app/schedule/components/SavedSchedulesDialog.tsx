@@ -190,7 +190,7 @@ export default function SavedSchedulesDialog() {
                 <TableBody>
                   {savedSchedules?.map((schedule: SavedSchedule) => (
                     <TableRow key={schedule.idsavedschedule}>
-                      <TableCell className="line-clamp-2 break-words whitespace-normal">
+                      <TableCell className="line-clamp-2 break-words">
                           {schedule.title}
                       </TableCell>
                       <TableCell className="w-[180px]">
