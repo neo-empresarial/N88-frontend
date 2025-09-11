@@ -15,7 +15,8 @@ import { useState, useEffect } from "react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Edit, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { toast } from 'react-toastify';
+
 
 interface EditProfileDialogProps {
   session: any;
@@ -110,11 +111,17 @@ export default function EditProfileDialog({
   
         if (!sessionResponse.ok) {
           console.error("Session update failed:", sessionResult);
-          alert("Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.");
+          toast.warning("Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.", {
+            position: "bottom-right",
+            autoClose: 4000,
+          });
         }
       } catch (sessionError) {
         console.error("Session update error:", sessionError);
-        alert("Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.");
+        toast.warning("Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.", {
+          position: "bottom-right",
+          autoClose: 2000,
+        });
       }
   
       if (onProfileUpdated) {
@@ -135,16 +142,26 @@ export default function EditProfileDialog({
       await queryClient.invalidateQueries({ queryKey: ["session"] });
       
       console.log("Profile updated successfully");
-      alert("Perfil atualizado com sucesso!");
+      toast.success("Perfil atualizado com sucesso!",{
+        position: "bottom-right",
+        autoClose: 2000,
+      });
       onClose();
       
     } catch (error) {
       console.error("Error updating profile:", error);
       
       if (error instanceof Error) {
-        alert(`Erro: ${error.message}`);
+        toast.error(`Erro ao atualizar perfil: ${error.message}`, {
+          position: "bottom-right",
+          autoClose: 2000,
+        });
+        
       } else {
-        alert("Erro ao atualizar perfil. Tente novamente.");
+        toast.error("Erro ao atualizar perfil. Tente novamente.", {
+          position: "bottom-right",
+          autoClose: 2000,
+        });
       }
     } finally {
       setIsLoading(false);
