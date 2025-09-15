@@ -98,8 +98,6 @@ export async function updateUserInSession(updatedUser: any) {
     },
   };
 
-  console.log("Session - New session:", newSession);
-
   await createSession(newSession);
 }
 
