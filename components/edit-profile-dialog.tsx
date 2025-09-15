@@ -96,7 +96,6 @@ export default function EditProfileDialog({
       }
   
       const updatedUser = await response.json();
-      console.log("Updated user from backend:", updatedUser);
   
       try {
         const sessionResponse = await fetch("/api/update-session", {
