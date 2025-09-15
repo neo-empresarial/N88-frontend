@@ -107,7 +107,6 @@ export default function EditProfileDialog({
         });
   
         const sessionResult = await sessionResponse.json();
-        console.log("Session update response:", sessionResult);
   
         if (!sessionResponse.ok) {
           console.error("Session update failed:", sessionResult);
