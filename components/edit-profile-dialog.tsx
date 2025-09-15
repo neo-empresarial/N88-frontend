@@ -17,9 +17,10 @@ import { Edit, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from 'react-toastify';
 
+import type { Session } from "lib/session";
 
 interface EditProfileDialogProps {
-  session: any;
+  session: Session;
   isOpen: boolean;
   onClose: () => void;
   onProfileUpdated?: () => Promise<void>; 
