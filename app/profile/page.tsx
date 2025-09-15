@@ -1,16 +1,9 @@
 ﻿"use client";
 import { getSession } from "@/lib/session";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import MyGroupsCard from "@/components/my-groups-card";
 import { Loader2, Edit } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";

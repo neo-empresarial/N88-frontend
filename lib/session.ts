@@ -79,7 +79,6 @@ export async function getSession() {
 }
 
 export async function updateUserInSession(updatedUser: any) {
-  console.log("Session - Updating user in session:", updatedUser);
   
   const currentSession = await getSession();
   

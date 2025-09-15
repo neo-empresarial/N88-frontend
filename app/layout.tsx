@@ -1,10 +1,8 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Infinity } from "@geist-ui/icons";
 import Providers from "./providers";
 import ProfileOptions from "@/app/profile/ProfileOptions";
 import FeedbackButton from "./feedback/FeedbackButton";

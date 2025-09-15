@@ -3,20 +3,9 @@ import { updateUserInSession } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
   try {
-    
-    
     const { updatedUser } = await request.json();
-    
-    
-      
-      
-      
-      
-      
-    
+
     await updateUserInSession(updatedUser);
-    
-    
     
     return NextResponse.json({ success: true });
   } catch (error) {
