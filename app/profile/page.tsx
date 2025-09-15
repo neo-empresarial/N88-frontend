@@ -5,13 +5,14 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import MyGroupsCard from "@/components/my-groups-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import CreateGroupDialog from "@/components/create-group-dialog";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 export default function Profile() {
   const useGroups = () => {
     return useQuery({
     queryKey: ["groups"],
     queryFn: async () => {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"}groups`,
         {
           credentials: "include",

@@ -2,7 +2,6 @@
 
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 
 export type Session = {
   user: {
@@ -24,7 +23,7 @@ export async function createSession(payload: Session) {
   // Ensure the payload matches the expected structure
   const sessionPayload = {
     user: {
-      id: payload.user.userId,
+      userId: payload.user.userId,
       name: payload.user.name,
       email: payload.user.email,
     },
@@ -53,6 +52,14 @@ export async function createSession(payload: Session) {
     expires: expiredAt,
     path: "/",
   });
+
+  cookies().set("refresh_token", sessionPayload.refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    expires: expiredAt,
+    path: "/",
+  });
 }
 
 export async function getSession() {
@@ -71,7 +78,6 @@ export async function getSession() {
     if (accessToken) {
       session.user.accessToken = accessToken;
     }
-
     return session;
   } catch (error) {
     console.error("Session verification error:", error);
@@ -82,4 +88,5 @@ export async function getSession() {
 export async function deleteSession() {
   cookies().delete("session");
   cookies().delete("access_token");
+  cookies().delete("refresh_token");
 }

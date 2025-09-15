@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 export async function POST(request: Request) {
   try {
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
 
     const backendUrl =
       process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
-    const response = await fetch(`${backendUrl}groups`, {
+    const response = await fetchWithAuth(`${backendUrl}groups`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,7 +36,6 @@ export async function POST(request: Request) {
         name,
         description,
         members,
-        // Note: You'll need to get the user ID from the token or pass it in the request
         ownerId: 0, // This needs to be fixed - get from token or request body
       }),
     });

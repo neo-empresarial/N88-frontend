@@ -27,6 +27,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface User {
   iduser: number;
@@ -62,8 +63,8 @@ const CreateGroupDialog = () => {
   const { data: users } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      // A requisição para buscar usuários também se beneficiará da autenticação de sessão.
-      const response = await fetch("/api/users");
+
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}users`, {credentials: "include"});
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to fetch users");
@@ -77,8 +78,8 @@ const CreateGroupDialog = () => {
       console.log("Dados recebidos na mutation:", data);
       const backendUrl =
       process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
-      
-      const response = await fetch(`${backendUrl}groups`, {
+
+      const response = await fetchWithAuth(`${backendUrl}groups`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,9 +140,6 @@ const CreateGroupDialog = () => {
       return;
     }
 
-    // A mutação agora recebe apenas os dados.
-    // O cookie de sessão, que contém a informação do token,
-    // será enviado automaticamente pelo navegador.
     createGroupMutation.mutate({
       ...data,
       members: selectedUsers.map((user) => user.iduser),

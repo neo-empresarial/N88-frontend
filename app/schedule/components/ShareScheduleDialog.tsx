@@ -25,6 +25,7 @@ import { getSession } from "@/lib/session";
 import { useSharedSchedulesQuery } from "@/app/hooks/useSharedSchedules";
 import { SavedSchedule } from "@/app/services/savedSchedulesService";
 import { toast } from "sonner";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface ShareScheduleDialogProps {
   schedule: SavedSchedule;
@@ -65,14 +66,11 @@ export default function ShareScheduleDialog({
     queryKey: ["groups"],
     queryFn: async () => {
       const session = await getSession();
-      if (!session?.accessToken) {
+      if (!session?.user.accessToken) {
         throw new Error("No access token found");
       }
 
-      const response = await fetch(buildUrl("groups"), {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
+      const response = await fetchWithAuth(buildUrl("groups"), {
         credentials: "include",
       });
 

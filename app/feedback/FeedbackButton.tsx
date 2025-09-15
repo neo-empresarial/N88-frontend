@@ -1,5 +1,4 @@
 ﻿import FloattingButton from "@/components/floatting-button";
-import { getSession } from "@/lib/session";
 import { MessageSquare } from "lucide-react";
 import FeedbackForm from "./FeedbackForm";
 
