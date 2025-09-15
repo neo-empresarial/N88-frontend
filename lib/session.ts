@@ -87,7 +87,6 @@ export async function updateUserInSession(updatedUser: any) {
     throw new Error("No session found");
   }
 
-  console.log("Session - Current session:", currentSession);
 
   const newSession = {
     ...currentSession,
