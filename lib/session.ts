@@ -5,13 +5,14 @@ import { cookies } from "next/headers";
 
 export type Session = {
   user: {
-    id: number;
+    accessToken: string;
+    refreshToken: string;
+    userId: number;
     name: string;
     email: string;
     course: string;
   };
-  accessToken: string;
-  refreshToken: string;
+  
 };
 
 const secretKey = process.env.SESSION_SECRET_KEY!;
@@ -22,13 +23,13 @@ export async function createSession(payload: Session) {
 
   const sessionPayload = {
     user: {
-      id: payload.user.id,
+      id: payload.user.userId,
       name: payload.user.name,
       email: payload.user.email,
       course: payload.user.course,
     },
-    accessToken: payload.accessToken,
-    refreshToken: payload.refreshToken,
+    accessToken: payload.user.accessToken,
+    refreshToken: payload.user.refreshToken,
   };
 
   const session = await new SignJWT(sessionPayload)
@@ -45,7 +46,7 @@ export async function createSession(payload: Session) {
     path: "/",
   });
 
-  cookies().set("access_token", payload.accessToken, {
+  cookies().set("access_token", sessionPayload.accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -57,7 +58,7 @@ export async function createSession(payload: Session) {
 export async function getSession() {
   const cookie = cookies().get("session")?.value;
   const accessToken = cookies().get("access_token")?.value;
-
+  
   if (!cookie) return null;
 
   try {
@@ -68,7 +69,7 @@ export async function getSession() {
     const session = payload as Session;
 
     if (accessToken) {
-      session.accessToken = accessToken;
+      session.user.accessToken = accessToken;
     }
 
     return session;

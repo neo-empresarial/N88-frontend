@@ -50,27 +50,23 @@ const NotificationsDropdown = () => {
   } = useQuery({
     queryKey: ["notifications", userId],
     queryFn: async () => {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
-      if (!token) {
-        throw new Error("No access token found");
-      }
+      if (!userId) return [];
 
       const response = await fetch("/api/notifications", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        method: "GET",
+        credentials: "include",
       });
+
       if (!response.ok) {
         throw new Error("Failed to fetch notifications");
       }
+
       const data = await response.json();
       return data;
     },
     enabled: !!userId,
   });
+
 
   const respondMutation = useMutation({
     mutationFn: async ({
@@ -80,21 +76,13 @@ const NotificationsDropdown = () => {
       notificationId: number;
       accept: boolean;
     }) => {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
-      if (!token) {
-        throw new Error("No access token found");
-      }
-
       const response = await fetch(
         `/api/notifications/${notificationId}/respond`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ accept }),
         }
@@ -111,10 +99,11 @@ const NotificationsDropdown = () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
       toast.success("Invitation responded to successfully");
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast.error(error.message || "Failed to respond to invitation");
     },
   });
+
 
   const handleRespond = (notificationId: number, accept: boolean) => {
     respondMutation.mutate({ notificationId, accept });
@@ -152,7 +141,7 @@ const NotificationsDropdown = () => {
             onClick={() => refetch()}
             className="w-full"
           >
-            Refresh Notifications
+            Atualizar notificações
           </Button>
         </div>
         {isLoading ? (

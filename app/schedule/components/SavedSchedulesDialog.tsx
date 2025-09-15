@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useSavedSchedulesQuery } from "@/app/hooks/useSavedSchedules";
-import { Loader2, List, Trash2, Loader, Share2 } from "lucide-react";
+import { Loader2, List, Trash2, Loader, Share2, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -158,14 +158,14 @@ export default function SavedSchedulesDialog() {
         <DialogTrigger asChild>
           <Button variant="outline" className="gap-2">
             <List className="h-4 w-4" />
-            Saved Schedules
+            Grades salvas
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="sm:max-w-[1000px]">
           <DialogHeader>
-            <DialogTitle>Saved Schedules</DialogTitle>
+            <DialogTitle>Grades salvas</DialogTitle>
             <DialogDescription>
-              View and manage your saved schedules
+              Vizualize e gerencie suas grades salvas
             </DialogDescription>
           </DialogHeader>
           {isLoading ? (
@@ -174,56 +174,52 @@ export default function SavedSchedulesDialog() {
             </div>
           ) : savedSchedules?.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No saved schedules yet
+              Não existem grades salvas
             </div>
           ) : (
             <div className="max-h-[400px] overflow-y-auto">
-              <Table>
+              <Table className="table-fixed">
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Subjects</TableHead>
-                    <TableHead className="w-[150px]">Actions</TableHead>
+                    <TableHead className="w-[180px]">Título</TableHead>
+                    <TableHead className="w-[180px]">Descrição</TableHead>
+                    <TableHead className="w-[50px]">Matérias</TableHead>
+                    <TableHead className="w-[150px]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {savedSchedules?.map((schedule: SavedSchedule) => (
                     <TableRow key={schedule.idsavedschedule}>
-                      <TableCell className="font-medium">
-                        {schedule.title}
+                      <TableCell className="line-clamp-2 break-words">
+                          {schedule.title}
                       </TableCell>
-                      <TableCell>{schedule.description}</TableCell>
-                      <TableCell>{schedule.items.length} subjects</TableCell>
+                      <TableCell className="w-[180px]">
+                        <div className="line-clamp-3 break-words">
+                          {schedule.description}
+                        </div>
+                      </TableCell>
+                      <TableCell>{schedule.items.length} matérias</TableCell>
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleLoadSchedule(schedule)}
-                            disabled={
-                              loadingScheduleId === schedule.idsavedschedule ||
-                              isDeleting
-                            }
+                            disabled={loadingScheduleId === schedule.idsavedschedule || isDeleting}
                             className="h-8"
                           >
                             {loadingScheduleId === schedule.idsavedschedule ? (
                               <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                             ) : (
-                              <Loader className="h-4 w-4 mr-1" />
+                              <Download className="h-4 w-4 mr-1" />
                             )}
-                            {loadingScheduleId === schedule.idsavedschedule
-                              ? "Loading..."
-                              : "Load"}
+                            {loadingScheduleId === schedule.idsavedschedule ? "Carregando..." : "Baixar"}
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleShare(schedule)}
-                            disabled={
-                              isDeleting ||
-                              loadingScheduleId === schedule.idsavedschedule
-                            }
+                            disabled={isDeleting || loadingScheduleId === schedule.idsavedschedule}
                             className="h-8"
                           >
                             <Share2 className="h-4 w-4 mr-1" />
@@ -232,13 +228,8 @@ export default function SavedSchedulesDialog() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() =>
-                              handleDelete(schedule.idsavedschedule)
-                            }
-                            disabled={
-                              isDeleting ||
-                              loadingScheduleId === schedule.idsavedschedule
-                            }
+                            onClick={() => handleDelete(schedule.idsavedschedule)}
+                            disabled={isDeleting || loadingScheduleId === schedule.idsavedschedule}
                             className="h-8 w-8"
                           >
                             <Trash2 className="h-4 w-4 text-destructive" />
@@ -257,10 +248,9 @@ export default function SavedSchedulesDialog() {
       <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogTitle>Você tem certeza?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              saved schedule.
+              Essa ação não pode ser desfeita. Isso irá deletar permanentemente a grade salva.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -269,7 +259,7 @@ export default function SavedSchedulesDialog() {
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground"
             >
-              Delete
+              Deletar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,7 +26,7 @@ function QuickSaveButton() {
 
   const handleQuickSave = () => {
     if (!currentScheduleId) {
-      toast.info("No schedule is currently loaded");
+      toast.info("Nenhum grade atualmente carregada.");
       return;
     }
 
@@ -36,15 +36,15 @@ function QuickSaveButton() {
     );
 
     if (existingSchedule) {
-      console.log("Updating existing schedule:", existingSchedule.title);
+      console.log("Atualizando grade existente:", existingSchedule.title);
       updateSchedule({
         id: existingSchedule.idsavedschedule,
         title: existingSchedule.title,
-        description: existingSchedule.description,
+        description: existingSchedule.description || '',
         scheduleSubjects: scheduleSubjects,
       });
     } else {
-      toast.error("Could not find the current schedule");
+      toast.error("Não foi possível encontrar a grade atual.");
     }
   };
 
@@ -56,7 +56,7 @@ function QuickSaveButton() {
       disabled={isCreating || !currentScheduleId}
     >
       <Save className="h-4 w-4" />
-      {isCreating ? "Saving..." : "Quick Save"}
+      {isCreating ? "Salvando..." : "Salvar"}
     </Button>
   );
 }
@@ -69,14 +69,31 @@ function CreateScheduleDialog() {
   const { createSchedule, savedSchedules, isCreating } =
     useSavedSchedulesQuery();
 
+  const TITLE_LIMIT = 45;
+  const DESCRIPTION_LIMIT = 100;
+
+  const handleTitleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value.length <= TITLE_LIMIT) {
+      setTitle(value);
+    }
+  };
+
+  const handleDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    if (value.length <= DESCRIPTION_LIMIT) {
+      setDescription(value);
+    }
+  };
+
   const handleSave = () => {
     if (!title.trim()) {
-      toast.error("Please enter a title for the schedule");
+      toast.error("Por favor, insira um título para a grade.");
       return;
     }
 
     if (scheduleSubjects.length === 0) {
-      toast.error("Please add at least one subject to the schedule");
+      toast.error("Por favor, insira ao menos uma matéria à grade.");
       return;
     }
 
@@ -96,34 +113,41 @@ function CreateScheduleDialog() {
       <DialogTrigger asChild>
         <Button variant="outline" className="gap-2">
           <Plus className="h-4 w-4" />
-          New Schedule
+          Nova grade
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Schedule</DialogTitle>
+          <DialogTitle>Crie uma nova grade</DialogTitle>
           <DialogDescription>
-            Create a new schedule with a different title and description.
+            Crie uma nova grade de horários com um título e descrição diferentes.
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">Título</Label>
             <Input
               id="title"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter schedule title"
+              onChange={handleTitleChange} 
+              placeholder="Insira o título da grade"
             />
+            <p className="text-sm text-right text-muted-foreground">
+              {title.length}/{TITLE_LIMIT}
+            </p>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description">Descrição</Label>
             <Textarea
               id="description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter schedule description (optional)"
+              onChange={handleDescriptionChange}
+              placeholder="Insira uma descrição (opcional)"
             />
+            <p className="text-sm text-right text-muted-foreground">
+              {description.length}/{DESCRIPTION_LIMIT}
+            </p>
+            
           </div>
         </div>
         <DialogFooter>
@@ -132,7 +156,7 @@ function CreateScheduleDialog() {
             onClick={handleSave}
             disabled={!title.trim() || isCreating}
           >
-            {isCreating ? "Saving..." : "Create Schedule"}
+            {isCreating ? "Salvando..." : "Criar grade"}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -140,33 +164,12 @@ function CreateScheduleDialog() {
   );
 }
 
-function TestJwtButton() {
-  const { testJwt } = useSavedSchedules();
-
-  const handleTest = async () => {
-    try {
-      const result = await testJwt();
-      toast.success("JWT test successful!");
-      console.log("JWT test result:", result);
-    } catch (error) {
-      toast.error("JWT test failed!");
-      console.error("JWT test error:", error);
-    }
-  };
-
-  return (
-    <Button variant="outline" onClick={handleTest}>
-      Test JWT
-    </Button>
-  );
-}
 
 export default function SaveScheduleDialog() {
   return (
     <div className="flex gap-2">
       <QuickSaveButton />
       <CreateScheduleDialog />
-      <TestJwtButton />
     </div>
   );
 }
