@@ -38,7 +38,7 @@ const NotificationsDropdown = () => {
       const session = await getSession();
       const uid = session?.user?.userId;
       if (uid) {
-        setUserId(+uid);
+        setUserId(Number(uid));
       }
     };
     checkSession();
