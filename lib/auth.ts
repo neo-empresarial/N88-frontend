@@ -30,7 +30,12 @@ async function register(data: any): Promise<any> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    return response.json();
+    const responseData = await response.json();
+    if (!response.ok) {
+      throw new Error(responseData.message || "Failed to register");
+    }
+    
+    return responseData;
   } catch (error) {
       console.error("Falha na chamada da API de registro:", error);
     return {
@@ -71,7 +76,7 @@ export async function signIn(
     };
   }
 }
-//-------------------------------------------------------------
+
 export async function signUp(
   state: FormState,
   formData: FormData
