@@ -1,5 +1,16 @@
 ﻿import { z } from "zod";
 
+export interface ICourse {
+  idcourse: number;
+  course: string;
+}
+
+export interface MappedCourse {
+  value: string;
+  label: string;
+}
+
+
 export type FormState = {
   error?: {
     name?: string[];
