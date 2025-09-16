@@ -19,8 +19,6 @@ const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function createSession(payload: Session) {
   const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  console.log(`payload: ${payload.user.name}`)
-  // Ensure the payload matches the expected structure
   const sessionPayload = {
     user: {
       userId: payload.user.userId,
