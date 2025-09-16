@@ -48,7 +48,9 @@ export const useSavedSchedules = () => {
 
     if (!response.ok) {
       throw new Error("Falha em criar a grade");
-    }  };
+    }
+    return response.json();
+  };
 
   const updateSavedSchedule = async (
     id: number,
