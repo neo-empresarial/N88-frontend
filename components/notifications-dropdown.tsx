@@ -82,7 +82,7 @@ const NotificationsDropdown = () => {
     },
     onSuccess: (updatedNotification) => {
       queryClient.setQueryData<Notification[]>(
-        ["notifications", userId],
+        ["notifications"],
         (old) => {
           const accept = respondMutation.variables?.accept;
           return old?.map((n) =>
