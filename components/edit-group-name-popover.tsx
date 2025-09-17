@@ -6,8 +6,8 @@ import { Input } from "./ui/input";
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getSession } from "@/lib/session";
 import { toast } from "sonner";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface UpdateGroupNameData {
   groupId: string;
@@ -17,7 +17,7 @@ interface UpdateGroupNameData {
 const useUpdateGroupName = () => {
   return useMutation({
     mutationFn: async ({ groupId, name }: UpdateGroupNameData) => {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${
           process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
         }groups/${groupId}`,

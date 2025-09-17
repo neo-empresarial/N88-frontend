@@ -1,8 +1,10 @@
+import { fetchWithAuth } from "./fetchWithAuth";
+
 export async function getGroup(groupId: number) {
   const backendUrl =
     process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
 
-  const response = await fetch(`${backendUrl}groups/${groupId}`, {
+  const response = await fetchWithAuth(`${backendUrl}groups/${groupId}`, {
     method: "GET",
     credentials: "include",
   });
