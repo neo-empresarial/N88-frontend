@@ -56,6 +56,7 @@ const SignUpForm = () => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(true);
+  const [selectedLabel, setSelectedLabel] = useState("");
 
   useEffect(() => {
     const getCourses = async () => {
@@ -118,7 +119,10 @@ const SignUpForm = () => {
                         key={course.value}
                         value={course.label}
                         onSelect={(currentValue) => {
-                          setValue(currentValue === value ? "" : currentValue);
+                          const selectedCourse = courses.find((c) => c.label === currentValue);
+                          if (selectedCourse){
+                            setValue(selectedCourse.value);
+                          }
                           setOpen(false);
                         }}
                       >
