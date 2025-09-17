@@ -23,6 +23,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from "@/components/ui/command";
 import { ICourse, MappedCourse } from "@/lib/type";
 
@@ -50,7 +51,7 @@ const fetchCourses = async (): Promise<MappedCourse[]> => {
 const SignUpForm = () => {
   const [state, action] = useFormState(signUp, undefined);
   const [showPassword, setShowPassword] = useState(false);
-  
+
   const [courses, setCourses] = useState([] as MappedCourse[]);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
@@ -88,7 +89,7 @@ const SignUpForm = () => {
         <div>
           <Label htmlFor="course">Curso</Label>
           <input type="hidden" name="course" id="course-input" value={value} />
-          
+
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -101,8 +102,8 @@ const SignUpForm = () => {
                 {loading
                   ? "Carregando cursos..."
                   : value
-                  ? courses.find((course) => course.value === value)?.label
-                  : "Selecione um curso..."}
+                    ? courses.find((course) => course.value === value)?.label
+                    : "Selecione um curso..."}
                 <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
@@ -110,26 +111,28 @@ const SignUpForm = () => {
               <Command>
                 <CommandInput placeholder="Procurar curso..." />
                 <CommandEmpty>Nenhum curso encontrado.</CommandEmpty>
-                <CommandGroup>
-                  {courses.map((course) => (
-                    <CommandItem
-                      key={course.value}
-                      value={course.value}
-                      onSelect={(currentValue) => {
-                        setValue(currentValue === value ? "" : currentValue);
-                        setOpen(false);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          value === course.value ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {course.label}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
+                <CommandList className="max-h-60 overflow-y-auto">
+                  <CommandGroup>
+                    {courses.map((course) => (
+                      <CommandItem
+                        key={course.value}
+                        value={course.label}
+                        onSelect={(currentValue) => {
+                          setValue(currentValue === value ? "" : currentValue);
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            value === course.value ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {course.label}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
               </Command>
             </PopoverContent>
           </Popover>
@@ -158,7 +161,7 @@ const SignUpForm = () => {
               placeholder="Insira uma senha"
               className="pr-12"
             />
-          
+
             <button
               type="button"
               onClick={togglePasswordVisibility}
