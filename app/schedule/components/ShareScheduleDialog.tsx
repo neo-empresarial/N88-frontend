@@ -129,34 +129,31 @@ export default function ShareScheduleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Share Schedule</DialogTitle>
-          <DialogDescription>
-            Share "{schedule.title}" with members of your groups
-          </DialogDescription>
+          <DialogTitle>Compartilhar grade</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Group Selection */}
           <div className="space-y-2">
-            <Label htmlFor="group">Select Group</Label>
+            <Label htmlFor="group">Selecione o grupo:</Label>
             <Select
               value={selectedGroupId?.toString() || ""}
               onValueChange={(value) => setSelectedGroupId(Number(value))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Choose a group" />
+                <SelectValue placeholder="Escolha um grupo" />
               </SelectTrigger>
               <SelectContent>
                 {isLoadingGroups ? (
                   <SelectItem value="loading" disabled>
                     <div className="flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading groups...
+                      Carregando grupos...
                     </div>
                   </SelectItem>
                 ) : groups?.length === 0 ? (
                   <SelectItem value="empty" disabled>
-                    No groups available
+                    Sem grupos disponíveis
                   </SelectItem>
                 ) : (
                   groups?.map((group: Group) => (
@@ -241,12 +238,12 @@ export default function ShareScheduleDialog({
               {isSharing ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Sharing...
+                  Compartilhando...
                 </>
               ) : (
                 <>
                   <Share2 className="h-4 w-4 mr-2" />
-                  Share Schedule
+                  Compartilhar grade
                 </>
               )}
             </Button>

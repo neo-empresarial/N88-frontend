@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { signUp } from "@/lib/auth";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useFormState } from "react-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -14,6 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { redirect } from "next/navigation";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -48,7 +49,7 @@ const fetchCourses = async (): Promise<MappedCourse[]> => {
   }
 };
 
-const SignUpForm = () => {
+ const SignUpForm = () => {
   const [state, action] = useFormState(signUp, undefined);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -89,7 +90,7 @@ const SignUpForm = () => {
 
         <div>
           <Label htmlFor="course">Curso</Label>
-          <input type="hidden" name="course" id="course-input" value={value} />
+          <input type="hidden" name="course" id="course-input" value={selectedLabel} />
 
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -118,10 +119,11 @@ const SignUpForm = () => {
                       <CommandItem
                         key={course.value}
                         value={course.label}
-                        onSelect={(currentValue) => {
-                          const selectedCourse = courses.find((c) => c.label === currentValue);
+                        onSelect={(currentLabel) => {
+                          const selectedCourse = courses.find((c) => c.label === currentLabel);
                           if (selectedCourse){
                             setValue(selectedCourse.value);
+                            setSelectedLabel(selectedCourse.label);
                           }
                           setOpen(false);
                         }}

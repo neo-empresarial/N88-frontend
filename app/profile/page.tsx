@@ -35,9 +35,9 @@ export default function Profile() {
   const { data: groups, isLoading, error } = useGroups();
 
   return (
-    <div className="flex flex-col items-center h-screen m-10">
-      <div className="grid grid-cols-[30%_70%] gap-4 w-full max-w-7xl">
-        <div className="flex flex-col gap-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-md h-fit">
+    <div className="flex flex-col items-center h-screen p-5">
+      <div className="grid grid-cols-[30%_70%] gap-10 w-full max-w-7xl">
+        <div className="flex flex-col gap-2 bg-gray-100 dark:bg-gray-800 p-4 rounded-md h-fit">
           <div className="flex gap-2 items-center">
             <Avatar>
               <AvatarFallback className="bg-gray-500 dark:bg-gray-700">
@@ -50,9 +50,9 @@ export default function Profile() {
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-md">
+        <div className="flex flex-col gap-2 bg-gray-100 dark:bg-gray-800 p-4 rounded-md max-h-195 overflow-y-auto">
           <h1 className="text-2xl font-bold">Grupos</h1>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 h-195">
             {isLoading ? (
               <div className="flex justify-center items-center h-full">
                 <div className="space-y-4">
