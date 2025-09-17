@@ -9,6 +9,20 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+		height:{"100": "25rem",
+			'110': "27.5rem",
+			'120': "30rem",
+			'130': "32.5rem",
+			'140': "35rem",
+			"145": "36.25rem",
+			'150': "37.5rem",
+			'160': "40rem",
+			'170': "42.5rem",
+			'180': "45rem",
+			'190': "47.5rem",
+			'195': "48.75rem",
+			"200": "50rem",
+		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
