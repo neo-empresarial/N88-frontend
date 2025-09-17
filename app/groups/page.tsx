@@ -4,13 +4,14 @@ import { useQuery } from "@tanstack/react-query";
 import { UserPlus, Users } from "@geist-ui/icons";
 import CreateGroupDialog from "@/components/create-group-dialog";
 import MyGroupsCard from "@/components/my-groups-card";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 const Groups = () => {
   const useGroups = () => {
     return useQuery({
       queryKey: ["groups"],
       queryFn: async () => {
-        const response = await fetch(
+        const response = await fetchWithAuth(
           `${
             process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
           }groups`,

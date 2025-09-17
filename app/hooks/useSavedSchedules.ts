@@ -29,8 +29,8 @@ export const useSavedSchedulesQuery = () => {
         description: data.description || '',
         items: data.scheduleSubjects.map((subject) => ({
           subjectCode: subject.code,
-          classCode: subject.class || "", // Ensure classCode is never undefined
-          activated: subject.activated ?? true, // Default to true if undefined
+          classCode: subject.class || "",
+          activated: subject.activated ?? true,
         })),
       });
     },
@@ -56,8 +56,8 @@ export const useSavedSchedulesQuery = () => {
         description: data.description || '',
         items: data.scheduleSubjects.map((subject) => ({
           subjectCode: subject.code,
-          classCode: subject.class || "", // Ensure classCode is never undefined
-          activated: subject.activated ?? true, // Default to true if undefined
+          classCode: subject.class || "",
+          activated: subject.activated ?? true,
         })),
       });
     },

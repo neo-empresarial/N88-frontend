@@ -1,16 +1,16 @@
 "use client";
 
-import { Link, LogOut, Pencil, Plus, Crown } from "lucide-react";
-import { Button } from "./ui/button";
+import { Crown } from "lucide-react";
 import AddMembersToGroupDialog from "./add-members-to-group-dialog";
 import EditGroupNamePopover from "./edit-group-name-popover";
 import RemoveMembersFromGroupDialog from "./remove-members-from-group-dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { getSession } from "@/lib/session";
 import { useEffect, useState } from "react";
 import LeaveGroupDialog from "./leave-group-dialog";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 const MyGroupsCard = ({ group }: { group: any }) => {
   const queryClient = useQueryClient();
@@ -19,16 +19,18 @@ const MyGroupsCard = ({ group }: { group: any }) => {
   useEffect(() => {
     const checkOwner = async () => {
       const session = await getSession();
-      if (session?.user?.id) {
-        setIsOwner(group.createdBy === Number(session.user.id));
+      if (session?.user.userId) {
+        setIsOwner(group.createdBy === session.user.userId);
+        console.log(group.createdBy === session.user.userId);
       }
+      console.log("Group Owner ID:", group.createdBy);
     };
     checkOwner();
   }, [group.createdBy]);
 
   const handleLeaveGroup = async () => {
     try {
-      const response = await fetch(`/api/groups/${group.id}/leave`, {
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}groups/${group.id}/leave`, {
         method: "POST",
         credentials: "include",
         headers: {

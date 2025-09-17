@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 export async function GET() {
   try {
@@ -14,10 +15,11 @@ export async function GET() {
 
     const backendUrl =
       process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
-    const response = await fetch(`${backendUrl}notifications`, {
+    const response = await fetchWithAuth(`${backendUrl}notifications`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -61,13 +63,14 @@ export async function POST(request: Request) {
 
     const backendUrl =
       process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
-    const response = await fetch(`${backendUrl}notifications/invite`, {
+    const response = await fetchWithAuth(`${backendUrl}notifications/invite`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ recipientId, groupId }),
+      credentials: "include",
     });
 
     if (!response.ok) {

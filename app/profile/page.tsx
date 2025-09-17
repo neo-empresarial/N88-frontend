@@ -8,6 +8,7 @@ import MyGroupsCard from "@/components/my-groups-card";
 import { Loader2, Edit } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import CreateGroupDialog from "@/components/create-group-dialog";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import EditProfileDialog from "@/components/edit-profile-dialog";
 import { useState } from "react";
 
@@ -27,7 +28,7 @@ export default function Profile() {
     return useQuery({
     queryKey: ["groups"],
     queryFn: async () => {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"}groups`,
         {
           credentials: "include",
