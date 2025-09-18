@@ -95,8 +95,6 @@ export default function EditProfileDialog({
       }
   
       const updatedUser = await response.json();
-      console.log("Updated user from backend:", updatedUser);
-  
       try {
         const sessionResponse = await fetch("/api/update-session", {
           method: "POST",
@@ -106,18 +104,13 @@ export default function EditProfileDialog({
           body: JSON.stringify({ updatedUser }),
         });
   
-        const sessionResult = await sessionResponse.json();
-        console.log("Session update response:", sessionResult);
-  
         if (!sessionResponse.ok) {
-          console.error("Session update failed:", sessionResult);
           toast.warning("Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.", {
             position: "bottom-right",
             autoClose: 4000,
           });
         }
-      } catch (sessionError) {
-        console.error("Session update error:", sessionError);
+      } catch {
         toast.warning("Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.", {
           position: "bottom-right",
           autoClose: 2000,
@@ -141,7 +134,6 @@ export default function EditProfileDialog({
   
       await queryClient.invalidateQueries({ queryKey: ["session"] });
       
-      console.log("Profile updated successfully");
       toast.success("Perfil atualizado com sucesso!",{
         position: "bottom-right",
         autoClose: 2000,
@@ -149,8 +141,6 @@ export default function EditProfileDialog({
       onClose();
       
     } catch (error) {
-      console.error("Error updating profile:", error);
-      
       if (error instanceof Error) {
         toast.error(`Erro ao atualizar perfil: ${error.message}`, {
           position: "bottom-right",
