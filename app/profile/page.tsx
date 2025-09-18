@@ -1,9 +1,5 @@
 ﻿"use client";
 import { getSession } from "@/lib/session";
-<<<<<<< HEAD
-=======
-
->>>>>>> 743ae2766e12c7dd16d1dcad8005307c7ad5eb20
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
