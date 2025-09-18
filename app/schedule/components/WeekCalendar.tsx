@@ -218,15 +218,8 @@ export default function WeekCalendarComponent() {
   }
 
   const generateTooltipContent = (code: string[]) => {
-    // Example: Matérias em conflito:
-    // - DAS5120
-    // - MTM3131
 
     const title = "Matérias em conflito:";
-
-    // Get colors from code:
-    // const colors = code.map((c) => getColorFromSubject(c));
-
     return (
       <>
         <p className="text-sm font-semibold tracking-tight">{title}</p>
@@ -290,8 +283,7 @@ export default function WeekCalendarComponent() {
                       </TableCell>
                     );
                   }
-
-                  // Pre-filter data for the current time and day
+                  
                   const cellData = tableData.filter(
                     (data) => data.time === time && data.day === day
                   )[0];

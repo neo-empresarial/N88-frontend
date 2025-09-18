@@ -28,8 +28,6 @@ import {
 import useMediaQuery from "./hooks/useMediaQuery";
 import { useRouter } from "next/navigation";
 
-// Home page
-
 export default function Home() {
   const router = useRouter();
 
@@ -67,14 +65,12 @@ export default function Home() {
     let intervalId: NodeJS.Timer | null = null;
 
     if (isSmallScreen) {
-      // Start cycling through items
       intervalId = setInterval(() => {
         setHoveredItem(items[indexRef.current].label);
         setDisplayText(items[indexRef.current].text);
         indexRef.current = (indexRef.current + 1) % items.length;
-      }, 2000); // e.g. rotate every 2 seconds
+      }, 2000);
     } else {
-      // On larger screens, revert to default text and rely on hover
       if (wasSmallScreenRef.current === true) {
         setHoveredItem(null);
         setDisplayText(defaultText);
@@ -82,7 +78,6 @@ export default function Home() {
     }
 
     return () => {
-      // Clear interval if we leave small screen or unmount
       if (intervalId) {
         //@ts-ignore
         clearInterval(intervalId);
@@ -91,9 +86,7 @@ export default function Home() {
   }, [isSmallScreen, items, defaultText]);
 
   useEffect(() => {
-    // Subscribe to scroll progress
     scrollYProgress.onChange((value) => {
-      // Map the scroll value to a fade effect
       setFade(value);
     });
   }, [scrollYProgress]);
@@ -104,7 +97,6 @@ export default function Home() {
 
     if (token) {
       localStorage.setItem("token", token);
-      // Optionally remove the token from the URL
       router.replace("/");
     }
   }, []);
@@ -251,7 +243,6 @@ export default function Home() {
           <div className='w-full h-full p-2'>
             <ResizablePanelGroup
               direction="horizontal"
-              //className="max-w-md rounded-lg border md:min-w-[450px]"
               className="rounded-lg border w-full h-full"
             >
               <ResizablePanel defaultSize={50}>

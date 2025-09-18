@@ -84,20 +84,15 @@ export default function SubjectsTable() {
     const [removed] = updatedSubjects.splice(index, 1);
 
     if (direction === "up") {
-      // If it's already the first item, wrap to the end
       if (index === 0) {
         updatedSubjects.push(removed);
       } else {
-        // Otherwise, move it up by one position
         updatedSubjects.splice(index - 1, 0, removed);
       }
     } else {
-      // direction: "down"
-      // If it's already the last item, wrap to the start
       if (index === searchedSubjects.length - 1) {
         updatedSubjects.unshift(removed);
       } else {
-        // Otherwise, move it down by one position
         updatedSubjects.splice(index + 1, 0, removed);
       }
     }
@@ -105,10 +100,9 @@ export default function SubjectsTable() {
     setSearchedSubjects(updatedSubjects);
   };
 
-  // Sync `rowSelection` with `searchedSubjects`, selecting all rows by default
   useEffect(() => {
     const newSelection = searchedSubjects.reduce((acc, row) => {
-      acc[row.code] = true; // Select all by default
+      acc[row.code] = true;
       return acc;
     }, {} as { [key: string]: boolean });
 
@@ -124,17 +118,15 @@ export default function SubjectsTable() {
       }
     };
 
-    // Create a ResizeObserver to observe height changes in the parent div
     const observer = new ResizeObserver(() => {
       updateMaxHeight();
     });
 
     if (tableContainerRef.current) {
-      observer.observe(tableContainerRef.current); // Start observing
-      updateMaxHeight(); // Set initial height
+      observer.observe(tableContainerRef.current);
+      updateMaxHeight();
     }
 
-    // Cleanup the observer on component unmount
     return () => {
       if (tableContainerRef.current) {
         observer.unobserve(tableContainerRef.current);
@@ -146,7 +138,7 @@ export default function SubjectsTable() {
     <div ref={tableContainerRef} className="p-3 h-full">
       <Table
         containerClassname="h-full overflow-y-auto relative"
-        style={{ maxHeight: maxHeight }} // Apply max-height dynamically
+        style={{ maxHeight: maxHeight }}
       >
         <TableHeader>
           <TableRow>

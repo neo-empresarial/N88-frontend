@@ -28,7 +28,6 @@ export default function GoogleAuthCallbackPage() {
       email: email,
     }));
 
-    // Create session for ProfileOptions and other server components
     await createSession({
       user: {
         id: parseInt(id, 10),

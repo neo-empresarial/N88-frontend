@@ -61,7 +61,6 @@ export default function ShareScheduleDialog({
 
   const { shareSchedule, isSharing } = useSharedSchedulesQuery();
 
-  // Fetch user's groups
   const { data: groups, isLoading: isLoadingGroups } = useQuery({
     queryKey: ["groups"],
     queryFn: async () => {

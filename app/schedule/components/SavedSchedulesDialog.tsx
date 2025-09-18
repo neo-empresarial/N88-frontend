@@ -73,18 +73,13 @@ export default function SavedSchedulesDialog() {
   };
 
   const handleLoadSchedule = async (schedule: SavedSchedule) => {
-    if (loadingScheduleId === schedule.idsavedschedule) return; // Prevent multiple simultaneous loads
+    if (loadingScheduleId === schedule.idsavedschedule) return;
 
     try {
       setLoadingScheduleId(schedule.idsavedschedule);
-
-      // Reset color usage before loading new schedule
       resetColorUsage();
-
-      // Set the current schedule ID
       setCurrentScheduleId(schedule.idsavedschedule);
 
-      // Get only the subjects needed for this schedule
       const subjectCodes = schedule.items.map((item) => item.subjectCode);
 
       const subjects = await getSubjectsByCodes(subjectCodes);
@@ -93,7 +88,6 @@ export default function SavedSchedulesDialog() {
         throw new Error("No subjects found for the schedule");
       }
 
-      // Prepare the data
       const scheduleItems = schedule.items.map((item) => ({
         code: item.subjectCode,
         class: item.classCode,
@@ -105,12 +99,9 @@ export default function SavedSchedulesDialog() {
         color: getUniqueColorPair(),
       }));
 
-
-      // Update the UI
       setSearchedSubjects(subjectsToLoad);
       setScheduleSubjects(scheduleItems);
 
-      // Close dialog and show success
       setOpen(false);
       toast.success("Grade carregada com sucesso");
     } catch (error) {
@@ -123,7 +114,7 @@ export default function SavedSchedulesDialog() {
       setLoadingScheduleId(null);
     }
   };
-  // Helper function to get random colors for subjects
+
   const getRandomColor = () => {
     const lightColors = [
       "bg-blue-200",

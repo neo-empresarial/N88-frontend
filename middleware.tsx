@@ -2,7 +2,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export default async function middleware(req: NextRequest) {
-  // Check if we're in development environment
   if (process.env.NODE_ENV === "development") {
     return NextResponse.next();
   }

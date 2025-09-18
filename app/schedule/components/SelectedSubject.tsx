@@ -33,11 +33,9 @@ export default function SelectedSubject() {
     const isSelected = rowSelection === row.classcode;
 
     if (isSelected) {
-      // Deselect the current row
       setRowSelection(null);
       removeClass(selectedSubject.code);
     } else {
-      // Select a new row, replacing the previous selection
       setRowSelection(row.classcode);
       addClass({
         code: selectedSubject.code,
@@ -77,7 +75,6 @@ export default function SelectedSubject() {
       return setRowSelection(isClassSelected);
     }
 
-    // Set the first class as selected by default
     if (selectedSubject.classes?.length) {
       setRowSelection(selectedSubject.classes[0].classcode);
       handleRowSelect(selectedSubject.classes[0]);
@@ -111,17 +108,15 @@ export default function SelectedSubject() {
       }
     };
 
-    // Create a ResizeObserver to observe height changes in the parent div
     const observer = new ResizeObserver(() => {
       updateMaxHeight();
     });
 
     if (tableContainerRef.current) {
-      observer.observe(tableContainerRef.current); // Start observing
-      updateMaxHeight(); // Set initial height
+      observer.observe(tableContainerRef.current);
+      updateMaxHeight();
     }
 
-    // Cleanup the observer on component unmount
     return () => {
       if (tableContainerRef.current) {
         observer.unobserve(tableContainerRef.current);
@@ -133,7 +128,7 @@ export default function SelectedSubject() {
     <div ref={tableContainerRef} className="p-3 h-full">
       <Table
         containerClassname="h-full overflow-y-auto relative"
-        style={{ maxHeight: maxHeight }} // Apply max-height dynamically
+        style={{ maxHeight: maxHeight }}
       >
         <TableHeader>
           <TableRow>

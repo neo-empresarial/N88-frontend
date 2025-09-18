@@ -7,7 +7,6 @@ import { useEffect } from "react";
 
 export default function GoogleLoginButton(props: { style: string }) {
   const searchParams = useSearchParams();
-  // const callbackUrl = searchParams.get("callbackUrl") || "/"; // Retrieve the callbackUrl query parameter
 
   const handleGoogleLogin = () => {
     window.location.href =

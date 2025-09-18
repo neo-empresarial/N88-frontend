@@ -2,7 +2,7 @@
 
 const instance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/",
-  withCredentials: true, // garante que cookies sejam enviados
+  withCredentials: true,
 });
 
 const useAxios = () => {
@@ -88,8 +88,6 @@ const useAxios = () => {
     }
   };
 
-  // Authentication routes
-
   const register = async (formData: object) => {
     try {
       const response = await axiosPublicInstance.post("auth/register", formData);
@@ -109,8 +107,6 @@ const useAxios = () => {
       return error;
     }
   };
-
-  // Feedback form
 
   const registerFeedback = async (formData: { message: string }) => {
     try {
