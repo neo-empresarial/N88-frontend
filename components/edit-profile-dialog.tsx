@@ -66,7 +66,7 @@ export default function EditProfileDialog({
     setIsLoading(true);
   
     try {
-      const token = localStorage.getItem("accessToken") || session?.accessToken;
+      const token = session?.accessToken;
       
       if (!token) {
         throw new Error("No access token found");
