@@ -27,6 +27,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface User {
   iduser: number;
@@ -59,10 +60,11 @@ const CreateGroupDialog = () => {
     },
   });
 
-  const { data: users, isLoading } = useQuery({
+  const { data: users } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const response = await fetch("/api/users");
+
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}users`, {credentials: "include"});
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to fetch users");
@@ -73,31 +75,31 @@ const CreateGroupDialog = () => {
 
   const createGroupMutation = useMutation({
     mutationFn: async (data: FormData & { members: number[] }) => {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
-      if (!token) {
-        throw new Error("No access token found");
-      }
+      console.log("Dados recebidos na mutation:", data);
+      const backendUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
 
-      const response = await fetch("/api/groups", {
+      const response = await fetchWithAuth(`${backendUrl}groups`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
+        credentials: 'include', 
       });
+
+
 
       if (!response.ok) {
         const error = await response.json();
+        console.error("Erro da API:", error);
         throw new Error(error.message || "Failed to create group");
       }
 
       return response.json();
     },
     onSuccess: () => {
+      console.log("Mutation bem-sucedida. Executando onSuccess.");
       toast.success(
         "Grupo criado com sucesso! Convites enviados para os membros selecionados."
       );
@@ -109,6 +111,7 @@ const CreateGroupDialog = () => {
       router.refresh();
     },
     onError: (error: Error) => {
+      console.error("Erro na mutation:", error);
       toast.error("Erro ao criar grupo");
     },
   });

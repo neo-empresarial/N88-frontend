@@ -15,7 +15,7 @@ import { Input } from "./ui/input";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { X } from "@geist-ui/icons";
 import { toast } from "sonner";
-import { getSession } from "@/lib/session";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface User {
   iduser: number;
@@ -33,7 +33,9 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
   const { data: users } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const response = await fetch("/api/users");
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}users`, {
+        credentials: "include",
+      });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to fetch users");
@@ -44,20 +46,12 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
 
   const { mutate: sendInvitations, isPending } = useMutation({
     mutationFn: async () => {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
-      if (!token) {
-        throw new Error("No access token found");
-      }
-
       const promises = selectedUsers.map((user) =>
-        fetch("/api/notifications", {
+        fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}notifications`, {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             recipientId: user.iduser,
@@ -84,6 +78,7 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
       console.error(error);
     },
   });
+
 
   const filteredUsers =
     users?.filter(

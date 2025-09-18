@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 export async function POST(
   request: Request,
@@ -27,7 +28,7 @@ export async function POST(
 
     const backendUrl =
       process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `${backendUrl}notifications/${params.id}/respond`,
       {
         method: "POST",
@@ -36,6 +37,7 @@ export async function POST(
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ accept }),
+        credentials: "include",
       }
     );
 

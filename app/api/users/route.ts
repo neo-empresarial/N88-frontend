@@ -1,3 +1,4 @@
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -12,7 +13,7 @@ export async function GET() {
       );
     }
 
-    const response = await fetch(`${backendUrl}users/`, {
+    const response = await fetchWithAuth(`${backendUrl}users/`, {
       headers: {
         "Content-Type": "application/json",
       },

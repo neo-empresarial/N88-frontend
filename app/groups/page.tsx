@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+<<<<<<< HEAD
 import { getSession } from "@/lib/session";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,12 @@ import CreateGroupDialog from "@/components/create-group-dialog";
 import MyGroupsCard from "@/components/my-groups-card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "react-toastify";
+=======
+import { UserPlus, Users } from "@geist-ui/icons";
+import CreateGroupDialog from "@/components/create-group-dialog";
+import MyGroupsCard from "@/components/my-groups-card";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
+>>>>>>> 743ae2766e12c7dd16d1dcad8005307c7ad5eb20
 
 const Groups = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,19 +27,11 @@ const Groups = () => {
     return useQuery({
       queryKey: ["groups"],
       queryFn: async () => {
-        const session = await getSession();
-        if (!session?.accessToken) {
-          throw new Error("No access token found");
-        }
-
-        const response = await fetch(
+        const response = await fetchWithAuth(
           `${
             process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
           }groups`,
           {
-            headers: {
-              Authorization: `Bearer ${session.accessToken}`,
-            },
             credentials: "include",
           }
         );
@@ -46,6 +45,7 @@ const Groups = () => {
     });
   };
 
+<<<<<<< HEAD
   const useFriends = () => {
     return useQuery({
       queryKey: ["friends"],
@@ -237,6 +237,9 @@ const sendFriendRequest = async (friendId: number) => {
       toast.error("Erro ao remover amigo");
     }
   };
+=======
+  const { data: groups, isLoading, error } = useGroups();
+>>>>>>> 743ae2766e12c7dd16d1dcad8005307c7ad5eb20
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">

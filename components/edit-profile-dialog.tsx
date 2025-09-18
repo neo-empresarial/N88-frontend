@@ -17,9 +17,10 @@ import { Edit, Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from 'react-toastify';
 
+import type { Session } from "lib/session";
 
 interface EditProfileDialogProps {
-  session: any;
+  session: Session;
   isOpen: boolean;
   onClose: () => void;
   onProfileUpdated?: () => Promise<void>; 
@@ -103,6 +104,9 @@ export default function EditProfileDialog({
           },
           body: JSON.stringify({ updatedUser }),
         });
+  
+        const sessionResult = await sessionResponse.json();
+        console.log("Session update response:", sessionResult);
   
         if (!sessionResponse.ok) {
           toast.warning("Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.", {

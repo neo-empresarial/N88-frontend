@@ -6,8 +6,8 @@ import { Input } from "./ui/input";
 
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getSession } from "@/lib/session";
 import { toast } from "sonner";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface UpdateGroupNameData {
   groupId: string;
@@ -17,23 +17,17 @@ interface UpdateGroupNameData {
 const useUpdateGroupName = () => {
   return useMutation({
     mutationFn: async ({ groupId, name }: UpdateGroupNameData) => {
-      const session = await getSession();
-      if (!session?.accessToken) {
-        throw new Error("No access token found");
-      }
-
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${
           process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
         }groups/${groupId}`,
         {
           method: "PATCH",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${session.accessToken}`,
           },
           body: JSON.stringify({ name }),
-          credentials: "include",
         }
       );
 

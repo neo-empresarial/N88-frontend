@@ -1,16 +1,86 @@
-﻿"use client";
+﻿"use server";
 
 import { redirect } from "next/navigation";
 import { FormState, SignUpFormSchema, SignInFormSchema } from "./type";
-import useAxios from "@/app/api/AxiosInstance";
 import { createSession } from "./session";
+
+async function login(data: any) {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const status = response.status;
+    const responseData = await response.json();
+    return { status, data: responseData.user };
+  } catch (error) {
+    console.error("Falha na chamada da API de login:", error);
+    return {
+      status: 500,
+      message: "Erro de rede. Verifique sua conexão.",
+    };
+  }
+}
+
+async function register(data: any): Promise<any> {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    const responseData = await response.json();
+    if (!response.ok) {
+      throw new Error(responseData.message || "Failed to register");
+    }
+    
+    return responseData;
+  } catch (error) {
+      console.error("Falha na chamada da API de registro:", error);
+    return {
+      statusCode: 500,
+      message: "Erro de rede. Verifique sua conexão.",
+    };
+  }
+}
+
+export async function signIn(
+  state: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const validatedFields = SignInFormSchema.safeParse({
+    email: formData.get("email"),
+    password: formData.get("password"),
+  });
+  
+  if (!validatedFields.success) {
+    return {
+      error: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+  
+  const response = await login(validatedFields.data);
+  console.log('response', response)
+
+  if (response.status === 201) {
+    const user = response.data
+    await createSession({ user });
+    redirect("/");
+  } else {
+    return {
+      message:
+        response.status === 401
+          ? "Email ou senha incorretos"
+          : response.message || "Ocorreu um erro no servidor.",
+    };
+  }
+}
 
 export async function signUp(
   state: FormState,
   formData: FormData
 ): Promise<FormState> {
-  const { register } = useAxios();
-
   const validationFields = SignUpFormSchema.safeParse({
     name: formData.get("name"),
     course: formData.get("course"),
@@ -23,72 +93,17 @@ export async function signUp(
       error: validationFields.error.flatten().fieldErrors,
     };
   }
+  
+  const response = await register(validationFields.data);
 
-  const response = (await register(validationFields.data)) as Response;
-
-  if (response.status === 201) {
-    return redirect("auth/signin");
+  if (response.statusCode === 201) {
+    return redirect("signin");
   }
 
   return {
     message:
-      response.status === 409
+      response.statusCode === 409
         ? "Esse email já está em uso. Tente outro."
-        : response.statusText,
-  };
-}
-
-export async function signIn(
-  state: FormState,
-  formData: FormData
-): Promise<FormState> {
-  const { login } = useAxios();
-
-  const validatedFields = SignInFormSchema.safeParse({
-    email: formData.get("email"),
-    password: formData.get("password"),
-  });
-
-  if (!validatedFields.success) {
-    return {
-      error: validatedFields.error.flatten().fieldErrors,
-    };
-  }
-
-  const response = (await login(validatedFields.data)) as any;
-
-  if (response.status === 201) {
-    const responseData = response.data;
-    const accessToken = responseData.access_token || responseData.accessToken;
-    const refreshToken =
-      responseData.refresh_token || responseData.refreshToken;
-
-    if (!accessToken) {
-      // handle error
-    }
-
-    // Store in localStorage for API calls
-    if (typeof window !== "undefined") {
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
-      // Optionally store user info
-      localStorage.setItem("user", JSON.stringify(responseData.user));
-    }
-
-    // Create session for ProfileOptions and other server components
-    await createSession({
-      user: responseData.user,
-      accessToken,
-      refreshToken,
-    });
-
-    redirect("/");
-  }
-
-  return {
-    message:
-      response.status === 401
-        ? "Email ou senha incorretos"
-        : response.statusText,
+        : response.message || "Ocorreu um erro no servidor.",
   };
 }
