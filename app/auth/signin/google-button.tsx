@@ -4,24 +4,31 @@ import { Button } from "@/components/ui/button";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
+import { createSession } from "@/lib/session";
+import { url } from "node:inspector/promises";
 
 export default function GoogleLoginButton(props: { style: string }) {
-  const searchParams = useSearchParams();
-  // const callbackUrl = searchParams.get("callbackUrl") || "/"; // Retrieve the callbackUrl query parameter
 
   const handleGoogleLogin = () => {
     window.location.href =
       (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/") +
-      "auth/google/login";
+      "auth/google/callback";
   };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
-    if (token) {
-      localStorage.setItem("token", token);
-      window.location.href = process.env.NEXT_PUBLIC_FRONTEND_URL!;
-    }
+    const payload = {
+      user: {
+        userId: Number(urlParams.get("userId")),
+        name: urlParams.get("name") || "",
+        email: urlParams.get("email") || "",
+        provider: "google",
+        accessToken: urlParams.get("accessToken") || "",
+        refreshToken: urlParams.get("refreshToken") || "",
+      },
+    };
+    console.log("Google login:", payload); // Debug log
+    createSession(payload);
   }, []);
 
   return (
