@@ -38,8 +38,7 @@ interface User {
 const formSchema = z.object({
   name: z.string().min(3, "Nome do grupo deve ter pelo menos 3 caracteres"),
   description: z
-    .string()
-    .min(10, "Descrição deve ter pelo menos 10 caracteres"),
+    .string(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -64,7 +63,7 @@ const CreateGroupDialog = () => {
     queryKey: ["users"],
     queryFn: async () => {
 
-      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}users`, {credentials: "include"});
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}users`, { credentials: "include" });
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to fetch users");
@@ -77,7 +76,7 @@ const CreateGroupDialog = () => {
     mutationFn: async (data: FormData & { members: number[] }) => {
       console.log("Dados recebidos na mutation:", data);
       const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
 
       const response = await fetchWithAuth(`${backendUrl}groups`, {
         method: "POST",
@@ -85,7 +84,7 @@ const CreateGroupDialog = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-        credentials: 'include', 
+        credentials: 'include',
       });
 
 
@@ -184,7 +183,7 @@ const CreateGroupDialog = () => {
                 <FormItem>
                   <FormLabel>Descrição do grupo</FormLabel>
                   <FormControl>
-                    <Input placeholder="Descrição do grupo" {...field} />
+                    <Input placeholder="Descrição do grupo (opcional)" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -235,7 +234,7 @@ const CreateGroupDialog = () => {
                 {selectedUsers.map((user) => (
                   <div
                     key={user.iduser}
-                    className="flex items-center justify-between p-2 rounded-md"
+                    className="flex items-center justify-between p-2 rounded-md bg-gray-800"
                   >
                     <div>
                       <div className="font-medium">{user.name}</div>

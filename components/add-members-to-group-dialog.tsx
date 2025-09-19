@@ -112,16 +112,16 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Invite Members</DialogTitle>
+          <DialogTitle>Convide membros</DialogTitle>
           <DialogDescription>
-            Send invitations to join the group
+            Envie convites para outros membros entrarem no grupo
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <div className="relative">
             <Input
               type="text"
-              placeholder="Search for a member"
+              placeholder="Procurar por membros..."
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
@@ -145,7 +145,7 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
                   </div>
                 ))}
                 {filteredUsers.length === 0 && (
-                  <div className="px-4 py-2 text-gray-500">No users found</div>
+                  <div className="px-4 py-2 text-gray-500">Nenhum usuário encontrado</div>
                 )}
               </div>
             )}
@@ -182,7 +182,7 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
                   Sending...
                 </div>
               ) : (
-                "Send Invitations"
+                "Mandar convites"
               )}
             </Button>
           </DialogFooter>

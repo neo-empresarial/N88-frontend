@@ -1,7 +1,8 @@
 "use client";
 
-import { Crown } from "lucide-react";
+import { Crown, Delete } from "lucide-react";
 import AddMembersToGroupDialog from "./add-members-to-group-dialog";
+import DeleteGroupDialog from "./delete-group-dialog";
 import EditGroupNamePopover from "./edit-group-name-popover";
 import RemoveMembersFromGroupDialog from "./remove-members-from-group-dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "./ui/hover-card";
@@ -52,10 +53,10 @@ const MyGroupsCard = ({ group }: { group: any }) => {
 
 
   return (
-    <div className="bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 mb-4 transition-all duration-200 hover:shadow-lg">
+    <div className="flex flex-col justify-between h-48 overflow-hidden bg-white dark:bg-gray-900 rounded-lg shadow-md p-6 mb-4 transition-all duration-200 hover:shadow-lg">
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-8">
             <h2 className="text-xl font-bold text-gray-800 dark:text-white">
               {group.name}
             </h2>
@@ -118,7 +119,9 @@ const MyGroupsCard = ({ group }: { group: any }) => {
             {isOwner ? (
               <>
                 <AddMembersToGroupDialog groupId={group.id} />
-                <RemoveMembersFromGroupDialog groupId={group.id} />
+                {group.members?.length > 1 && (
+                <RemoveMembersFromGroupDialog groupId={group.id} />)}
+                <DeleteGroupDialog groupId={group.id} />
               </>
             ) : (
               <LeaveGroupDialog onConfirm={handleLeaveGroup} />
