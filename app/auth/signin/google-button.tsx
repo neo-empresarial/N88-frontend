@@ -70,7 +70,7 @@ export default function GoogleLoginButton(props: { style: string }) {
     <div className="w-1/2">
       <Button
         onClick={handleGoogleLogin}
-        className={`bg-red-500 hover:bg-red-600 text-white ${props.style}`}
+        className={`bg-red-500 hover:bg-red-600 text-white ${props.style ? ' ' + props.style : ''}`}
         disabled={isProcessing}
       >
         <IconBrandGoogle className="h-5 w-5" />
