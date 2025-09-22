@@ -13,7 +13,7 @@ async function refreshAccessToken() {
     )
       .then(async (res: Response) => {
       if (!res.ok) {
-        deleteSession();
+        await deleteSession();
       }
       })
       .finally(() => {
