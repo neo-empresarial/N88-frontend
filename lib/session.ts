@@ -30,7 +30,6 @@ export async function createSession(payload: Session) {
     accessToken: payload.user.accessToken,
     refreshToken: payload.user.refreshToken,
   };
-  console.log("Creating session with payload:", sessionPayload); // Debug log
   const session = await new SignJWT(sessionPayload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
