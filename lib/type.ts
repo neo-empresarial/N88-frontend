@@ -36,7 +36,7 @@ export const SignUpFormSchema: z.ZodObject<{
   password: z.string()
   .min(6, { message: "Essa senha está muito curta hein... Ela deve ter no mínimo 6 caracteres!" }) 
   .regex(strongPasswordRegex, {
-    message: 'Sua senha precisa conter pelo menos uma letra minúscula, maiúscila, um número e um símbolo'})
+    message: 'Sua senha precisa conter pelo menos uma letra minúscula, maiúscula, um número e um símbolo'})
 });
 
 export const SignInFormSchema: z.ZodObject<{
