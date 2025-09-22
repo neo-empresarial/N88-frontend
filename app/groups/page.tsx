@@ -12,9 +12,7 @@ const Groups = () => {
       queryKey: ["groups"],
       queryFn: async () => {
         const response = await fetchWithAuth(
-          `${
-            process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
-          }groups`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}groups`,
           {
             credentials: "include",
           }

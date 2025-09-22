@@ -1,13 +1,13 @@
 ﻿import axios from "axios";
 
 const instance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/",
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
   withCredentials: true, // garante que cookies sejam enviados
 });
 
 const useAxios = () => {
   const axiosPublicInstance = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/",
+    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
     headers: {
       "Content-Type": "application/json",
     },

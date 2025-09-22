@@ -1,3 +1,5 @@
+import { deleteSession } from "./session";
+
 let refreshPromise: Promise<void> | null = null;
 
 async function refreshAccessToken() {
@@ -5,17 +7,17 @@ async function refreshAccessToken() {
     refreshPromise = fetch(
       `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/refresh`,
       {
-        method: "POST",
-        credentials: "include",
-      }
+      method: "POST",
+      credentials: "include",
+      } as RequestInit
     )
-      .then(async (res) => {
-        if (!res.ok) {
-          throw new Error("Falha ao atualizar o access token");
-        }
+      .then(async (res: Response) => {
+      if (!res.ok) {
+        await deleteSession();
+      }
       })
       .finally(() => {
-        refreshPromise = null;
+      refreshPromise = null;
       });
   }
 

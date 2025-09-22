@@ -77,7 +77,7 @@ const CreateGroupDialog = () => {
     mutationFn: async (data: FormData & { members: number[] }) => {
       console.log("Dados recebidos na mutation:", data);
       const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
+      process.env.NEXT_PUBLIC_BACKEND_URL;
 
       const response = await fetchWithAuth(`${backendUrl}groups`, {
         method: "POST",

@@ -7,6 +7,7 @@ export type Session = {
   user: {
     accessToken: string;
     refreshToken: string;
+    provider: string;
     userId: number;
     name: string;
     email: string;
@@ -24,11 +25,11 @@ export async function createSession(payload: Session) {
       userId: payload.user.userId,
       name: payload.user.name,
       email: payload.user.email,
+      provider: payload.user.provider,
     },
     accessToken: payload.user.accessToken,
     refreshToken: payload.user.refreshToken,
   };
-
   const session = await new SignJWT(sessionPayload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -38,7 +39,7 @@ export async function createSession(payload: Session) {
   cookies().set("session", session, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "lax",  
     expires: expiredAt,
     path: "/",
   });
