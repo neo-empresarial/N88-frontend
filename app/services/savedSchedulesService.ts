@@ -79,7 +79,7 @@ export const useSavedSchedules = () => {
     if (!response.ok) {
       throw new Error("Falha em deletar a grade");
     }
-    // window.location.reload(); perguntar para o guto sobre isso
+    window.location.reload(); 
 
   };
 
