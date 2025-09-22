@@ -18,9 +18,7 @@ const useUpdateGroupName = () => {
   return useMutation({
     mutationFn: async ({ groupId, name }: UpdateGroupNameData) => {
       const response = await fetchWithAuth(
-        `${
-          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
-        }groups/${groupId}`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}groups/${groupId}`,
         {
           method: "PATCH",
           credentials: "include",

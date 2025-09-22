@@ -2,40 +2,76 @@
 
 import { Button } from "@/components/ui/button";
 import { IconBrandGoogle } from "@tabler/icons-react";
-import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { createSession } from "@/lib/session";
-import { url } from "node:inspector/promises";
 
 export default function GoogleLoginButton(props: { style: string }) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const handleGoogleLogin = () => {
-    window.location.href =
-      (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/") +
-      "auth/google/callback";
+    const backendUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL;
+    window.location.href = `${backendUrl}auth/google/login`;
   };
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const payload = {
-      user: {
-        userId: Number(urlParams.get("userId")),
-        name: urlParams.get("name") || "",
-        email: urlParams.get("email") || "",
-        provider: "google",
-        accessToken: urlParams.get("accessToken") || "",
-        refreshToken: urlParams.get("refreshToken") || "",
-      },
-    };
-    console.log("Google login:", payload); // Debug log
-    createSession(payload);
-  }, []);
+    const userId = searchParams.get("userId");
+    const name = searchParams.get("name") || "";
+    const email = searchParams.get("email") || "";
+    const provider = searchParams.get("provider") || "google"; // Default para "google"
+    const accessToken = searchParams.get("accessToken") || "";
+    const refreshToken = searchParams.get("refreshToken") || "";
+
+    console.log("Parâmetros do URL:", {
+      userId,
+      name,
+      email,
+      provider,
+      accessToken,
+      refreshToken,
+    });
+
+    if (
+      userId &&
+      name &&
+      email &&
+      accessToken &&
+      refreshToken &&
+      !isProcessing
+    ) {
+      setIsProcessing(true);
+      const payload = {
+        user: {
+          userId: Number(userId),
+          name,
+          email,
+          provider,
+          accessToken,
+          refreshToken,
+        },
+      };
+
+      createSession(payload)
+        .then(() => {
+          console.log("Sessão criada com sucesso, redirecionando para /");
+          router.push("/");
+        })
+        .catch((error) => {
+          console.error("Erro ao criar sessão:", error);
+          router.push("/login?error=auth_failed");
+        });
+    }
+  }, [searchParams, isProcessing, router]);
 
   return (
     <div className="w-1/2">
       <Button
         onClick={handleGoogleLogin}
-        className={`bg-red-500 hover:bg-red-600 text-white + ${props.style}`}
+        className={`bg-red-500 hover:bg-red-600 text-white ${props.style}`}
+        disabled={isProcessing}
       >
         <IconBrandGoogle className="h-5 w-5" />
         <span className="ml-2">Login com Google</span>
