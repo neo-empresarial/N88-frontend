@@ -23,7 +23,6 @@ const MyGroupsCard = ({ group }: { group: any }) => {
         setIsOwner(group.createdBy === session.user.userId);
         console.log(group.createdBy === session.user.userId);
       }
-      console.log("Group Owner ID:", group.createdBy);
     };
     checkOwner();
   }, [group.createdBy]);
