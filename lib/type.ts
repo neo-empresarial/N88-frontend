@@ -22,7 +22,7 @@ export type FormState = {
 } | undefined;
 
 const strongPasswordRegex = new RegExp (
-  "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])"
+  "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{6,}$"
 );
 
 export const SignUpFormSchema: z.ZodObject<{
