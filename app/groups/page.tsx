@@ -9,6 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Plus, UserPlus, Users, Search, UserMinus, UserCheck, UserX } from "@geist-ui/icons";
 import CreateGroupDialog from "@/components/create-group-dialog";
 import MyGroupsCard from "@/components/my-groups-card";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { toast } from "react-toastify";
 
@@ -97,6 +98,138 @@ const Groups = () => {
       },
     });
   };
+
+  const { data: groups, isLoading: groupsLoading } = useGroups();
+  const { data: friends, isLoading: friendsLoading, refetch: refetchFriends } = useFriends();
+  const { data: pendingRequests, isLoading: pendingLoading, refetch: refetchPending } = usePendingRequests();
+
+const searchUsers = async (term: string) => {
+  if (!term.trim()) {
+    setSearchResults([]);
+    return;
+  }
+
+  try {
+    const session = await getSession();
+    if (!session?.accessToken) return;
+
+    const response = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
+      }friends/search?q=${encodeURIComponent(term)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      }
+    );
+
+    if (response.ok) {
+      const results = await response.json();
+      setSearchResults(results);
+    } else {
+      console.error("Search failed:", response.status);
+      toast.error("Erro ao buscar usuários");
+    }
+  } catch (error) {
+    console.error("Error searching users:", error);
+    toast.error("Erro ao buscar usuários");
+  }
+};
+
+const sendFriendRequest = async (friendId: number) => {
+  try {
+    const session = await getSession();
+    if (!session?.accessToken) return;
+
+    const response = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
+      }friends/${friendId}`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+        credentials: "include",
+      }
+    );
+
+    if (response.ok) {
+      toast.success("Solicitação de amizade enviada!");
+      setSearchResults([]);
+      setSearchTerm("");
+      refetchPending();
+    } else {
+      console.error("Failed to send friend request:", response.status, response.statusText);
+      toast.error("Erro ao enviar solicitação");
+    }
+  } catch (error) {
+    console.error("Error sending friend request:", error);
+    toast.error("Erro ao enviar solicitação");
+  }
+};
+
+  const acceptFriendRequest = async (friendshipId: number) => {
+    try {
+      const session = await getSession();
+      if (!session?.accessToken) return;
+
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
+        }friends/accept/${friendshipId}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        toast.success("Amigo adicionado!");
+        refetchFriends(); 
+        refetchPending();
+      } else {
+        toast.error("Erro ao aceitar solicitação");
+      }
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+      toast.error("Erro ao aceitar solicitação");
+    }
+  };
+
+  const removeFriend = async (friendId: number) => {
+    try {
+      const session = await getSession();
+      if (!session?.accessToken) return;
+
+      const response = await fetch(
+        `${
+          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
+        }friends/${friendId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${session.accessToken}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        toast.success("Amigo removido!");
+        refetchFriends(); 
+      } else {
+        toast.error("Erro ao remover amigo");
+      }
+    } catch (error) {
+      console.error("Error removing friend:", error);
+      toast.error("Erro ao remover amigo");
+    }
+  };
+
+  const { data: groups, isLoading, error } = useGroups();
 
   const { data: groups, isLoading: groupsLoading } = useGroups();
   const { data: friends, isLoading: friendsLoading, refetch: refetchFriends } = useFriends();

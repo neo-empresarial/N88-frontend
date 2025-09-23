@@ -1,10 +1,8 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Infinity } from "@geist-ui/icons";
 import Providers from "./providers";
 import ProfileOptions from "@/app/profile/ProfileOptions";
 import FeedbackButton from "./feedback/FeedbackButton";
@@ -67,11 +65,11 @@ export default function RootLayout({
                       <Link href={"/schedule"}>Matérias</Link>
                     </MenubarTrigger>
                   </MenubarMenu>
-                  <MenubarMenu>
+                  {/* <MenubarMenu>
                     <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
                       <Link href={"/professors"}>Professores</Link>
                     </MenubarTrigger>
-                  </MenubarMenu>
+                  </MenubarMenu> */}
                   <MenubarMenu>
                     <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
                       <Link href={"/groups"}>Grupos</Link>

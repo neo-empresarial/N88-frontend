@@ -5,13 +5,15 @@ import { cookies } from "next/headers";
 
 export type Session = {
   user: {
-    id: number;
+    accessToken: string;
+    refreshToken: string;
+    provider: string;
+    userId: number;
     name: string;
     email: string;
     course: string;
   };
-  accessToken: string;
-  refreshToken: string;
+  
 };
 
 const secretKey = process.env.SESSION_SECRET_KEY!;
@@ -22,15 +24,14 @@ export async function createSession(payload: Session) {
 
   const sessionPayload = {
     user: {
-      id: payload.user.id,
+      userId: payload.user.userId,
       name: payload.user.name,
       email: payload.user.email,
       course: payload.user.course,
     },
-    accessToken: payload.accessToken,
-    refreshToken: payload.refreshToken,
+    accessToken: payload.user.accessToken,
+    refreshToken: payload.user.refreshToken,
   };
-
   const session = await new SignJWT(sessionPayload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -40,12 +41,20 @@ export async function createSession(payload: Session) {
   cookies().set("session", session, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",  
+    expires: expiredAt,
+    path: "/",
+  });
+
+  cookies().set("access_token", sessionPayload.accessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     expires: expiredAt,
     path: "/",
   });
 
-  cookies().set("access_token", payload.accessToken, {
+  cookies().set("refresh_token", sessionPayload.refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
@@ -57,7 +66,7 @@ export async function createSession(payload: Session) {
 export async function getSession() {
   const cookie = cookies().get("session")?.value;
   const accessToken = cookies().get("access_token")?.value;
-
+  
   if (!cookie) return null;
 
   try {
@@ -68,9 +77,8 @@ export async function getSession() {
     const session = payload as Session;
 
     if (accessToken) {
-      session.accessToken = accessToken;
+      session.user.accessToken = accessToken;
     }
-
     return session;
   } catch (error) {
     console.error("Session verification error:", error);
@@ -107,4 +115,5 @@ export async function updateUserInSession(updatedUser: any) {
 export async function deleteSession() {
   cookies().delete("session");
   cookies().delete("access_token");
+  cookies().delete("refresh_token");
 }
