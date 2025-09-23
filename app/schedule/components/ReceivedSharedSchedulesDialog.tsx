@@ -87,7 +87,7 @@ export default function ReceivedSharedSchedulesDialog() {
         <DialogTrigger asChild>
           <Button variant="outline" className="gap-2">
             <Inbox className="h-4 w-4" />
-            Shared with Me
+            Compartilhados comigo
             {receivedSharedSchedules && receivedSharedSchedules.length > 0 && (
               <Badge variant="secondary" className="ml-1">
                 {
@@ -101,9 +101,9 @@ export default function ReceivedSharedSchedulesDialog() {
         </DialogTrigger>
         <DialogContent className="sm:max-w-[800px] max-h-[600px]">
           <DialogHeader>
-            <DialogTitle>Shared Schedules</DialogTitle>
+            <DialogTitle>Grades compartilhadas</DialogTitle>
             <DialogDescription>
-              Schedules shared with you by other users
+              Grades compartilhadas com você por outros usuários
             </DialogDescription>
           </DialogHeader>
 
@@ -115,9 +115,9 @@ export default function ReceivedSharedSchedulesDialog() {
             receivedSharedSchedules.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Inbox className="h-12 w-12 mx-auto mb-4 opacity-50" />
-              <p>No shared schedules yet</p>
+              <p>Ainda não existem grades compartilhadas com você</p>
               <p className="text-sm">
-                When someone shares a schedule with you, it will appear here
+                Quando alguém compartilhar uma grade de horários com você, ela irá aparecer aqui.
               </p>
             </div>
           ) : (
@@ -125,12 +125,12 @@ export default function ReceivedSharedSchedulesDialog() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Schedule</TableHead>
-                    <TableHead>Shared by</TableHead>
-                    <TableHead>Group</TableHead>
+                    <TableHead>Grade</TableHead>
+                    <TableHead>Compartilhado por</TableHead>
+                    <TableHead>Grupo</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Shared on</TableHead>
-                    <TableHead className="w-[150px]">Actions</TableHead>
+                    <TableHead>Compartilhado no</TableHead>
+                    <TableHead className="w-[150px]">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -147,7 +147,7 @@ export default function ReceivedSharedSchedulesDialog() {
                             </div>
                             <div className="text-xs text-muted-foreground">
                               {sharedSchedule.originalSchedule.items.length}{" "}
-                              subjects
+                              matérias
                             </div>
                           </div>
                         </TableCell>
@@ -209,7 +209,7 @@ export default function ReceivedSharedSchedulesDialog() {
                             <div className="text-sm text-muted-foreground">
                               {sharedSchedule.acceptedAt && (
                                 <div>
-                                  Accepted on{" "}
+                                  Aceito por {" "}
                                   {formatDate(sharedSchedule.acceptedAt)}
                                 </div>
                               )}
@@ -229,29 +229,28 @@ export default function ReceivedSharedSchedulesDialog() {
       <AlertDialog open={showDeclineAlert} onOpenChange={setShowDeclineAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Decline Shared Schedule?</AlertDialogTitle>
+            <AlertDialogTitle>Recusar grade compartilhada?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to decline this shared schedule? This action
-              cannot be undone.
+              Tem certeza que você quer recusar essa grade compartilhada? Essa ação não pode ser desfeita.
               {selectedSchedule && (
                 <div className="mt-2 p-3 bg-muted rounded-md">
                   <div className="font-medium">
                     {selectedSchedule.originalSchedule.title}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Shared by {selectedSchedule.sharedByUserName}
+                    Compartilhado por {selectedSchedule.sharedByUserName}
                   </div>
                 </div>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDecline}
               className="bg-destructive text-destructive-foreground"
             >
-              Decline
+              Recusar
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

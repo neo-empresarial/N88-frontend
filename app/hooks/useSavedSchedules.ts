@@ -20,17 +20,17 @@ export const useSavedSchedulesQuery = () => {
   const createMutation = useMutation({
     mutationFn: (data: {
       title: string;
-      description: string;
+      description?: string;
       scheduleSubjects: scheduleSubjectsType[];
     }) => {
       console.log("Creating schedule with data:", data);
       return createSavedSchedule({
         title: data.title,
-        description: data.description,
+        description: data.description || '',
         items: data.scheduleSubjects.map((subject) => ({
           subjectCode: subject.code,
-          classCode: subject.class || "", // Ensure classCode is never undefined
-          activated: subject.activated ?? true, // Default to true if undefined
+          classCode: subject.class || "",
+          activated: subject.activated ?? true,
         })),
       });
     },
@@ -47,17 +47,17 @@ export const useSavedSchedulesQuery = () => {
     mutationFn: (data: {
       id: number;
       title: string;
-      description: string;
+      description?: string;
       scheduleSubjects: scheduleSubjectsType[];
     }) => {
       console.log("Updating schedule with data:", data);
       return updateSavedSchedule(data.id, {
         title: data.title,
-        description: data.description,
+        description: data.description || '',
         items: data.scheduleSubjects.map((subject) => ({
           subjectCode: subject.code,
-          classCode: subject.class || "", // Ensure classCode is never undefined
-          activated: subject.activated ?? true, // Default to true if undefined
+          classCode: subject.class || "",
+          activated: subject.activated ?? true,
         })),
       });
     },
@@ -82,6 +82,8 @@ export const useSavedSchedulesQuery = () => {
       toast.error(error.message || "Failed to delete schedule");
     },
   });
+
+  console.log(savedSchedulesQuery.data)
 
   return {
     savedSchedules: savedSchedulesQuery.data,

@@ -8,7 +8,6 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getSession } from "@/lib/session";
 import { toast } from "sonner";
@@ -22,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface User {
   iduser: number;
@@ -30,7 +30,6 @@ interface User {
 }
 
 const RemoveMembersFromGroupDialog = ({ groupId }: { groupId: number }) => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
   const queryClient = useQueryClient();
 
@@ -42,21 +41,20 @@ const RemoveMembersFromGroupDialog = ({ groupId }: { groupId: number }) => {
   const handleRemoveMembers = async () => {
     try {
       const session = await getSession();
-      if (!session?.accessToken) {
+      if (!session?.user.accessToken) {
         throw new Error("No access token found");
       }
 
       for (const user of selectedUsers) {
-        const response = await fetch(
-          `${
-            process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
-          }groups/${groupId}/members/${user.iduser}`,
+        const response = await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}groups/${groupId}/members/${user.iduser}`,
           {
             method: "DELETE",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${session.accessToken}`,
+              Authorization: `Bearer ${session.user.accessToken}`,
             },
+            credentials: "include",
           }
         );
 

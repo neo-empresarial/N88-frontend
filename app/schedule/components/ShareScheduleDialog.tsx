@@ -25,6 +25,7 @@ import { getSession } from "@/lib/session";
 import { useSharedSchedulesQuery } from "@/app/hooks/useSharedSchedules";
 import { SavedSchedule } from "@/app/services/savedSchedulesService";
 import { toast } from "sonner";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface ShareScheduleDialogProps {
   schedule: SavedSchedule;
@@ -45,7 +46,7 @@ interface Group {
 
 const buildUrl = (endpoint: string) => {
   const baseUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+    process.env.NEXT_PUBLIC_BACKEND_URL;
   return `${baseUrl.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
 };
 
@@ -65,14 +66,11 @@ export default function ShareScheduleDialog({
     queryKey: ["groups"],
     queryFn: async () => {
       const session = await getSession();
-      if (!session?.accessToken) {
+      if (!session?.user.accessToken) {
         throw new Error("No access token found");
       }
 
-      const response = await fetch(buildUrl("groups"), {
-        headers: {
-          Authorization: `Bearer ${session.accessToken}`,
-        },
+      const response = await fetchWithAuth(buildUrl("groups"), {
         credentials: "include",
       });
 
@@ -129,34 +127,31 @@ export default function ShareScheduleDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Share Schedule</DialogTitle>
-          <DialogDescription>
-            Share "{schedule.title}" with members of your groups
-          </DialogDescription>
+          <DialogTitle>Compartilhar grade</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
           {/* Group Selection */}
           <div className="space-y-2">
-            <Label htmlFor="group">Select Group</Label>
+            <Label htmlFor="group">Selecione o grupo:</Label>
             <Select
               value={selectedGroupId?.toString() || ""}
               onValueChange={(value) => setSelectedGroupId(Number(value))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Choose a group" />
+                <SelectValue placeholder="Escolha um grupo" />
               </SelectTrigger>
               <SelectContent>
                 {isLoadingGroups ? (
                   <SelectItem value="loading" disabled>
                     <div className="flex items-center gap-2">
                       <Loader2 className="h-4 w-4 animate-spin" />
-                      Loading groups...
+                      Carregando grupos...
                     </div>
                   </SelectItem>
                 ) : groups?.length === 0 ? (
                   <SelectItem value="empty" disabled>
-                    No groups available
+                    Sem grupos disponíveis
                   </SelectItem>
                 ) : (
                   groups?.map((group: Group) => (
@@ -241,12 +236,12 @@ export default function ShareScheduleDialog({
               {isSharing ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Sharing...
+                  Compartilhando...
                 </>
               ) : (
                 <>
                   <Share2 className="h-4 w-4 mr-2" />
-                  Share Schedule
+                  Compartilhar grade
                 </>
               )}
             </Button>

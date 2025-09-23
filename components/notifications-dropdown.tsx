@@ -5,7 +5,6 @@ import { Button } from "./ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -13,6 +12,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { useEffect, useState } from "react";
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface Notification {
   id: number;
@@ -36,40 +36,22 @@ const NotificationsDropdown = () => {
   useEffect(() => {
     const checkSession = async () => {
       const session = await getSession();
-      if (session?.user?.id) {
-        setUserId(Number(session.user.id));
+      const uid = session?.user?.userId;
+      if (uid) {
+        setUserId(Number(uid));
       }
     };
     checkSession();
   }, []);
 
-  const {
-    data: notifications,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["notifications", userId],
+  const { data: notifications, isLoading, refetch } = useQuery({
+    queryKey: ["notifications"],
     queryFn: async () => {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
-      if (!token) {
-        throw new Error("No access token found");
-      }
-
-      const response = await fetch("/api/notifications", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to fetch notifications");
-      }
-      const data = await response.json();
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}notifications`);
+      if (!response.ok) throw new Error("Failed to fetch notifications");
+      const data: Notification[] = await response.json();
       return data;
     },
-    enabled: !!userId,
   });
 
   const respondMutation = useMutation({
@@ -80,21 +62,13 @@ const NotificationsDropdown = () => {
       notificationId: number;
       accept: boolean;
     }) => {
-      const token =
-        typeof window !== "undefined"
-          ? localStorage.getItem("accessToken")
-          : null;
-      if (!token) {
-        throw new Error("No access token found");
-      }
-
       const response = await fetch(
-        `/api/notifications/${notificationId}/respond`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}notifications/${notificationId}/respond`,
         {
           method: "POST",
+          credentials: "include",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ accept }),
         }
@@ -106,15 +80,23 @@ const NotificationsDropdown = () => {
 
       return response.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
+    onSuccess: (updatedNotification) => {
+      queryClient.setQueryData<Notification[]>(
+        ["notifications"],
+        (old) => {
+          const accept = respondMutation.variables?.accept;
+          return old?.map((n) =>
+            n.id === updatedNotification.id
+              ? { ...n, status: accept ? "ACCEPTED" : "DECLINED" }
+              : n
+          );
+        }
+      );
       queryClient.invalidateQueries({ queryKey: ["groups"] });
       toast.success("Invitation responded to successfully");
     },
-    onError: (error) => {
-      toast.error(error.message || "Failed to respond to invitation");
-    },
   });
+
 
   const handleRespond = (notificationId: number, accept: boolean) => {
     respondMutation.mutate({ notificationId, accept });
@@ -137,9 +119,9 @@ const NotificationsDropdown = () => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
-          {pendingNotifications?.length > 0 && (
+          {pendingNotifications && pendingNotifications.length > 0 && (
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] text-white flex items-center justify-center">
-              {pendingNotifications.length}
+              {pendingNotifications?.length}
             </span>
           )}
         </Button>
@@ -152,7 +134,7 @@ const NotificationsDropdown = () => {
             onClick={() => refetch()}
             className="w-full"
           >
-            Refresh Notifications
+            Atualizar notificações
           </Button>
         </div>
         {isLoading ? (
