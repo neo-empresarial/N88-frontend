@@ -209,7 +209,7 @@ export default function ReceivedSharedSchedulesDialog() {
                             <div className="text-sm text-muted-foreground">
                               {sharedSchedule.acceptedAt && (
                                 <div>
-                                  Aceito pelo {" "}
+                                  Aceito por {" "}
                                   {formatDate(sharedSchedule.acceptedAt)}
                                 </div>
                               )}

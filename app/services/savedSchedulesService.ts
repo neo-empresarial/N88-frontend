@@ -23,7 +23,7 @@ export interface CreateSavedScheduleDto {
 
 
 const getBackendUrl = () => {
-  return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
+  return process.env.NEXT_PUBLIC_BACKEND_URL;
 };
 
 export const useSavedSchedules = () => {
@@ -79,7 +79,7 @@ export const useSavedSchedules = () => {
     if (!response.ok) {
       throw new Error("Falha em deletar a grade");
     }
-    // window.location.reload(); perguntar para o guto sobre isso
+    window.location.reload(); 
 
   };
 

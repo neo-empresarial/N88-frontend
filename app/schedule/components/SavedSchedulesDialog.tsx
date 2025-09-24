@@ -223,7 +223,7 @@ export default function SavedSchedulesDialog() {
                             className="h-8"
                           >
                             <Share2 className="h-4 w-4 mr-1" />
-                            Share
+                            Compartilhar
                           </Button>
                           <Button
                             variant="ghost"

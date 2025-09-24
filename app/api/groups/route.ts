@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     }
 
     const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
+      process.env.NEXT_PUBLIC_BACKEND_URL;
     const response = await fetchWithAuth(`${backendUrl}groups`, {
       method: "POST",
       headers: {
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         name,
         description,
         members,
-        ownerId: 0, // This needs to be fixed - get from token or request body
+        ownerId: 0,
       }),
     });
 

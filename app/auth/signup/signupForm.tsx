@@ -5,18 +5,73 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { signUp } from "@/lib/auth";
-import { useState } from "react";
+import { useState, useEffect, use } from "react";
 import { useFormState } from "react-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { redirect } from "next/navigation";
+import { Check, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { ICourse, MappedCourse } from "@/lib/type";
 
-const SignUpForm = () => {
-  const [state, action] = useFormState(signUp, undefined);
-  const [showPassword, setShowPassword]=useState(false);
+const getBackendUrl = () => {
+  return process.env.NEXT_PUBLIC_BACKEND_URL;
+};
 
-  const togglePasswordVisibility = ()=> {
-    setShowPassword(!showPassword)
+const fetchCourses = async (): Promise<MappedCourse[]> => {
+  try {
+    const response = await fetch(`${getBackendUrl()}courses`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch courses");
+    }
+    const coursesData = await response.json() as ICourse[];
+    return coursesData.map(course => ({
+      value: course.idcourse.toString(),
+      label: course.course,
+    }));
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    return [];
   }
+};
+
+ const SignUpForm = () => {
+  const [state, action] = useFormState(signUp, undefined);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const [courses, setCourses] = useState([] as MappedCourse[]);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [selectedLabel, setSelectedLabel] = useState("");
+
+  useEffect(() => {
+    const getCourses = async () => {
+      setLoading(true);
+      const coursesData: MappedCourse[] = await fetchCourses();
+      setCourses(coursesData);
+      setLoading(false);
+    };
+    getCourses();
+  }, []);
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   return (
     <form action={action}>
@@ -34,8 +89,59 @@ const SignUpForm = () => {
         </div>
 
         <div>
-          <Label htmlFor="course">Curso</Label>{" "}
-          <Input id="course" name="course" placeholder="Insira seu curso" />
+          <Label htmlFor="course">Curso</Label>
+          <input type="hidden" name="course" id="course-input" value={selectedLabel} />
+
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="w-full justify-between"
+                disabled={loading}
+              >
+                {loading
+                  ? "Carregando cursos..."
+                  : value
+                    ? courses.find((course) => course.value === value)?.label
+                    : "Selecione um curso..."}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[500px] p-0">
+              <Command>
+                <CommandInput placeholder="Procurar curso..." />
+                <CommandEmpty>Nenhum curso encontrado.</CommandEmpty>
+                <CommandList className="max-h-60 overflow-y-auto">
+                  <CommandGroup>
+                    {courses.map((course) => (
+                      <CommandItem
+                        key={course.value}
+                        value={course.label}
+                        onSelect={(currentLabel) => {
+                          const selectedCourse = courses.find((c) => c.label === currentLabel);
+                          if (selectedCourse){
+                            setValue(selectedCourse.value);
+                            setSelectedLabel(selectedCourse.label);
+                          }
+                          setOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            value === course.value ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {course.label}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
           {state?.error?.course && (
             <p className="text-sm text-red-500">{state.error.course}</p>
           )}
@@ -61,7 +167,7 @@ const SignUpForm = () => {
               placeholder="Insira uma senha"
               className="pr-12"
             />
-          
+
             <button
               type="button"
               onClick={togglePasswordVisibility}

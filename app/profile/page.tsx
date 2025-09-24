@@ -28,7 +28,7 @@ export default function Profile() {
     queryKey: ["groups"],
     queryFn: async () => {
       const response = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"}groups`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}groups`,
         {
           credentials: "include",
         }
@@ -107,7 +107,7 @@ export default function Profile() {
 
         <div className="flex flex-col gap-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-md">
           <h1 className="text-2xl font-bold">Grupos</h1>
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 h-195">
             {isLoading ? (
               <div className="flex flex-col gap-4">
                 <div className="flex justify-center items-center py-8">
