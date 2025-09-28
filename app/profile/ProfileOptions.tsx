@@ -1,22 +1,17 @@
-﻿import { User, SunMoon } from "lucide-react";
+﻿import { User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuPortal,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import Theme from "@/components/Theme";
 
 import LogoutButton from "@/components/logout-button";
 import { getSession } from "@/lib/session";
@@ -41,7 +36,6 @@ export default async function ProfileOptions() {
               <></>
             )}
 
-            {/* Avatar with responsive size */}
             <Avatar className="w-8 h-8">
               <AvatarImage
                 src={"/default-avatar.png"}
@@ -97,9 +91,6 @@ export default async function ProfileOptions() {
                 </DropdownMenuItem>
               </DropdownMenuGroup>
 
-              {/* <DropdownMenuSeparator /> */}
-
-              {/* Logout Button */}
               <DropdownMenuGroup>
                 <DropdownMenuItem>
                   <LogoutButton />
@@ -107,18 +98,6 @@ export default async function ProfileOptions() {
               </DropdownMenuGroup>
             </>
           )}
-          {/* <DropdownMenuSeparator />
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <SunMoon />
-              <Label className="ml-2">Mudar o tema</Label>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <Theme />
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub> */}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

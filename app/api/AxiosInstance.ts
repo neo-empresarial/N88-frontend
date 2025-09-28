@@ -56,16 +56,11 @@ const useAxios = () => {
 
   const getSubject = async (id: number) => {
     try {
-      console.log("Debug - Making request to:", `/subjects/${id}`);
-
       const response = await instance.get(`/subjects/${id}`);
-      console.log("Debug - Request successful:", response.status);
       return response.data;
     } catch (error: any) {
-      console.log("Debug - Request failed:", error);
 
       if (error.response?.status === 401) {
-        console.log("Debug - 401 error, redirecting to login");
         if (typeof window !== "undefined") {
           window.location.href = "/auth/signin";
         }
