@@ -91,7 +91,6 @@ export default function WeekCalendarComponent() {
         allSchedules = [...allSchedules, ...schedules];
       });
 
-      console.log('allSchedules:', allSchedules);
 
       const credits = allSchedules.reduce((acc, schedule) => {
         return acc + schedule.classesnumber;
@@ -194,7 +193,6 @@ export default function WeekCalendarComponent() {
         );
 
         if (index === -1) {
-          console.log("Index not found");
           return;
         }
 

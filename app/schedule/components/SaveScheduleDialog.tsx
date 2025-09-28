@@ -36,7 +36,6 @@ function QuickSaveButton() {
     );
 
     if (existingSchedule) {
-      console.log("Atualizando grade existente:", existingSchedule.title);
       updateSchedule({
         id: existingSchedule.idsavedschedule,
         title: existingSchedule.title,

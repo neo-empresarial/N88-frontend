@@ -151,7 +151,6 @@ export default function SavedSchedulesDialog() {
       <Dialog
         open={open}
         onOpenChange={(newOpen) => {
-          console.log("Dialog open state changing to:", newOpen);
           setOpen(newOpen);
         }}
       >

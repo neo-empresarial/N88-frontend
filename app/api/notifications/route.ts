@@ -29,10 +29,8 @@ export async function GET() {
     }
 
     const data = await response.json();
-    console.log("Backend notifications response:", data);
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching notifications:", error);
     return NextResponse.json(
       { error: "Failed to fetch notifications" },
       { status: 500 }

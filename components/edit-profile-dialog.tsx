@@ -258,7 +258,6 @@ const handleSubmit = async (e: React.FormEvent) => {
       });
 
       const sessionResult = await sessionResponse.json();
-      console.log("Session update response:", sessionResult);
 
       if (!sessionResponse.ok) {
         toast.warning(
