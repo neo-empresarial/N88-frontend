@@ -2,21 +2,18 @@
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import grade from "./assets/grade.png";
-import materias from "./assets/materias.png";
 import logo from "./assets/logo-neo.svg";
 import { useEffect, useRef, useState } from "react";
-import { motion, useScroll } from "motion/react";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import {
   Github,
-  Edit2,
   Instagram,
   Globe,
   AlertTriangle,
   BarChart,
   Save,
   Coffee,
-  User,
 } from "@geist-ui/icons";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
@@ -26,17 +23,11 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import useMediaQuery from "./hooks/useMediaQuery";
-import { useRouter } from "next/navigation";
+import { useMemo } from "react";
 
 export default function Home() {
-  const router = useRouter();
-
-  const [isMounted, setIsMounted] = useState(false);
-  const { scrollYProgress } = useScroll();
-  const [fade, setFade] = useState(0);
   const [displayText, setDisplayText] = useState("qualquer curso");
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-
   const defaultText = "qualquer curso";
 
   const isSmallScreen = useMediaQuery("(max-width: 640px)");
@@ -45,15 +36,19 @@ export default function Home() {
 
   const wasSmallScreenRef = useRef(isSmallScreen);
 
-  const items = [
-    { id: 1, label: "CTC", text: "engenharia" },
-    { id: 2, label: "CCS", text: "saúde" },
-    { id: 3, label: "CSE", text: "socioeconômicas" },
-    { id: 4, label: "CFH", text: "filosofia e humanas" },
-    { id: 5, label: "CCB", text: "ciências biológicas" },
-    { id: 6, label: "CCE", text: "expressão" },
-    { id: 7, label: "CCJ", text: "jurídicas"}
-  ];
+
+  const items = useMemo(
+    () => [
+      { id: 1, label: "CTC", text: "engenharia" },
+      { id: 2, label: "CCS", text: "saúde" },
+      { id: 3, label: "CSE", text: "socioeconômicas" },
+      { id: 4, label: "CFH", text: "filosofia e humanas" },
+      { id: 5, label: "CCB", text: "ciências biológicas" },
+      { id: 6, label: "CCE", text: "expressão" },
+      { id: 7, label: "CCJ", text: "jurídicas"},
+    ],
+    []
+  );
 
   const people = [
     "Gustavo",
@@ -62,7 +57,7 @@ export default function Home() {
   ];
 
   useEffect(() => {
-    let intervalId: NodeJS.Timer | null = null;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
 
     if (isSmallScreen) {
       intervalId = setInterval(() => {
@@ -79,27 +74,10 @@ export default function Home() {
 
     return () => {
       if (intervalId) {
-        //@ts-ignore
         clearInterval(intervalId);
       }
     };
   }, [isSmallScreen, items, defaultText]);
-
-  useEffect(() => {
-    scrollYProgress.onChange((value) => {
-      setFade(value);
-    });
-  }, [scrollYProgress]);
-
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
-
-    if (token) {
-      localStorage.setItem("token", token);
-      router.replace("/");
-    }
-  }, []);
 
   const handleMouseEnter = (itemLabel: string, itemText: string) => {
     if (!isSmallScreen) {
@@ -292,7 +270,6 @@ export default function Home() {
             <div className="flex flex-col gap-2">
               {people.map((name) => (
                 <div key={name} className="relative group">
-                  {/* Name text with right padding so it doesn't overlap the button */}
                   <p className="pr-12 text-[#898989]  group-hover:text-black group-hover:dark:text-[#FAFAFA] transition-colors cursor-pointer">
                     {name}
                   </p>
