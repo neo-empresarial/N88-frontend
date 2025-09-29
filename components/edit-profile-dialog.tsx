@@ -179,7 +179,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     await queryClient.invalidateQueries({ queryKey: ["session"] });
 
     try {
-      const sessionResponse = await fetch("/api/update-session", {
+      const sessionResponse = await fetch("/update-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ updatedUser }),
