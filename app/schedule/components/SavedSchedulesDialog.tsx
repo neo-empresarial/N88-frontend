@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useSavedSchedulesQuery } from "@/app/hooks/useSavedSchedules";
-import { Loader2, List, Trash2, Loader, Share2, Download } from "lucide-react";
+import { Loader2, List, Trash2, Share2, Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -51,7 +51,7 @@ export default function SavedSchedulesDialog() {
     useSavedSchedulesQuery();
   const { setScheduleSubjects, setSearchedSubjects, setCurrentScheduleId } =
     useSubjects();
-  const { getAllSubjectsWithRelations, getSubjectsByCodes } = useAxios();
+  const { getSubjectsByCodes } = useAxios();
 
   const handleDelete = (id: number) => {
     setSelectedSchedule(id);
