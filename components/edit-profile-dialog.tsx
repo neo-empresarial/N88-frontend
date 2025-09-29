@@ -31,8 +31,9 @@ import {
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import { ICourse, MappedCourse } from "@/lib/type";
-
+import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { Session } from "@/lib/session";
+import { useRouter } from "next/navigation";
 
 interface EditProfileDialogProps {
   session: Session;
@@ -49,6 +50,8 @@ type oldDataType = {
     course: string;
   };
 };
+
+
 
 const getBackendUrl = () => {
   return process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -84,7 +87,7 @@ export default function EditProfileDialog({
   });
   const [isLoading, setIsLoading] = useState(false);
   const queryClient = useQueryClient();
-
+  const router = useRouter();
   const [courses, setCourses] = useState<MappedCourse[]>([]);
   const [coursePopoverOpen, setCoursePopoverOpen] = useState(false);
   const [coursesLoading, setCoursesLoading] = useState(true);
@@ -130,82 +133,29 @@ export default function EditProfileDialog({
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-
   if (isLoading) return;
-
   setIsLoading(true);
 
   try {
-    let token = session?.accessToken;
-
-    if (!token) {
-      throw new Error("No access token found");
-    }
-
     const userId = session?.user?.userId;
+    if (!userId) throw new Error("User ID not found in session");
 
-    if (!userId) {
-      throw new Error("User ID not found in session");
-    }
+    const API_BASE = (process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/").replace(/\/?$/, "/");
+    const url = `${API_BASE}users/${userId}`;
 
-    const performUpdate = async (token: string) => {
-      const url = `${
-        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"
-      }users/${userId}`;
-
-      const dataToSubmit = {
-        ...formData,
-        course: selectedLabel,
-      };
-
-      return await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-        body: JSON.stringify(dataToSubmit),
-      });
+    const dataToSubmit = {
+      ...formData,
+      course: selectedLabel,
     };
 
-    let response = await performUpdate(token);
-
-    if (response.status === 401) {
-      const refreshToken = session?.refreshToken;
-      if (!refreshToken) {
-        throw new Error("No refresh token found");
-      }
-
-      const refreshResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"}auth/refresh`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-          body: JSON.stringify({ refreshToken }),
-        }
-      );
-
-      if (!refreshResponse.ok) {
-        throw new Error("Failed to refresh token");
-      }
-
-      const refreshData = await refreshResponse.json();
-      const newAccessToken = refreshData.accessToken;
-      const newRefreshToken = refreshData.refreshToken;
-
-      queryClient.setQueryData(["session"], (oldData: oldDataType) => ({
-        ...oldData,
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-      }));
-
-      token = newAccessToken;
-      response = await performUpdate(token);
-    }
+    const response = await fetchWithAuth(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(dataToSubmit),
+    });
 
     if (!response.ok) {
       const errorData = await response.text();
@@ -214,80 +164,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     const updatedUser = await response.json();
 
-    // Refresh tokens after successful update
-    try {
-      const refreshToken = session?.refreshToken;
-      if (refreshToken) {
-        const refreshResponse = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/"}auth/refresh`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({ refreshToken }),
-          }
-        );
-
-        if (refreshResponse.ok) {
-          const refreshData = await refreshResponse.json();
-          const newAccessToken = refreshData.accessToken;
-          const newRefreshToken = refreshData.refreshToken;
-
-          // Update the session with new tokens
-          queryClient.setQueryData(["session"], (oldData: oldDataType) => ({
-            ...oldData,
-            accessToken: newAccessToken,
-            refreshToken: newRefreshToken,
-          }));
-
-          // Also update server-side session
-          await fetch("/api/update-session", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ accessToken: newAccessToken, refreshToken: newRefreshToken }),
-          });
-        }
-      }
-    } catch (refreshError) {
-      console.error("Failed to refresh tokens after update:", refreshError);
-      // Continue without failing the update
-    }
-
-    try {
-      const sessionResponse = await fetch("/api/update-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ updatedUser }),
-      });
-
-      if (!sessionResponse.ok) {
-        toast.warning(
-          "Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.",
-          {
-            position: "bottom-right",
-            autoClose: 4000,
-          }
-        );
-      }
-    } catch {
-      toast.warning(
-        "Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.",
-        {
-          position: "bottom-right",
-          autoClose: 2000,
-        }
-      );
-    }
-
-    if (onProfileUpdated) {
-      await onProfileUpdated();
-    }
+    if (onProfileUpdated) await onProfileUpdated();
 
     queryClient.setQueryData(["session"], (oldData: oldDataType) => ({
       ...oldData,
@@ -299,26 +176,36 @@ const handleSubmit = async (e: React.FormEvent) => {
         course: selectedLabel,
       },
     }));
-
     await queryClient.invalidateQueries({ queryKey: ["session"] });
 
-    toast.success("Perfil atualizado com sucesso!", {
-      position: "bottom-right",
-      autoClose: 2000,
-    });
-    onClose();
-  } catch (error) {
-    if (error instanceof Error) {
-      toast.error(`Erro ao atualizar perfil: ${error.message}`, {
-        position: "bottom-right",
-        autoClose: 2000,
+    try {
+      const sessionResponse = await fetch("/api/update-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ updatedUser }),
       });
-    } else {
-      toast.error("Erro ao atualizar perfil. Tente novamente.", {
+      if (!sessionResponse.ok) {
+        toast.warning("Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.", {
+          position: "bottom-right",
+          autoClose: 4000,
+        });
+      }
+    } catch {
+      toast.warning("Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.", {
         position: "bottom-right",
         autoClose: 2000,
       });
     }
+
+    toast.success("Perfil atualizado com sucesso!", { position: "bottom-right", autoClose: 2000 });
+    onClose?.();
+    await queryClient.invalidateQueries({ queryKey: ["session"] });
+    await new Promise(requestAnimationFrame);
+    await new Promise(requestAnimationFrame);
+    router.refresh();
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "Erro ao atualizar perfil. Tente novamente.";
+    toast.error(`Erro ao atualizar perfil: ${msg}`, { position: "bottom-right", autoClose: 2000 });
   } finally {
     setIsLoading(false);
   }
