@@ -27,7 +27,9 @@ const Groups = () => {
     });
   };
 
-  const { data: groups, isLoading, error } = useGroups();
+  const { data: groups } = useGroups();
+
+  console.log('groups', groups);
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
@@ -39,7 +41,7 @@ const Groups = () => {
           </div>
           <div className="flex flex-col gap-2">
             {groups &&
-              groups.map((group: any) => (
+              groups.map((group) => (
                 <MyGroupsCard key={group.id} group={group} />
               ))}
           </div>

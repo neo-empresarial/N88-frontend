@@ -40,7 +40,7 @@ export default function Profile() {
 
         return response.json();
       },
-      enabled: !!session?.accessToken,
+      enabled: !!session,
     });
   };
 
