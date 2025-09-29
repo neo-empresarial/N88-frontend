@@ -34,6 +34,7 @@ export default function GoogleLoginButton(props: { style: string }) {
       !isProcessing
     ) {
       setIsProcessing(true);
+      const course = searchParams.get("course") || "";
       const payload = {
         user: {
           userId: Number(userId),
@@ -42,6 +43,7 @@ export default function GoogleLoginButton(props: { style: string }) {
           provider,
           accessToken,
           refreshToken,
+          course, // Add course to the user object
         },
       };
 
