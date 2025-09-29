@@ -75,7 +75,6 @@ const CreateGroupDialog = () => {
 
   const createGroupMutation = useMutation({
     mutationFn: async (data: FormData & { members: number[] }) => {
-      console.log("Dados recebidos na mutation:", data);
       const backendUrl =
       process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -99,7 +98,6 @@ const CreateGroupDialog = () => {
       return response.json();
     },
     onSuccess: () => {
-      console.log("Mutation bem-sucedida. Executando onSuccess.");
       toast.success(
         "Grupo criado com sucesso! Convites enviados para os membros selecionados."
       );

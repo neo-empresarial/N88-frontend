@@ -61,7 +61,6 @@ export async function signIn(
   }
   
   const response = await login(validatedFields.data);
-  console.log('response', response)
 
   if (response.status === 201) {
     const user = response.data

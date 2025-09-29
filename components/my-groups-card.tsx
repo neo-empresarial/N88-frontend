@@ -21,7 +21,6 @@ const MyGroupsCard = ({ group }: { group: any }) => {
       const session = await getSession();
       if (session?.user.userId) {
         setIsOwner(group.createdBy === session.user.userId);
-        console.log(group.createdBy === session.user.userId);
       }
     };
     checkOwner();

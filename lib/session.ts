@@ -11,6 +11,7 @@ export type Session = {
     userId: number;
     name: string;
     email: string;
+    course: string;
   };
   
 };
@@ -20,11 +21,13 @@ const encodedKey = new TextEncoder().encode(secretKey);
 
 export async function createSession(payload: Session) {
   const expiredAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
   const sessionPayload = {
     user: {
       userId: payload.user.userId,
       name: payload.user.name,
       email: payload.user.email,
+      course: payload.user.course,
       provider: payload.user.provider,
     },
     accessToken: payload.user.accessToken,
@@ -82,6 +85,28 @@ export async function getSession() {
     console.error("Session verification error:", error);
     return null;
   }
+}
+
+export async function updateUserInSession(updatedUser: any) {
+  const currentSession = await getSession();
+  
+  if (!currentSession) {
+    throw new Error("No session found");
+  }
+
+  const newSession = {
+    user: {
+      accessToken: currentSession.user.accessToken,
+      refreshToken: currentSession.user.refreshToken,
+      provider: currentSession.user.provider,
+      userId: updatedUser.iduser || currentSession.user.userId, 
+      name: updatedUser.name,
+      email: updatedUser.email,
+      course: updatedUser.course,
+    },
+  };
+
+  await createSession(newSession);
 }
 
 export async function deleteSession() {

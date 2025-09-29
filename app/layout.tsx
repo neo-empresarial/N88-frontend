@@ -11,6 +11,8 @@ import { Toaster } from "sonner";
 import NotificationsDropdown from "@/components/notifications-dropdown";
 import Image from "next/image";
 import logo from "./assets/logo-neo.svg";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -35,6 +37,18 @@ export default function RootLayout({
       >
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+            <ToastContainer
+              position="bottom-right"
+              autoClose={5000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="colored"
+            />
             <div className="flex flex-col min-h-full">
               <Menubar className="flex justify-between items-center h-16">
                 <div className="flex space-x-4 items-center">
