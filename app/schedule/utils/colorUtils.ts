@@ -1,8 +1,8 @@
 import { lightColors, darkColors } from "../constants/colors";
 
 // Keep track of used colors
-let usedLightColors = new Set<string>();
-let usedDarkColors = new Set<string>();
+const usedLightColors = new Set<string>();
+const usedDarkColors = new Set<string>();
 
 export function getUniqueColorPair(): [string, string] {
   // Find first unused light color

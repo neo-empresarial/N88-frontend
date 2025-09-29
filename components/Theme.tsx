@@ -1,10 +1,6 @@
 ﻿"use client";
 
 import { useTheme } from "next-themes";
-import {
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-} from "./ui/dropdown-menu";
 import { Moon, Sun } from "lucide-react";
 import { Switch } from "./ui/switch";
 import { Label } from "./ui/label";
