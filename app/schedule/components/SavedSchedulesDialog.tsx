@@ -123,28 +123,6 @@ export default function SavedSchedulesDialog() {
       setLoadingScheduleId(null);
     }
   };
-  // Helper function to get random colors for subjects
-  const getRandomColor = () => {
-    const lightColors = [
-      "bg-blue-200",
-      "bg-green-200",
-      "bg-yellow-200",
-      "bg-red-200",
-      "bg-purple-200",
-      "bg-pink-200",
-    ];
-    const darkColors = [
-      "bg-blue-800",
-      "bg-green-800",
-      "bg-yellow-800",
-      "bg-red-800",
-      "bg-purple-800",
-      "bg-pink-800",
-    ];
-
-    const randomIndex = Math.floor(Math.random() * lightColors.length);
-    return [lightColors[randomIndex], darkColors[randomIndex]];
-  };
 
   return (
     <>
@@ -187,7 +165,7 @@ export default function SavedSchedulesDialog() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {savedSchedules?.map((schedule: SavedSchedule) => (
+                  {(Array.isArray(savedSchedules) ? savedSchedules : []).map((schedule) => (
                     <TableRow key={schedule.idsavedschedule}>
                       <TableCell className="line-clamp-2 break-words">
                           {schedule.title}
