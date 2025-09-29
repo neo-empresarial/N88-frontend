@@ -4,7 +4,12 @@ import { redirect } from "next/navigation";
 import { FormState, SignUpFormSchema, SignInFormSchema } from "./type";
 import { createSession } from "./session";
 
-async function login(data: any) {
+type data = {
+  email: string;
+  password: string;
+};
+
+async function login(data: data) {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`, {
       method: "POST",
@@ -23,7 +28,7 @@ async function login(data: any) {
   }
 }
 
-async function register(data: any): Promise<any> {
+async function register(data: data) {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`, {
       method: "POST",
