@@ -17,7 +17,6 @@ import { useSubjects } from "../providers/subjectsContext";
 import { Save, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { SavedSchedule } from "@/app/services/savedSchedulesService";
-import { useSavedSchedules } from "@/app/services/savedSchedulesService";
 
 function QuickSaveButton() {
   const { scheduleSubjects, currentScheduleId } = useSubjects();
@@ -65,7 +64,7 @@ function CreateScheduleDialog() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const { scheduleSubjects } = useSubjects();
-  const { createSchedule, savedSchedules, isCreating } =
+  const { createSchedule, isCreating } =
     useSavedSchedulesQuery();
 
   const TITLE_LIMIT = 45;

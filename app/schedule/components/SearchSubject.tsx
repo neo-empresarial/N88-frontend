@@ -4,7 +4,6 @@ import { useState, useMemo } from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 
 import {
-  scheduleSubjectsType,
   useSubjects,
 } from "../providers/subjectsContext";
 
@@ -38,7 +37,6 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
     scheduleSubjects,
     setScheduleSubjects,
     setSelectedSubject,
-    selectedSubject,
   } = useSubjects();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");

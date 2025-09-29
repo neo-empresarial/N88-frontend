@@ -11,7 +11,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { getSession } from "@/lib/session";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
 interface Notification {

@@ -40,7 +40,6 @@ export default function WeekCalendarComponent() {
     searchedSubjects,
     onFocusSubject,
     onFocusSubjectClass,
-    setTotalCredits
   } = useSubjects();
   const { theme } = useTheme();
 
@@ -75,31 +74,6 @@ export default function WeekCalendarComponent() {
       (classData) => classData.classcode === classCode
     );
     return classData ? classData.schedules : [];
-  }
-
-  function calculateTotalCredits() {
-    if (scheduleSubjects.length > 0) {
-      let allSchedules: any[] = [];
-
-      scheduleSubjects.forEach((subject) => {
-        if (subject.activated === false) return;
-        const schedules = getSchedulesFromSubjectClass(
-          subject.code,
-          subject.class,
-          searchedSubjects
-        );
-        allSchedules = [...allSchedules, ...schedules];
-      });
-
-
-      const credits = allSchedules.reduce((acc, schedule) => {
-        return acc + schedule.classesnumber;
-      }, 0);
-
-      setTotalCredits(credits);
-    } else {
-      setTotalCredits(0);
-    }
   }
 
   function generateTimesAndDays() {
@@ -218,6 +192,7 @@ export default function WeekCalendarComponent() {
   const generateTooltipContent = (code: string[]) => {
 
     const title = "Matérias em conflito:";
+  
     return (
       <>
         <p className="text-sm font-semibold tracking-tight">{title}</p>
@@ -281,7 +256,8 @@ export default function WeekCalendarComponent() {
                       </TableCell>
                     );
                   }
-                  
+
+                  // Pre-filter data for the current time and day
                   const cellData = tableData.filter(
                     (data) => data.time === time && data.day === day
                   )[0];
