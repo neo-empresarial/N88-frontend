@@ -31,15 +31,9 @@ interface Notification {
 
 const NotificationsDropdown = () => {
   const queryClient = useQueryClient();
-  const [userId, setUserId] = useState<number | null>(null);
-
   useEffect(() => {
     const checkSession = async () => {
-      const session = await getSession();
-      const uid = session?.user?.userId;
-      if (uid) {
-        setUserId(Number(uid));
-      }
+      await getSession();
     };
     checkSession();
   }, []);

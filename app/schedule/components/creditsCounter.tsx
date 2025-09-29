@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSubjects } from "../providers/subjectsContext";
-import { SubjectsType } from "../types/dataType";
 
 const CreditsCounter = () => {
   const {
