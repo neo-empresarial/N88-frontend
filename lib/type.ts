@@ -22,7 +22,7 @@ export type FormState = {
 } | undefined;
 
 const strongPasswordRegex = new RegExp (
-  "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])"
+  "^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{6,}$"
 );
 
 export const SignUpFormSchema: z.ZodObject<{
@@ -36,7 +36,7 @@ export const SignUpFormSchema: z.ZodObject<{
   password: z.string()
   .min(6, { message: "Essa senha está muito curta hein... Ela deve ter no mínimo 6 caracteres!" }) 
   .regex(strongPasswordRegex, {
-    message: 'Sua senha precisa conter pelo menos uma letra minúscula, maiúscila, um número e um símbolo'})
+    message: 'Sua senha precisa conter pelo menos uma letra minúscula, maiúscula, um número e um símbolo'})
 });
 
 export const SignInFormSchema: z.ZodObject<{

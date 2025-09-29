@@ -29,7 +29,7 @@ import {
 import { ICourse, MappedCourse } from "@/lib/type";
 
 const getBackendUrl = () => {
-  return process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+  return process.env.NEXT_PUBLIC_BACKEND_URL;
 };
 
 const fetchCourses = async (): Promise<MappedCourse[]> => {

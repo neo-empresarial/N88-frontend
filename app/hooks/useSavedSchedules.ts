@@ -23,7 +23,6 @@ export const useSavedSchedulesQuery = () => {
       description?: string;
       scheduleSubjects: scheduleSubjectsType[];
     }) => {
-      console.log("Creating schedule with data:", data);
       return createSavedSchedule({
         title: data.title,
         description: data.description || '',
@@ -38,7 +37,6 @@ export const useSavedSchedulesQuery = () => {
       queryClient.invalidateQueries({ queryKey: ["savedSchedules"] });
     },
     onError: (error: Error) => {
-      console.error("Error saving schedule:", error);
       toast.error(error.message || "Failed to save schedule");
     },
   });
@@ -50,7 +48,6 @@ export const useSavedSchedulesQuery = () => {
       description?: string;
       scheduleSubjects: scheduleSubjectsType[];
     }) => {
-      console.log("Updating schedule with data:", data);
       return updateSavedSchedule(data.id, {
         title: data.title,
         description: data.description || '',
@@ -83,7 +80,6 @@ export const useSavedSchedulesQuery = () => {
     },
   });
 
-  console.log(savedSchedulesQuery.data)
 
   return {
     savedSchedules: savedSchedulesQuery.data,

@@ -89,12 +89,6 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
         (interestsSubject) => interestsSubject.code !== subject.code
       );
 
-      console.log("Removing subject:", {
-        code: subject.code,
-        newSearchedSubjects,
-        newScheduleSubjects,
-      });
-
       setSearchedSubjects(newSearchedSubjects);
       setScheduleSubjects(newScheduleSubjects);
       setSelectedSubject({} as SubjectsType);
@@ -116,12 +110,6 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
 
         const newSearchedSubjects = [...searchedSubjects, dataWithColors];
         const newScheduleSubjects = [...scheduleSubjects, newScheduleSubject];
-
-        console.log("Adding subject:", {
-          code: subject.code,
-          newSearchedSubjects,
-          newScheduleSubjects,
-        });
 
         setSearchedSubjects(newSearchedSubjects);
         setScheduleSubjects(newScheduleSubjects);
