@@ -55,7 +55,7 @@ const EditGroupNamePopover = ({ groupId }: { groupId: string }) => {
             setName("");
             setIsOpen(false);
           },
-          onError: (error) => {
+          onError: () => {
             toast.error("Falha ao atualizar o nome do grupo");
           },
         }

@@ -13,7 +13,27 @@ import { useEffect, useState } from "react";
 import LeaveGroupDialog from "./leave-group-dialog";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
-const MyGroupsCard = ({ group }: { group: any }) => {
+type groupType = {
+  id: string;
+  name: string;
+  description: string;
+  createdBy: number;
+  members: Array<{
+    iduser: number;
+    name: string;
+    email: string;
+    course: string;
+  }>;
+};
+
+type memberType = {
+  iduser: number;
+  name: string;
+  email: string;
+  course: string;
+};
+
+const MyGroupsCard = ({ group }: { group: groupType }) => {
   const queryClient = useQueryClient();
   const [isOwner, setIsOwner] = useState(false);
 
@@ -73,7 +93,7 @@ const MyGroupsCard = ({ group }: { group: any }) => {
         <p className="text-gray-600 dark:text-gray-300">{group.description}</p>
         <div className="flex items-center gap-2 mt-4">
           <div className="flex -space-x-2">
-            {group.members?.slice(0, 3).map((member: any, index: number) => (
+            {group.members?.slice(0, 3).map((member: memberType) => (
               <div
                 key={member.iduser}
                 className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-600 border-2 border-white dark:border-gray-800 flex items-center justify-center"
@@ -94,7 +114,7 @@ const MyGroupsCard = ({ group }: { group: any }) => {
                   <div className="flex flex-col gap-2">
                     <h4 className="text-sm font-semibold">Todos os membros</h4>
                     <div className="flex flex-col gap-2">
-                      {group.members?.map((member: any) => (
+                      {group.members?.map((member: memberType) => (
                         <div
                           key={member.iduser}
                           className="flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -116,10 +136,10 @@ const MyGroupsCard = ({ group }: { group: any }) => {
           <div className="flex items-center gap-2 ml-auto">
             {isOwner ? (
               <>
-                <AddMembersToGroupDialog groupId={group.id} />
+                <AddMembersToGroupDialog groupId={Number(group.id)} />
                 {group.members?.length > 1 && (
-                <RemoveMembersFromGroupDialog groupId={group.id} />)}
-                <DeleteGroupDialog groupId={group.id} />
+                <RemoveMembersFromGroupDialog groupId={Number(group.id)} />)}
+                <DeleteGroupDialog groupId={Number(group.id)} />
               </>
             ) : (
               <LeaveGroupDialog onConfirm={handleLeaveGroup} />
