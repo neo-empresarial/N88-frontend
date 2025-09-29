@@ -24,6 +24,13 @@ export default function GoogleLoginButton(props: { style: string }) {
     const provider = searchParams.get("provider") || "google"; // Default para "google"
     const accessToken = searchParams.get("accessToken") || "";
     const refreshToken = searchParams.get("refreshToken") || "";
+    console.log("Valores do URL:", {
+    userId,
+    name,
+    email,
+    accessToken: accessToken ? 'PRESENTE' : 'FALTANDO', // Não mostre o token
+    refreshToken: refreshToken ? 'PRESENTE' : 'FALTANDO', // Não mostre o token
+});
 
     if (
       userId &&

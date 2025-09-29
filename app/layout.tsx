@@ -65,11 +65,7 @@ export default function RootLayout({
                       <Link href={"/schedule"}>Matérias</Link>
                     </MenubarTrigger>
                   </MenubarMenu>
-                  {/* <MenubarMenu>
-                    <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
-                      <Link href={"/professors"}>Professores</Link>
-                    </MenubarTrigger>
-                  </MenubarMenu> */}
+                  
                   <MenubarMenu>
                     <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
                       <Link href={"/groups"}>Grupos</Link>

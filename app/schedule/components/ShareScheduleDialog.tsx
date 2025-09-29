@@ -61,7 +61,6 @@ export default function ShareScheduleDialog({
 
   const { shareSchedule, isSharing } = useSharedSchedulesQuery();
 
-  // Fetch user's groups
   const { data: groups, isLoading: isLoadingGroups } = useQuery({
     queryKey: ["groups"],
     queryFn: async () => {
@@ -174,8 +173,8 @@ export default function ShareScheduleDialog({
                   onCheckedChange={handleShareWithAllToggle}
                 />
                 <Label htmlFor="shareWithAll">
-                  Share with all group members ({selectedGroup.members.length}{" "}
-                  members)
+                  Compartilhar com todos os membros ({selectedGroup.members.length}{" "}
+                  membros)
                 </Label>
               </div>
 
@@ -212,7 +211,7 @@ export default function ShareScheduleDialog({
                   </div>
                   {selectedUserIds.length === 0 && (
                     <p className="text-sm text-muted-foreground">
-                      Please select at least one member
+                      Por favor, selecione ao menos um membro
                     </p>
                   )}
                 </div>
@@ -223,7 +222,7 @@ export default function ShareScheduleDialog({
           {/* Action Buttons */}
           <div className="flex justify-end gap-2 pt-4">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
+              Cancelar
             </Button>
             <Button
               onClick={handleShare}

@@ -55,7 +55,6 @@ export function SubjectsProvider({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Load initial state from localStorage
   const [searchedSubjects, setSearchedSubjects] = useState<SubjectsType[]>(
     () => {
       try {

@@ -46,9 +46,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [paginationLimit, setPaginationLimit] = useState(20);
 
-  // filter objects based on user input
   const filteredSubjects = useMemo(() => {
-    // Ensure subjects is always an array
     const subjectsArray = subjects || [];
 
     const filtered_subjects = subjectsArray.filter(
@@ -57,7 +55,6 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
         subject.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    // Change the name to include the code
     return filtered_subjects.map((subject) => {
       return {
         ...subject,
