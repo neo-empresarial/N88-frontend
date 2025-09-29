@@ -5,10 +5,8 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -45,8 +43,10 @@ interface Group {
 }
 
 const buildUrl = (endpoint: string) => {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL;
+  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+  if (!baseUrl) {
+    throw new Error("NEXT_PUBLIC_BACKEND_URL is not defined");
+  }
   return `${baseUrl.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
 };
 
