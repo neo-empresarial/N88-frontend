@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+﻿import axios, { AxiosError } from "axios";
 
 const instance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
@@ -58,9 +58,9 @@ const useAxios = () => {
     try {
       const response = await instance.get(`/subjects/${id}`);
       return response.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
 
-      if (error.response?.status === 401) {
+      if (axios.isAxiosError(error) && error.response?.status === 401) {
         if (typeof window !== "undefined") {
           window.location.href = "/auth/signin";
         }
