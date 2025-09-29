@@ -11,6 +11,8 @@ import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import EditProfileDialog from "@/components/edit-profile-dialog";
 import { useState } from "react";
 
+import { groupType } from "@/components/my-groups-card";
+
 export default function Profile() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const queryClient = useQueryClient();
@@ -135,7 +137,7 @@ export default function Profile() {
             ) : (
               <>
                 {groups && groups.length > 0 ? (
-                  groups.map((group: any) => (
+                  groups.map((group: groupType) => (
                     <MyGroupsCard key={group.id} group={group} />
                   ))
                 ) : (

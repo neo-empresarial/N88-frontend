@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import LeaveGroupDialog from "./leave-group-dialog";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
-type groupType = {
+export type groupType = {
   id: string;
   name: string;
   description: string;

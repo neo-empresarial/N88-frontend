@@ -38,7 +38,10 @@ export async function sendFeedback(
 
     if (res.status === 201) return { success: true };
     return { message: res.statusText || 'Erro ao enviar feedback' };
-  } catch (e: any) {
-    return { message: e?.response?.data?.message ?? 'Falha ao enviar feedback' };
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      return { message: e.response?.data?.message ?? 'Falha ao enviar feedback' };
+    }
+    return { message: 'Falha ao enviar feedback' };
   }
 }
