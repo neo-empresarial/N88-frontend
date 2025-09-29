@@ -32,7 +32,7 @@ import {
 import { cn } from "@/lib/utils";
 import { ICourse, MappedCourse } from "@/lib/type";
 
-import type { Session } from "lib/session";
+import { Session } from "@/lib/session";
 
 interface EditProfileDialogProps {
   session: Session;
@@ -40,6 +40,15 @@ interface EditProfileDialogProps {
   onClose: () => void;
   onProfileUpdated?: () => Promise<void>;
 }
+
+type oldDataType = {
+  user: {
+    userId: number;
+    name: string;
+    email: string;
+    course: string;
+  };
+};
 
 const getBackendUrl = () => {
   return process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -188,7 +197,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       const newAccessToken = refreshData.accessToken;
       const newRefreshToken = refreshData.refreshToken;
 
-      queryClient.setQueryData(["session"], (oldData: any) => ({
+      queryClient.setQueryData(["session"], (oldData: oldDataType) => ({
         ...oldData,
         accessToken: newAccessToken,
         refreshToken: newRefreshToken,
@@ -227,7 +236,7 @@ const handleSubmit = async (e: React.FormEvent) => {
           const newRefreshToken = refreshData.refreshToken;
 
           // Update the session with new tokens
-          queryClient.setQueryData(["session"], (oldData: any) => ({
+          queryClient.setQueryData(["session"], (oldData: oldDataType) => ({
             ...oldData,
             accessToken: newAccessToken,
             refreshToken: newRefreshToken,
@@ -257,8 +266,6 @@ const handleSubmit = async (e: React.FormEvent) => {
         body: JSON.stringify({ updatedUser }),
       });
 
-      const sessionResult = await sessionResponse.json();
-
       if (!sessionResponse.ok) {
         toast.warning(
           "Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.",
@@ -282,7 +289,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       await onProfileUpdated();
     }
 
-    queryClient.setQueryData(["session"], (oldData: any) => ({
+    queryClient.setQueryData(["session"], (oldData: oldDataType) => ({
       ...oldData,
       user: {
         ...oldData?.user,
