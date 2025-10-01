@@ -33,9 +33,11 @@ const getBackendUrl = () => {
 
 const fetchCourses = async (): Promise<MappedCourse[]> => {
   try {
-    const response = await fetch(`${getBackendUrl()}courses`);
+    const response = await fetch(`${getBackendUrl()}courses`, {
+      credentials: 'omit', // Include cookies in the request
+    });
     if (!response.ok) {
-      throw new Error("Failed to fetch courses");
+      throw new Error(`Failed to fetch courses: ${response.statusText}`);
     }
     const coursesData = await response.json() as ICourse[];
     return coursesData.map(course => ({
