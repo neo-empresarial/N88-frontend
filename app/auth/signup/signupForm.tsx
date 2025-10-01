@@ -34,7 +34,7 @@ const getBackendUrl = () => {
 const fetchCourses = async (): Promise<MappedCourse[]> => {
   try {
     const response = await fetch(`${getBackendUrl()}courses`, {
-      credentials: 'omit', // Include cookies in the request
+      credentials: 'include', // Include cookies in the request
     });
     if (!response.ok) {
       throw new Error(`Failed to fetch courses: ${response.statusText}`);
