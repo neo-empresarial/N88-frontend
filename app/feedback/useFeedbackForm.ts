@@ -1,8 +1,7 @@
 ﻿"use client";
 
 import { z } from "zod";
-
-import useAxios from "../api/AxiosInstance";
+import axios from "axios";
 
 type FormState = {
   error?: {
@@ -19,26 +18,30 @@ const FeedbackFormSchema: z.ZodObject<{
   message: z.string().min(10, { message: "Seu feedback deve ter no mínimo 10 caracteres" }).trim(),
 });
 
-export async function sendFeedback(state: FormState, formData: FormData): Promise<FormState> {
-  const { registerFeedback } = useAxios();
-
-  const validationFields = FeedbackFormSchema.safeParse({
-    message: formData.get("message"),
+export async function sendFeedback(
+  _state: FormState,
+  formData: FormData
+): Promise<FormState> {
+  const parsed = FeedbackFormSchema.safeParse({
+    message: formData.get('message'),
   });
 
-  if (!validationFields.success) {
-    return {
-      error: validationFields.error.flatten().fieldErrors,
-    };
+  if (!parsed.success) {
+    return { error: parsed.error.flatten().fieldErrors };
   }
 
-  const response = await registerFeedback(validationFields.data) as Response;
+  try {
+    const res = await axios.post(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/feedback`,
+      parsed.data
+    );
 
-  if (response.status === 201) return {
-    success: true,
-  };
-
-  return {
-    message: response.statusText,
+    if (res.status === 201) return { success: true };
+    return { message: res.statusText || 'Erro ao enviar feedback' };
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      return { message: e.response?.data?.message ?? 'Falha ao enviar feedback' };
+    }
+    return { message: 'Falha ao enviar feedback' };
   }
 }

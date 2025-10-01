@@ -16,6 +16,13 @@ export type Session = {
   
 };
 
+type UpdatedUser = {
+  iduser?: number;
+  name: string;
+  email: string;
+  course: string;
+};
+
 const secretKey = process.env.SESSION_SECRET_KEY!;
 const encodedKey = new TextEncoder().encode(secretKey);
 
@@ -42,7 +49,7 @@ export async function createSession(payload: Session) {
   cookies().set("session", session, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",  
+    sameSite: "none",  
     expires: expiredAt,
     path: "/",
   });
@@ -50,7 +57,7 @@ export async function createSession(payload: Session) {
   cookies().set("access_token", sessionPayload.accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none",
     expires: expiredAt,
     path: "/",
   });
@@ -58,7 +65,7 @@ export async function createSession(payload: Session) {
   cookies().set("refresh_token", sessionPayload.refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none",
     expires: expiredAt,
     path: "/",
   });
@@ -87,7 +94,7 @@ export async function getSession() {
   }
 }
 
-export async function updateUserInSession(updatedUser: any) {
+export async function updateUserInSession(updatedUser: UpdatedUser) {
   const currentSession = await getSession();
   
   if (!currentSession) {

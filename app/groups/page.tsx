@@ -6,6 +6,8 @@ import CreateGroupDialog from "@/components/create-group-dialog";
 import MyGroupsCard from "@/components/my-groups-card";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 
+import { groupType } from "@/components/my-groups-card";
+
 const Groups = () => {
   const useGroups = () => {
     return useQuery({
@@ -27,7 +29,7 @@ const Groups = () => {
     });
   };
 
-  const { data: groups, isLoading, error } = useGroups();
+  const { data: groups } = useGroups();
 
   return (
     <div className="flex flex-col items-center justify-center w-full h-full">
@@ -39,7 +41,7 @@ const Groups = () => {
           </div>
           <div className="flex flex-col gap-2">
             {groups &&
-              groups.map((group: any) => (
+              groups.map((group: groupType) => (
                 <MyGroupsCard key={group.id} group={group} />
               ))}
           </div>
