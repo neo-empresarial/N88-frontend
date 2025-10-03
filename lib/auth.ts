@@ -35,6 +35,7 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
     const common = { httpOnly: true, secure: true, sameSite: "lax" as const, path: "/", maxAge };
     jar.set("access_token", accessToken, common);
     jar.set("refresh_token", refreshToken, common);
+    jar.set("session", JSON.stringify(res.data), { ...common, httpOnly: false });
 
     redirect("/");
   }
