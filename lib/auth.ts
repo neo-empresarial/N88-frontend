@@ -34,7 +34,7 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
 
   const body = await res.json();
 
-  if (res.ok && body?.user && body?.accessToken && body?.refreshToken) {
+  if (res.ok && body?.user && body?.user.accessToken && body?.user.refreshToken) {
     logEvent("🔐 Login bem-sucedido", { user: body.user.email });
 
     const secret = new TextEncoder().encode(process.env.SESSION_SECRET_KEY!);
@@ -46,8 +46,8 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
         email: body.user.email,
         provider: body.user.provider,
       },
-      accessToken: body.accessToken,
-      refreshToken: body.refreshToken,
+      accessToken: body.user.accessToken,
+      refreshToken: body.user.refreshToken,
     };
 
     const maxAgeSec = 7 * 24 * 60 * 60;
@@ -66,14 +66,14 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
       maxAge: maxAgeSec,
     });
 
-    jar.set("access_token", body.accessToken, {
+    jar.set("access_token", body.user.accessToken, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
       path: "/",
       maxAge: maxAgeSec,
     });
-    jar.set("refresh_token", body.refreshToken, {
+    jar.set("refresh_token", body.user.refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
