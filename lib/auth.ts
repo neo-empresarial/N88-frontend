@@ -3,19 +3,9 @@ import { SignUpFormSchema } from "./type";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { FormState, SignInFormSchema } from "./type";
+import { SignJWT } from "jose";
 
 type data = { email: string; password: string };
-
-async function login(data: data) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  const status = response.status;
-  const json = await response.json(); // espere { user, accessToken, refreshToken }
-  return { status, data: json.user };
-}
 
 export async function signIn(state: FormState, formData: FormData): Promise<FormState> {
   const validated = SignInFormSchema.safeParse({
@@ -24,18 +14,59 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
   });
   if (!validated.success) return { error: validated.error.flatten().fieldErrors };
 
-  const res = await login(validated.data);
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(validated.data),
+  });
 
-  if (res.status === 200 || res.status === 201) {
-    const { accessToken, refreshToken } = res.data ?? {};
-    if (!accessToken || !refreshToken) return { message: "Resposta sem tokens." };
+  const body = await res.json(); // { user, accessToken, refreshToken }
+  if (res.ok && body?.user && body?.accessToken && body?.refreshToken) {
+    const secret = new TextEncoder().encode(process.env.SESSION_SECRET_KEY!);
+
+    const payload = {
+      user: {
+        id: body.user.id,
+        name: body.user.name,
+        email: body.user.email,
+        provider: body.user.provider,
+      },
+      accessToken: body.accessToken,
+      refreshToken: body.refreshToken,
+    };
+
+    const maxAgeSec = 7 * 24 * 60 * 60;
+    const session = await new SignJWT(payload)
+      .setProtectedHeader({ alg: "HS256" })
+      .setIssuedAt()
+      .setExpirationTime(maxAgeSec)
+      .sign(secret);
 
     const jar = cookies();
-    const maxAge = 7 * 24 * 60 * 60;
-    const common = { httpOnly: true, secure: true, sameSite: "lax" as const, path: "/", maxAge };
-    jar.set("access_token", accessToken, common);
-    jar.set("refresh_token", refreshToken, common);
-    jar.set("session", JSON.stringify(res.data), { ...common, httpOnly: false });
+    jar.set("session", session, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: maxAgeSec,
+    });
+
+    // (opcional) se quiser manter os cookies de tokens separados:
+    jar.set("access_token", body.accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: maxAgeSec,
+    });
+    jar.set("refresh_token", body.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+      maxAge: maxAgeSec,
+    });
 
     redirect("/");
   }
