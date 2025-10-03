@@ -47,7 +47,7 @@ export async function createSession(payload: Session) {
 
   cookies().set("session", session, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "none",
     expires: expiredAt,
     path: "/",
@@ -55,7 +55,7 @@ export async function createSession(payload: Session) {
 
   cookies().set("access_token", sessionPayload.accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "none",
     expires: expiredAt,
     path: "/",
@@ -63,7 +63,7 @@ export async function createSession(payload: Session) {
 
   cookies().set("refresh_token", sessionPayload.refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: true,
     sameSite: "none",
     expires: expiredAt,
     path: "/",

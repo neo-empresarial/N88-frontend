@@ -2,7 +2,7 @@
 
 const instance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
-  withCredentials: true, // garante que cookies sejam enviados
+  withCredentials: true,
 });
 
 const useAxios = () => {
