@@ -13,7 +13,7 @@ export default function SignupPage() {
 
         <Label className="mt-2">
           Já possui uma conta?{" "}
-          <Link href="/auth/signin" className="underline underline-offset-2">
+          <Link href="/api/auth/signin" className="underline underline-offset-2">
             Entre aqui
           </Link>
         </Label>

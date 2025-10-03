@@ -2,8 +2,8 @@
 
 const PUBLIC_PATHS = [
   "/",
-  "/auth/signin",
-  "/auth/signup",
+  "/api/auth/signin",
+  "/api/auth/signup",
 ];
 
 function isIgnored(pathname: string) {
@@ -42,7 +42,7 @@ export function middleware(req: NextRequest) {
 
   // Sem nenhum token → login
   const signin = req.nextUrl.clone();
-  signin.pathname = "/auth/signin";
+  signin.pathname = "/api/auth/signin";
   signin.searchParams.set("from", pathname + (search || ""));
   return NextResponse.redirect(signin);
 }

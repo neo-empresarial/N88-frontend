@@ -54,7 +54,7 @@ export default async function ProfileOptions() {
               <DropdownMenuItem>
                 <Button className="w-full">
                   <Link
-                    href={"/auth/signin"}
+                    href={"/api/auth/signin"}
                     className="flex items-center justify-center cursor-pointer w-full"
                   >
                     <LogIn className="w-5" />
