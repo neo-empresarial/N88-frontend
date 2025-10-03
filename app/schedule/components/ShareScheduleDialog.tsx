@@ -42,13 +42,13 @@ interface Group {
   }[];
 }
 
-const buildUrl = (endpoint: string) => {
-  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-  if (!baseUrl) {
-    throw new Error("NEXT_PUBLIC_BACKEND_URL is not defined");
-  }
-  return `${baseUrl.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
-};
+// const buildUrl = (endpoint: string) => {
+//   const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+//   if (!baseUrl) {
+//     throw new Error("NEXT_PUBLIC_BACKEND_URL is not defined");
+//   }
+//   return `${baseUrl.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
+// };
 
 export default function ShareScheduleDialog({
   schedule,
@@ -70,7 +70,7 @@ export default function ShareScheduleDialog({
         throw new Error("No access token found");
       }
 
-      const response = await fetchWithAuth(buildUrl("groups"), {
+      const response = await fetchWithAuth("/api/groups", {
         credentials: "include",
       });
 

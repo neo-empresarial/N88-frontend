@@ -14,7 +14,7 @@ const Groups = () => {
       queryKey: ["groups"],
       queryFn: async () => {
         const response = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}groups`,
+          `/api/groups`,
           {
             credentials: "include",
           }

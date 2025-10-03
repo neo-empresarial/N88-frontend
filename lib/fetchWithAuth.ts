@@ -5,7 +5,7 @@ let refreshPromise: Promise<void> | null = null;
 async function refreshAccessToken() {
   if (!refreshPromise) {
     refreshPromise = fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}auth/refresh`,
+      `/api/auth/refresh`,
       {
       method: "POST",
       credentials: "include",

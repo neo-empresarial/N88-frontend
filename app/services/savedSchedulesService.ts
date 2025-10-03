@@ -22,13 +22,13 @@ export interface CreateSavedScheduleDto {
 }
 
 
-const getBackendUrl = () => {
-  return process.env.NEXT_PUBLIC_BACKEND_URL;
-};
+// const getBackendUrl = () => {
+//   return process.env.NEXT_PUBLIC_BACKEND_URL;
+// };
 
 export const useSavedSchedules = () => {
   const getSavedSchedules = async () => {
-  const response = await fetchWithAuth(`${getBackendUrl()}saved-schedules`, {
+  const response = await fetchWithAuth(`/api/saved-schedules`, {
     method: "GET",
     credentials: "include",
   });
@@ -37,7 +37,7 @@ export const useSavedSchedules = () => {
 };
 
   const createSavedSchedule = async (data: CreateSavedScheduleDto) => {
-    const response = await fetchWithAuth(`${getBackendUrl()}saved-schedules`, {
+    const response = await fetchWithAuth(`/api/saved-schedules`, {
       method: "POST",
       credentials: "include",
       headers: {
@@ -56,7 +56,7 @@ export const useSavedSchedules = () => {
     id: number,
     data: CreateSavedScheduleDto
   ) => {
-    const response = await fetchWithAuth(`${getBackendUrl()}saved-schedules/${id}`, {
+    const response = await fetchWithAuth(`/api/saved-schedules/${id}`, {
       method: "PATCH",
       credentials: "include",
       headers: {
@@ -71,7 +71,7 @@ export const useSavedSchedules = () => {
   };
 
   const deleteSavedSchedule = async (id: number) => {
-    const response = await fetchWithAuth(`${getBackendUrl()}saved-schedules/${id}`, {
+    const response = await fetchWithAuth(`/api/saved-schedules/${id}`, {
       method: "DELETE",
       credentials: "include",
     });
@@ -79,12 +79,12 @@ export const useSavedSchedules = () => {
     if (!response.ok) {
       throw new Error("Falha em deletar a grade");
     }
-    window.location.reload(); 
+    window.location.reload();
 
   };
 
 
-  return {  
+  return {
     getSavedSchedules,
     createSavedSchedule,
     updateSavedSchedule,

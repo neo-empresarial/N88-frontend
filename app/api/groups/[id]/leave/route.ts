@@ -16,9 +16,9 @@ export async function POST(
 
     const token = authorization.replace("Bearer ", "");
 
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
-    const response = await fetchWithAuth(`${backendUrl}groups/${params.id}/leave`, {
+    // const backendUrl =
+    //   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
+    const response = await fetchWithAuth(`/api/groups/${params.id}/leave`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

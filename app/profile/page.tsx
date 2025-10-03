@@ -30,7 +30,7 @@ export default function Profile() {
     queryKey: ["groups"],
     queryFn: async () => {
       const response = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}groups`,
+        `/api/groups`,
         {
           credentials: "include",
         }
@@ -91,7 +91,7 @@ export default function Profile() {
               onClick={() => setIsEditDialogOpen(true)}
               className="h-8 w-8 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-md hover:scale-105 transition-all duration-200 ease-in-out"
               disabled={sessionLoading}
-              title="Editar perfil" 
+              title="Editar perfil"
             >
               <Edit className="h-4 w-4" />
             </Button>

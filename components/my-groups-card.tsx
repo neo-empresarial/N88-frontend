@@ -48,7 +48,7 @@ const MyGroupsCard = ({ group }: { group: groupType }) => {
 
   const handleLeaveGroup = async () => {
     try {
-      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}groups/${group.id}/leave`, {
+      const response = await fetchWithAuth(`/api/groups/${group.id}/leave`, {
         method: "POST",
         credentials: "include",
         headers: {

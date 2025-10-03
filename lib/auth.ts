@@ -11,7 +11,7 @@ type data = {
 
 async function login(data: data) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`, {
+    const response = await fetch(`/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
@@ -31,7 +31,7 @@ async function login(data: data) {
 
 async function register(data: data) {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`, {
+    const response = await fetch(`/api/auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),

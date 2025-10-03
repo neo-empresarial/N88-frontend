@@ -16,10 +16,10 @@ export async function DELETE(
 
     const token = authorization.replace("Bearer ", "");
 
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
+    // const backendUrl =
+    //   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
     const response = await fetchWithAuth(
-      `${backendUrl}groups/${params.id}/members/${params.userId}`,
+      `/api/groups/${params.id}/members/${params.userId}`,
       {
         method: "DELETE",
         headers: {

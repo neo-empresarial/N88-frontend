@@ -27,14 +27,14 @@ import {
 } from "@/components/ui/command";
 import { ICourse, MappedCourse } from "@/lib/type";
 
-const getBackendUrl = () => {
-  return process.env.NEXT_PUBLIC_BACKEND_URL;
-};
+// const getBackendUrl = () => {
+//   return process.env.NEXT_PUBLIC_BACKEND_URL;
+// };
 
 const fetchCourses = async (): Promise<MappedCourse[]> => {
   try {
-    const response = await fetch(`${getBackendUrl()}courses`, {
-      credentials: 'include', // Include cookies in the request
+    const response = await fetch(`/api/courses`, {
+      credentials: 'include',
     });
     if (!response.ok) {
       throw new Error(`Failed to fetch courses: ${response.statusText}`);

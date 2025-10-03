@@ -33,7 +33,7 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
   const { data: users } = useQuery({
     queryKey: ["users"],
     queryFn: async () => {
-      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}users`, {
+      const response = await fetchWithAuth(`/api/users`, {
         credentials: "include",
       });
       if (!response.ok) {
@@ -47,7 +47,7 @@ const AddMembersToGroupDialog = ({ groupId }: { groupId: number }) => {
   const { mutate: sendInvitations, isPending } = useMutation({
     mutationFn: async () => {
       const promises = selectedUsers.map((user) =>
-        fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}notifications`, {
+        fetchWithAuth(`/api/notifications`, {
           method: "POST",
           credentials: "include",
           headers: {

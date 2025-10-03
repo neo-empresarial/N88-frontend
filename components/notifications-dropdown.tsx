@@ -41,7 +41,7 @@ const NotificationsDropdown = () => {
   const { data: notifications, isLoading, refetch } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
-      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}notifications`,
+      const response = await fetchWithAuth(`/api/notifications`,
         { credentials: "include" }
       );
       if (!response.ok) throw new Error("Failed to fetch notifications");
@@ -59,7 +59,7 @@ const NotificationsDropdown = () => {
       accept: boolean;
     }) => {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}notifications/${notificationId}/respond`,
+        `/api/notifications/${notificationId}/respond`,
         {
           method: "POST",
           credentials: "include",

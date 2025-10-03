@@ -32,13 +32,13 @@ export interface AcceptSharedScheduleDto {
   sharedScheduleId: number;
 }
 
-const buildUrl = (endpoint: string) => {
-  const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-  if (!baseUrl) {
-    throw new Error("NEXT_PUBLIC_BACKEND_URL environment variable is not defined");
-  }
-  return `${baseUrl.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
-};
+// const buildUrl = (endpoint: string) => {
+//   const baseUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+//   if (!baseUrl) {
+//     throw new Error("NEXT_PUBLIC_BACKEND_URL environment variable is not defined");
+//   }
+//   return `${baseUrl.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
+// };
 
 const handleApiError = async (response: Response) => {
   if (!response.ok) {
@@ -52,7 +52,7 @@ const handleApiError = async (response: Response) => {
 
 export const useSharedSchedules = () => {
   const shareSchedule = async (data: ShareScheduleDto) => {
-    const response = await fetchWithAuth(buildUrl("shared-schedules/share"), {
+    const response = await fetchWithAuth("/api/shared-schedules/share", {
       method: "POST",
       credentials: "include",
       headers: {
@@ -65,7 +65,7 @@ export const useSharedSchedules = () => {
   };
 
   const getReceivedSharedSchedules = async () => {
-    const response = await fetchWithAuth(buildUrl("shared-schedules/received"), {
+    const response = await fetchWithAuth("/api/shared-schedules/received", {
       method: "GET",
       credentials: "include",
     });
@@ -74,7 +74,7 @@ export const useSharedSchedules = () => {
   };
 
   const getSentSharedSchedules = async () => {
-    const response = await fetchWithAuth(buildUrl("shared-schedules/sent"), {
+    const response = await fetchWithAuth("/api/shared-schedules/sent", {
       method: "GET",
       credentials: "include",
     });
@@ -84,7 +84,7 @@ export const useSharedSchedules = () => {
 
 
   const acceptSharedSchedule = async (data: AcceptSharedScheduleDto) => {
-    const response = await fetchWithAuth(buildUrl("shared-schedules/accept"), {
+    const response = await fetchWithAuth("/api/shared-schedules/accept", {
       method: "POST",
       credentials: "include",
       headers: {
@@ -98,7 +98,7 @@ export const useSharedSchedules = () => {
 
 
   const declineSharedSchedule = async (id: number) => {
-    const response = await fetchWithAuth(buildUrl(`shared-schedules/${id}/decline`), {
+    const response = await fetchWithAuth(`/api/shared-schedules/${id}/decline`, {
       method: "DELETE",
       credentials: "include",
     });

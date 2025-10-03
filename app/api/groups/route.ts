@@ -23,9 +23,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL;
-    const response = await fetchWithAuth(`${backendUrl}groups`, {
+    // const backendUrl =
+    //   process.env.NEXT_PUBLIC_BACKEND_URL;
+    const response = await fetchWithAuth(`api/groups`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

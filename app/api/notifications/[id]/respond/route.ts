@@ -26,10 +26,10 @@ export async function POST(
       );
     }
 
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL;
+    // const backendUrl =
+    //   process.env.NEXT_PUBLIC_BACKEND_URL;
     const response = await fetchWithAuth(
-      `${backendUrl}notifications/${params.id}/respond`,
+      `/api/notifications/${params.id}/respond`,
       {
         method: "POST",
         headers: {

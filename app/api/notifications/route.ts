@@ -13,9 +13,9 @@ export async function GET() {
 
     const token = authorization.replace("Bearer ", "");
 
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
-    const response = await fetchWithAuth(`${backendUrl}notifications`, {
+    // const backendUrl =
+    //   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
+    const response = await fetchWithAuth(`/api/notifications`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -59,9 +59,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
-    const response = await fetchWithAuth(`${backendUrl}notifications/invite`, {
+    // const backendUrl =
+    //   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
+    const response = await fetchWithAuth(`/api/notifications/invite`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -21,8 +21,8 @@ export async function GET(req: Request) {
   }
 
   const hdrs = await nextHeaders();
-  const backend = (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/+$/, "");
-  const resp = await fetch(`${backend}/auth/refresh`, {
+  // const backend = (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || "").replace(/\/+$/, "");
+  const resp = await fetch(`/api/auth/refresh`, {
     method: "POST",
     cache: "no-store",
     headers: {

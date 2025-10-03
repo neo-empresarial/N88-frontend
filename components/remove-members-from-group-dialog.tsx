@@ -47,7 +47,7 @@ const RemoveMembersFromGroupDialog = ({ groupId }: { groupId: number }) => {
 
       for (const user of selectedUsers) {
         const response = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}groups/${groupId}/members/${user.iduser}`,
+          `/api/groups/${groupId}/members/${user.iduser}`,
           {
             method: "DELETE",
             headers: {

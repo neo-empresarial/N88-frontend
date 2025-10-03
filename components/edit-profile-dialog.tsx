@@ -59,7 +59,7 @@ const getBackendUrl = () => {
 
 const fetchCourses = async (): Promise<MappedCourse[]> => {
   try {
-    const response = await fetch(`${getBackendUrl()}courses`,
+    const response = await fetch(`/api/courses`,
       { credentials: "include" }
     );
     if (!response.ok) {

@@ -63,7 +63,7 @@ export async function createSession(payload: Session) {
 
   cookies().set("refresh_token", sessionPayload.refreshToken, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "development",
     sameSite: "none",
     expires: expiredAt,
     path: "/",

@@ -13,7 +13,7 @@ export async function GET() {
       );
     }
 
-    const response = await fetchWithAuth(`${backendUrl}users/`, {
+    const response = await fetchWithAuth(`/api/users/`, {
       headers: {
         "Content-Type": "application/json",
       },

@@ -64,7 +64,7 @@ const CreateGroupDialog = () => {
     queryKey: ["users"],
     queryFn: async () => {
 
-      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}users`, {credentials: "include"});
+      const response = await fetchWithAuth(`/api/users`, {credentials: "include"});
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to fetch users");
@@ -78,7 +78,7 @@ const CreateGroupDialog = () => {
       const backendUrl =
       process.env.NEXT_PUBLIC_BACKEND_URL;
 
-      const response = await fetchWithAuth(`${backendUrl}groups`, {
+      const response = await fetchWithAuth(`/api/groups`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
