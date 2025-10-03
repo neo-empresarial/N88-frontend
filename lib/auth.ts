@@ -5,6 +5,11 @@ import { cookies } from "next/headers";
 import { FormState, SignInFormSchema } from "./type";
 import { SignJWT } from "jose";
 
+// função de logger simples
+function logEvent(event: string, details?: unknown) {
+  console.log(`[AUTH] ${event}`, details ?? "");
+}
+
 type data = { email: string; password: string };
 
 export async function signIn(state: FormState, formData: FormData): Promise<FormState> {
@@ -12,7 +17,13 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
     email: formData.get("email"),
     password: formData.get("password"),
   });
-  if (!validated.success) return { error: validated.error.flatten().fieldErrors };
+
+  if (!validated.success) {
+    logEvent("❌ Validação falhou no login", validated.error.flatten().fieldErrors);
+    return { error: validated.error.flatten().fieldErrors };
+  }
+
+  logEvent("✅ Validação de login bem-sucedida", { email: validated.data.email });
 
   const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`, {
     method: "POST",
@@ -21,8 +32,11 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
     body: JSON.stringify(validated.data),
   });
 
-  const body = await res.json(); // { user, accessToken, refreshToken }
+  const body = await res.json();
+
   if (res.ok && body?.user && body?.accessToken && body?.refreshToken) {
+    logEvent("🔐 Login bem-sucedido", { user: body.user.email });
+
     const secret = new TextEncoder().encode(process.env.SESSION_SECRET_KEY!);
 
     const payload = {
@@ -52,7 +66,6 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
       maxAge: maxAgeSec,
     });
 
-    // (opcional) se quiser manter os cookies de tokens separados:
     jar.set("access_token", body.accessToken, {
       httpOnly: true,
       secure: true,
@@ -71,6 +84,7 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
     redirect("/");
   }
 
+  logEvent("⚠️ Falha no login", { status: res.status, body });
   return { message: res.status === 401 ? "Email ou senha incorretos" : "Erro ao autenticar." };
 }
 
@@ -85,12 +99,14 @@ async function register(data: data) {
     });
     const responseData = await response.json();
     if (!response.ok) {
+      console.error("[REGISTER] ❌ Falha no registro:", responseData.message);
       throw new Error(responseData.message || "Failed to register");
     }
 
+    console.log("[REGISTER] ✅ Registro bem-sucedido:", responseData.email);
     return responseData;
   } catch (error) {
-      console.error("Falha na chamada da API de registro:", error);
+    console.error("[REGISTER] 🚨 Erro de rede:", error);
     return {
       statusCode: 500,
       message: "Erro de rede. Verifique sua conexão.",
@@ -98,10 +114,7 @@ async function register(data: data) {
   }
 }
 
-export async function signUp(
-  state: FormState,
-  formData: FormData
-): Promise<FormState> {
+export async function signUp(state: FormState, formData: FormData): Promise<FormState> {
   const validationFields = SignUpFormSchema.safeParse({
     name: formData.get("name"),
     course: formData.get("course"),
@@ -110,17 +123,20 @@ export async function signUp(
   });
 
   if (!validationFields.success) {
-    return {
-      error: validationFields.error.flatten().fieldErrors,
-    };
+    console.warn("[SIGNUP] ❌ Validação falhou", validationFields.error.flatten().fieldErrors);
+    return { error: validationFields.error.flatten().fieldErrors };
   }
+
+  console.log("[SIGNUP] ✅ Validação bem-sucedida", { email: validationFields.data.email });
 
   const response = await register(validationFields.data);
 
   if (response.statusCode === 201) {
+    console.log("[SIGNUP] 🎉 Usuário registrado, redirecionando para signin");
     return redirect("signin");
   }
 
+  console.error("[SIGNUP] ⚠️ Erro no servidor ou email duplicado", response);
   return {
     message:
       response.statusCode === 409
