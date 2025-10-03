@@ -3,101 +3,44 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/", "/auth/signin", "/auth/signup"];
 
-function isIgnored(pathname: string) {
-  return (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/favicon.ico") ||
-    pathname.startsWith("/robots.txt") ||
-    pathname.startsWith("/sitemap.xml") ||
-    pathname.startsWith("/images") ||
-    pathname.startsWith("/public")
-  );
+function isIgnored(p: string) {
+  return p.startsWith("/_next")
+    || p === "/favicon.ico" || p === "/robots.txt" || p === "/sitemap.xml"
+    || p.startsWith("/images") || p.startsWith("/public");
 }
-
-function isPublic(pathname: string) {
-  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"));
-}
-
-function mask(v?: string) {
-  if (!v) return undefined;
-  if (v.length <= 8) return "***";
-  return v.slice(0, 4) + "…" + v.slice(-4);
+function isPublic(p: string) {
+  return PUBLIC_PATHS.some((base) => p === base || p.startsWith(base + "/"));
 }
 
 export function middleware(req: NextRequest) {
-  const { pathname, searchParams } = req.nextUrl;
+  const { pathname } = req.nextUrl;
+  if (isIgnored(pathname) || isPublic(pathname)) return NextResponse.next();
+
   const access = req.cookies.get("access_token")?.value;
   const refresh = req.cookies.get("refresh_token")?.value;
 
-  const decision = (() => {
-    if (isIgnored(pathname) || isPublic(pathname)) return "next(public_or_ignored)";
-    if (access) return "next(access_found)";
-    if (refresh) return "redirect(refresh)";
-    return "redirect(signin)";
-  })();
+  if (access) return NextResponse.next({
+    headers: {
+      "x-mw-has-access": "true",
+      "x-mw-has-refresh": String(!!refresh),
+    }
+  });
 
-  // 1) DEBUG QUICK VIEW (returns JSON if ?__debug=1)
-  if (searchParams.has("__debug")) {
-    const info = {
-      now: new Date().toISOString(),
-      path: pathname,
-      search: req.nextUrl.search,
-      matcherHit: ["/schedule/:path*", "/profile/:path*"].some((m) => pathname.startsWith(m.split(":")[0])),
-      public: isPublic(pathname),
-      ignored: isIgnored(pathname),
-      cookiesSeen: {
-        access_token: mask(access),
-        refresh_token: mask(refresh),
-      },
-      headersSample: {
-        host: req.headers.get("host"),
-        referer: req.headers.get("referer"),
-        userAgent: req.headers.get("user-agent"),
-        xForwardedProto: req.headers.get("x-forwarded-proto"),
-        xForwardedFor: req.headers.get("x-forwarded-for"),
-      },
-      decision,
-      geo: req.geo ?? null,
-      ip: req.ip ?? null,
-    };
-    return new NextResponse(JSON.stringify(info, null, 2), {
-      status: 200,
-      headers: { "content-type": "application/json; charset=utf-8" },
-    });
-  }
-
-  // 2) NORMAL FLOW + DEBUG HEADERS (visíveis no Network tab)
-  const resHeaders = new Headers();
-  resHeaders.set("x-mw-decision", decision);
-  resHeaders.set("x-mw-path", pathname);
-  resHeaders.set("x-mw-public", String(isPublic(pathname)));
-  resHeaders.set("x-mw-ignored", String(isIgnored(pathname)));
-  resHeaders.set("x-mw-has-access", String(Boolean(access)));
-  resHeaders.set("x-mw-has-refresh", String(Boolean(refresh)));
-
-  if (decision === "next(public_or_ignored)" || decision === "next(access_found)") {
-    return NextResponse.next({ headers: resHeaders });
-  }
-
-  if (decision === "redirect(refresh)") {
+  if (refresh) {
     const url = req.nextUrl.clone();
     url.pathname = "/api/auth/refresh";
     url.searchParams.set("returnTo", pathname + (req.nextUrl.search || ""));
     const res = NextResponse.redirect(url);
-    // Mantém os headers de debug no redirect (útil em testes via curl)
-    res.headers.set("x-mw-decision", decision);
+    res.headers.set("x-mw-decision", "redirect(refresh)");
     return res;
   }
 
-  // redirect(signin)
   const signin = req.nextUrl.clone();
   signin.pathname = "/auth/signin";
   signin.searchParams.set("from", pathname + (req.nextUrl.search || ""));
   const res = NextResponse.redirect(signin);
-  res.headers.set("x-mw-decision", decision);
+  res.headers.set("x-mw-decision", "redirect(signin)");
   return res;
 }
 
-export const config = {
-  matcher: ["/schedule/:path*", "/profile/:path*"],
-};
+export const config = { matcher: ["/schedule/:path*", "/profile/:path*"] };
