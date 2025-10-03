@@ -32,11 +32,17 @@ import {
 import { cn } from "@/lib/utils";
 import { ICourse, MappedCourse } from "@/lib/type";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
-import { Session } from "@/lib/session";
 import { useRouter } from "next/navigation";
 
+  interface User {
+    userId?: number;
+    name?: string;
+    course?: string;
+    email?: string;
+  }
+
 interface EditProfileDialogProps {
-  session: Session;
+  session: { user: User | undefined };
   isOpen: boolean;
   onClose: () => void;
   onProfileUpdated?: () => Promise<void>;
@@ -111,7 +117,7 @@ export default function EditProfileDialog({
 
         if (session.user.course) {
           const currentCourse = coursesData.find(
-            (course) => course.label === session.user.course
+            (course) => session.user && course.label === session.user.course
           );
           if (currentCourse) {
             setSelectedLabel(currentCourse.label);
