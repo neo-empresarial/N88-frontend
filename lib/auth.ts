@@ -14,7 +14,7 @@ async function login(data: data) {
   });
   const status = response.status;
   const json = await response.json(); // espere { user, accessToken, refreshToken }
-  return { status, data: json };
+  return { status, data: json.user };
 }
 
 export async function signIn(state: FormState, formData: FormData): Promise<FormState> {
@@ -25,6 +25,7 @@ export async function signIn(state: FormState, formData: FormData): Promise<Form
   if (!validated.success) return { error: validated.error.flatten().fieldErrors };
 
   const res = await login(validated.data);
+
   if (res.status === 200 || res.status === 201) {
     const { accessToken, refreshToken } = res.data ?? {};
     if (!accessToken || !refreshToken) return { message: "Resposta sem tokens." };
