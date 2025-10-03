@@ -7,7 +7,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:8000/:path*", // porta onde seu Nest roda
+        destination: `${NEXT_PUBLIC_BACKEND_URL}/:path*"`,
       },
     ];
   },
