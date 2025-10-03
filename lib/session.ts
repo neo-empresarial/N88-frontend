@@ -13,7 +13,6 @@ export type Session = {
     email: string;
     course: string;
   };
-  
 };
 
 type UpdatedUser = {
@@ -49,7 +48,7 @@ export async function createSession(payload: Session) {
   cookies().set("session", session, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "none",  
+    sameSite: "none",
     expires: expiredAt,
     path: "/",
   });
@@ -74,7 +73,7 @@ export async function createSession(payload: Session) {
 export async function getSession() {
   const cookie = cookies().get("session")?.value;
   const accessToken = cookies().get("access_token")?.value;
-  
+
   if (!cookie) return null;
 
   try {
@@ -96,7 +95,7 @@ export async function getSession() {
 
 export async function updateUserInSession(updatedUser: UpdatedUser) {
   const currentSession = await getSession();
-  
+
   if (!currentSession) {
     throw new Error("No session found");
   }
@@ -106,7 +105,7 @@ export async function updateUserInSession(updatedUser: UpdatedUser) {
       accessToken: currentSession.user.accessToken,
       refreshToken: currentSession.user.refreshToken,
       provider: currentSession.user.provider,
-      userId: updatedUser.iduser || currentSession.user.userId, 
+      userId: updatedUser.iduser || currentSession.user.userId,
       name: updatedUser.name,
       email: updatedUser.email,
       course: updatedUser.course,

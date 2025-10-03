@@ -59,7 +59,9 @@ const getBackendUrl = () => {
 
 const fetchCourses = async (): Promise<MappedCourse[]> => {
   try {
-    const response = await fetch(`${getBackendUrl()}courses`);
+    const response = await fetch(`${getBackendUrl()}courses`,
+      { credentials: "include" }
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch courses");
     }
@@ -183,6 +185,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ updatedUser }),
+        credentials: "include",
       });
       if (!sessionResponse.ok) {
         toast.warning("Perfil atualizado, mas pode ser necessário recarregar a página para ver as mudanças.", {

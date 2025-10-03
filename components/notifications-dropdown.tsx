@@ -41,7 +41,9 @@ const NotificationsDropdown = () => {
   const { data: notifications, isLoading, refetch } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
-      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}notifications`);
+      const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}notifications`,
+        { credentials: "include" }
+      );
       if (!response.ok) throw new Error("Failed to fetch notifications");
       const data: Notification[] = await response.json();
       return data;
