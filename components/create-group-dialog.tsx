@@ -75,8 +75,8 @@ const CreateGroupDialog = () => {
 
   const createGroupMutation = useMutation({
     mutationFn: async (data: FormData & { members: number[] }) => {
-      const backendUrl =
-      process.env.NEXT_PUBLIC_BACKEND_URL;
+      // const backendUrl =
+      // process.env.NEXT_PUBLIC_BACKEND_URL;
 
       const response = await fetchWithAuth(`/api/groups`, {
         method: "POST",

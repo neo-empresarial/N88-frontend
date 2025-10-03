@@ -53,9 +53,9 @@ type oldDataType = {
 
 
 
-const getBackendUrl = () => {
-  return process.env.NEXT_PUBLIC_BACKEND_URL;
-};
+// const getBackendUrl = () => {
+//   return process.env.NEXT_PUBLIC_BACKEND_URL;
+// };
 
 const fetchCourses = async (): Promise<MappedCourse[]> => {
   try {
