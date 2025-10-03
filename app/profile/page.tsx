@@ -25,6 +25,14 @@ export default function Profile() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
+  // Defina um tipo explícito para o usuário
+  interface User {
+    name?: string;
+    course?: string;
+    email?: string;
+    // Adicione outros campos conforme necessário
+  }
+
   // 1) Busca sessão via API interna (server-side)
   const {
     data: sessionData,
@@ -32,7 +40,7 @@ export default function Profile() {
     isError: sessionError,
   } = useQuery({
     queryKey: ["session"],
-    queryFn: () => getJson<{ ok: boolean; user?: any }>("/api/session"),
+    queryFn: () => getJson<{ ok: boolean; user?: User }>("/api/session"),
     staleTime: 0,
     gcTime: 1000 * 60 * 5,
     refetchOnWindowFocus: true,
