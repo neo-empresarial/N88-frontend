@@ -7,7 +7,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: `${NEXT_PUBLIC_BACKEND_URL}/:path*"`,
+        destination: "https://n88-backend-git-development-neos-projects-cd039f7e.vercel.app/:path*",
       },
     ];
   },
