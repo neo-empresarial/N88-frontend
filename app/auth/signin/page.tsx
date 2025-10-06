@@ -37,16 +37,16 @@ export default function Login() {
           <div className="w-full flex justify-center">
             <GoogleLoginButton style="w-full cursor-pointer" />
           </div>
-          <SeparatorWithText style="my-5" text="OU CONTINUE COM" />
+          {/* <SeparatorWithText style="my-5" text="OU CONTINUE COM" /> */}
 
-          <SignInForm />
+          {/* <SignInForm /> */}
 
-          <div className="mt-2">
+          {/* <div className="mt-2">
             <Label className="text-md">Não possui uma conta? 😱 </Label>
             <Link href="/auth/signup" className="underline underline-offset-2">
               Crie uma aqui
             </Link>
-          </div>
+          </div> */}
         </CardContent>
       </Card>
     </div>
