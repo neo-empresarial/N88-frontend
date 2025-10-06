@@ -5,21 +5,21 @@
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
+// import { Label } from "@/components/ui/label";
 import GoogleLoginButton from "./google-button";
-import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
-import SignInForm from "./signinForm";
+// import { Separator } from "@/components/ui/separator";
+// import Link from "next/link";
+// import SignInForm from "./signinForm";
 
-function SeparatorWithText(props: { text: string; style: string }) {
-  return (
-    <div className={`flex items-center space-x-4 ${props.style}`}>
-      <Separator className="flex-1" />
-      <span className="text-sm text-muted-foreground">{props.text}</span>
-      <Separator className="flex-1" />
-    </div>
-  );
-}
+// function SeparatorWithText(props: { text: string; style: string }) {
+//   return (
+//     <div className={`flex items-center space-x-4 ${props.style}`}>
+//       <Separator className="flex-1" />
+//       <span className="text-sm text-muted-foreground">{props.text}</span>
+//       <Separator className="flex-1" />
+//     </div>
+//   );
+// }
 
 export default function Login() {
   return (
