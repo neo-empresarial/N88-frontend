@@ -405,7 +405,7 @@ export default function Home() {
               <Image src={logo} alt="grade" width={50} height={50} />
             </div>
             <div className="flex flex-col text-white">
-              <h1 className="text-lg lg:text-2xl ">NEO Empresrial</h1>
+              <h1 className="text-lg lg:text-2xl ">NEO Empresarial</h1>
               <p className="text-sm">
                 Capacitando engenheiros, mudando o futuro.
               </p>
