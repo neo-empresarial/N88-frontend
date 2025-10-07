@@ -10,6 +10,7 @@ export default function LogoutButton() {
 
     const response = await fetch("/api/auth/signout", {
       method: "GET",
+      credentials: "include",
     });
 
     if (response.ok) {

@@ -25,15 +25,6 @@ export default function GoogleLoginButton(props: { style: string }) {
     const accessToken = searchParams.get("accessToken") || "";
     const refreshToken = searchParams.get("refreshToken") || "";
 
-    console.log("Parâmetros do URL:", {
-      userId,
-      name,
-      email,
-      provider,
-      accessToken,
-      refreshToken,
-    });
-
     if (
       userId &&
       name &&
@@ -43,6 +34,7 @@ export default function GoogleLoginButton(props: { style: string }) {
       !isProcessing
     ) {
       setIsProcessing(true);
+      const course = searchParams.get("course") || "";
       const payload = {
         user: {
           userId: Number(userId),
@@ -51,12 +43,12 @@ export default function GoogleLoginButton(props: { style: string }) {
           provider,
           accessToken,
           refreshToken,
+          course, // Add course to the user object
         },
       };
 
       createSession(payload)
         .then(() => {
-          console.log("Sessão criada com sucesso, redirecionando para /");
           router.push("/");
         })
         .catch((error) => {

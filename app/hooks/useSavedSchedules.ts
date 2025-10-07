@@ -2,6 +2,20 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSavedSchedules } from "../services/savedSchedulesService";
 import { toast } from "sonner";
 import { scheduleSubjectsType } from "../schedule/providers/subjectsContext";
+import type { SavedSchedule } from "../services/savedSchedulesService";
+
+// Normaliza qualquer forma comum para um array
+function normalizeSchedules(x: unknown): SavedSchedule[] {
+  if (Array.isArray(x)) return x;
+  // objetos comuns: {data: [...]}, {items: [...]}, {results: [...]}
+  const obj = x as { data?: unknown; items?: unknown; results?: unknown };
+  if (Array.isArray(obj?.data)) return obj.data;
+  if (Array.isArray(obj?.items)) return obj.items;
+  if (Array.isArray(obj?.results)) return obj.results;
+  // objeto único -> coloca em array; null/undefined -> []
+  if (obj && typeof obj === "object") return [obj as SavedSchedule];
+  return [];
+}
 
 export const useSavedSchedulesQuery = () => {
   const {
@@ -12,9 +26,16 @@ export const useSavedSchedulesQuery = () => {
   } = useSavedSchedules();
   const queryClient = useQueryClient();
 
-  const savedSchedulesQuery = useQuery({
+  const savedSchedulesQuery = useQuery<SavedSchedule[]>({
     queryKey: ["savedSchedules"],
-    queryFn: getSavedSchedules,
+    // Garante sempre um array
+    queryFn: async () => {
+      const raw = await getSavedSchedules();
+      return normalizeSchedules(raw);
+    },
+    initialData: [],         // evita undefined no primeiro render
+    select: (data) => data ?? [],
+    staleTime: 30_000,       // opcional: menos refetch
   });
 
   const createMutation = useMutation({
@@ -22,24 +43,22 @@ export const useSavedSchedulesQuery = () => {
       title: string;
       description?: string;
       scheduleSubjects: scheduleSubjectsType[];
-    }) => {
-      console.log("Creating schedule with data:", data);
-      return createSavedSchedule({
+    }) =>
+      createSavedSchedule({
         title: data.title,
-        description: data.description || '',
+        description: data.description || "",
         items: data.scheduleSubjects.map((subject) => ({
           subjectCode: subject.code,
           classCode: subject.class || "",
           activated: subject.activated ?? true,
         })),
-      });
-    },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["savedSchedules"] });
+      toast.success("Grade salva com sucesso");
     },
     onError: (error: Error) => {
-      console.error("Error saving schedule:", error);
-      toast.error(error.message || "Failed to save schedule");
+      toast.error(error.message || "Falha ao salvar a grade");
     },
   });
 
@@ -49,25 +68,23 @@ export const useSavedSchedulesQuery = () => {
       title: string;
       description?: string;
       scheduleSubjects: scheduleSubjectsType[];
-    }) => {
-      console.log("Updating schedule with data:", data);
-      return updateSavedSchedule(data.id, {
+    }) =>
+      updateSavedSchedule(data.id, {
         title: data.title,
-        description: data.description || '',
+        description: data.description || "",
         items: data.scheduleSubjects.map((subject) => ({
           subjectCode: subject.code,
           classCode: subject.class || "",
           activated: subject.activated ?? true,
         })),
-      });
-    },
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["savedSchedules"] });
       toast.success("Grade atualizada com sucesso");
     },
     onError: (error: Error) => {
       console.error("Error updating schedule:", error);
-      toast.error(error.message || "Failed to update schedule");
+      toast.error(error.message || "Falha ao atualizar a grade");
     },
   });
 
@@ -75,18 +92,16 @@ export const useSavedSchedulesQuery = () => {
     mutationFn: deleteSavedSchedule,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["savedSchedules"] });
-      toast.success("Schedule deleted successfully");
+      toast.success("Grade deletada com sucesso");
     },
     onError: (error: Error) => {
       console.error("Error deleting schedule:", error);
-      toast.error(error.message || "Failed to delete schedule");
+      toast.error(error.message || "Falha ao deletar a grade");
     },
   });
 
-  console.log(savedSchedulesQuery.data)
-
   return {
-    savedSchedules: savedSchedulesQuery.data,
+    savedSchedules: savedSchedulesQuery.data ?? [], // sempre array
     isLoading: savedSchedulesQuery.isLoading,
     error: savedSchedulesQuery.error,
     createSchedule: createMutation.mutate,

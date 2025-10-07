@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { signUp } from "@/lib/auth";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useFormState } from "react-dom";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -14,7 +14,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { redirect } from "next/navigation";
 import { Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -34,9 +33,11 @@ const getBackendUrl = () => {
 
 const fetchCourses = async (): Promise<MappedCourse[]> => {
   try {
-    const response = await fetch(`${getBackendUrl()}courses`);
+    const response = await fetch(`${getBackendUrl()}courses`, {
+      credentials: 'include', // Include cookies in the request
+    });
     if (!response.ok) {
-      throw new Error("Failed to fetch courses");
+      throw new Error(`Failed to fetch courses: ${response.statusText}`);
     }
     const coursesData = await response.json() as ICourse[];
     return coursesData.map(course => ({

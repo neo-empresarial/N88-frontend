@@ -4,12 +4,18 @@ import { redirect } from "next/navigation";
 import { FormState, SignUpFormSchema, SignInFormSchema } from "./type";
 import { createSession } from "./session";
 
-async function login(data: any) {
+type data = {
+  email: string;
+  password: string;
+};
+
+async function login(data: data) {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
+      credentials: "include",
     });
     const status = response.status;
     const responseData = await response.json();
@@ -23,18 +29,19 @@ async function login(data: any) {
   }
 }
 
-async function register(data: any): Promise<any> {
+async function register(data: data) {
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}auth/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
+      credentials: "include",
     });
     const responseData = await response.json();
     if (!response.ok) {
       throw new Error(responseData.message || "Failed to register");
     }
-    
+
     return responseData;
   } catch (error) {
       console.error("Falha na chamada da API de registro:", error);
@@ -53,15 +60,14 @@ export async function signIn(
     email: formData.get("email"),
     password: formData.get("password"),
   });
-  
+
   if (!validatedFields.success) {
     return {
       error: validatedFields.error.flatten().fieldErrors,
     };
   }
-  
+
   const response = await login(validatedFields.data);
-  console.log('response', response)
 
   if (response.status === 201) {
     const user = response.data
@@ -93,7 +99,7 @@ export async function signUp(
       error: validationFields.error.flatten().fieldErrors,
     };
   }
-  
+
   const response = await register(validationFields.data);
 
   if (response.statusCode === 201) {

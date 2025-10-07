@@ -13,7 +13,13 @@ export type Session = {
     email: string;
     course: string;
   };
-  
+};
+
+type UpdatedUser = {
+  iduser?: number;
+  name: string;
+  email: string;
+  course: string;
 };
 
 const secretKey = process.env.SESSION_SECRET_KEY!;
@@ -28,6 +34,7 @@ export async function createSession(payload: Session) {
       name: payload.user.name,
       email: payload.user.email,
       course: payload.user.course,
+      provider: payload.user.provider,
     },
     accessToken: payload.user.accessToken,
     refreshToken: payload.user.refreshToken,
@@ -40,24 +47,24 @@ export async function createSession(payload: Session) {
 
   cookies().set("session", session, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",  
+    secure: true,
+    sameSite: "none",
     expires: expiredAt,
     path: "/",
   });
 
   cookies().set("access_token", sessionPayload.accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: true,
+    sameSite: "none",
     expires: expiredAt,
     path: "/",
   });
 
   cookies().set("refresh_token", sessionPayload.refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: true,
+    sameSite: "none",
     expires: expiredAt,
     path: "/",
   });
@@ -66,7 +73,7 @@ export async function createSession(payload: Session) {
 export async function getSession() {
   const cookie = cookies().get("session")?.value;
   const accessToken = cookies().get("access_token")?.value;
-  
+
   if (!cookie) return null;
 
   try {
@@ -86,28 +93,24 @@ export async function getSession() {
   }
 }
 
-export async function updateUserInSession(updatedUser: any) {
-  console.log("Session - Updating user in session:", updatedUser);
-  
+export async function updateUserInSession(updatedUser: UpdatedUser) {
   const currentSession = await getSession();
-  
+
   if (!currentSession) {
     throw new Error("No session found");
   }
 
-  console.log("Session - Current session:", currentSession);
-
   const newSession = {
-    ...currentSession,
     user: {
-      id: updatedUser.iduser,
+      accessToken: currentSession.user.accessToken,
+      refreshToken: currentSession.user.refreshToken,
+      provider: currentSession.user.provider,
+      userId: updatedUser.iduser || currentSession.user.userId,
       name: updatedUser.name,
       email: updatedUser.email,
       course: updatedUser.course,
     },
   };
-
-  console.log("Session - New session:", newSession);
 
   await createSession(newSession);
 }

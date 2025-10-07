@@ -17,7 +17,6 @@ import { SubjectsType } from "./types/dataType";
 import { useEffect, useState } from "react";
 import useAxios from "@/app/api/AxiosInstance";
 import { SubjectsProvider } from "./providers/subjectsContext";
-import CreditsCounter from "./components/creditsCounter";
 
 export default function SchedulePage() {
   const { getAllSubjects } = useAxios();
@@ -27,7 +26,7 @@ export default function SchedulePage() {
     getAllSubjects().then((data: SubjectsType[]) => {
       setSubjects(data);
     });
-  }, []);
+  }, [getAllSubjects]);
 
   return (
     <div className="p-10 grid gap-2 grid-cols-1 ">
