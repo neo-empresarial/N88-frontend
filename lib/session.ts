@@ -71,26 +71,15 @@ export async function createSession(payload: Session) {
 }
 
 export async function getSession() {
-  const cookie = cookies().get("session")?.value;
-  const accessToken = cookies().get("access_token")?.value;
+  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/session`, {
+    method: 'GET',
+    credentials: 'include',   // envia cookies para o domínio da API
+    headers: { 'Accept': 'application/json' },
+    cache: 'no-store',
+  });
 
-  if (!cookie) return null;
-
-  try {
-    const { payload } = await jwtVerify(cookie, encodedKey, {
-      algorithms: ["HS256"],
-    });
-
-    const session = payload as Session;
-
-    if (accessToken) {
-      session.user.accessToken = accessToken;
-    }
-    return session;
-  } catch (error) {
-    console.error("Session verification error:", error);
-    return null;
-  }
+  if (!res.ok) return null;
+  return res.json(); // { user: ... } vindo do backend
 }
 
 export async function updateUserInSession(updatedUser: UpdatedUser) {
