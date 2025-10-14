@@ -1,6 +1,6 @@
 ﻿"use server";
 
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT } from "jose";
 import { cookies } from "next/headers";
 
 export type Session = {
