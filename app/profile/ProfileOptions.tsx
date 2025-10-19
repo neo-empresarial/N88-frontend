@@ -22,6 +22,7 @@ import { Users } from "@geist-ui/icons";
 
 export default async function ProfileOptions() {
   const session = await getSession();
+  console.log("Session in ProfileOptions:", session);
 
   return (
     <div>

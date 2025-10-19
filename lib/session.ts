@@ -2,6 +2,7 @@
 
 import { SignJWT } from "jose";
 import { cookies } from "next/headers";
+import { fetchWithAuth } from "./fetchWithAuth";
 
 export type Session = {
   user: {
@@ -71,15 +72,19 @@ export async function createSession(payload: Session) {
 }
 
 export async function getSession() {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/session`, {
+  const url = `${process.env.NEXT_PUBLIC_BACKEND_URL}users/session`;
+  const res = await fetch(url, {
     method: 'GET',
-    credentials: 'include',   // envia cookies para o domínio da API
+    credentials: 'include',
     headers: { 'Accept': 'application/json' },
     cache: 'no-store',
   });
 
-  if (!res.ok) return null;
-  return res.json(); // { user: ... } vindo do backend
+  if (!res.ok) {
+    console.error('getSession: resposta não OK', res.status, res.statusText);
+    return null;
+  }
+  return res.json();
 }
 
 export async function updateUserInSession(updatedUser: UpdatedUser) {
@@ -105,7 +110,7 @@ export async function updateUserInSession(updatedUser: UpdatedUser) {
 }
 
 export async function deleteSession() {
-  cookies().delete("session");
-  cookies().delete("access_token");
-  cookies().delete("refresh_token");
+  // cookies().delete("session");
+  // cookies().delete("access_token");
+  // cookies().delete("refresh_token");
 }
