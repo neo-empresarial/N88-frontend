@@ -46,7 +46,9 @@ const useAxios = () => {
 
   const getFilteredSubjects = async (search: string) => {
     try {
-      const response = await instance.get(`/subjects?search=${encodeURIComponent(search)}`);
+      const response = await instance.get(
+        `/subjects?search=${encodeURIComponent(search)}`
+      );
       return response.data;
     } catch (error) {
       console.error("Error fetching filtered subjects:", error);
@@ -59,7 +61,6 @@ const useAxios = () => {
       const response = await instance.get(`/subjects/${id}`);
       return response.data;
     } catch (error: unknown) {
-
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         if (typeof window !== "undefined") {
           window.location.href = "/auth/signin";
@@ -71,12 +72,14 @@ const useAxios = () => {
     }
   };
 
-
   const getCheckUserExtraInfo = async (email: string) => {
     try {
-      const response = await axiosPublicInstance.get("/users/check_extra_info", {
-        params: { email },
-      });
+      const response = await axiosPublicInstance.get(
+        "/users/check_extra_info",
+        {
+          params: { email },
+        }
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -87,7 +90,10 @@ const useAxios = () => {
 
   const register = async (formData: object) => {
     try {
-      const response = await axiosPublicInstance.post("auth/register", formData);
+      const response = await axiosPublicInstance.post(
+        "auth/register",
+        formData
+      );
       return response;
     } catch (error) {
       return error;

@@ -13,7 +13,6 @@ export type Session = {
     email: string;
     course: string;
   };
-  
 };
 
 type UpdatedUser = {
@@ -46,35 +45,28 @@ export async function createSession(payload: Session) {
     .setExpirationTime(expiredAt)
     .sign(encodedKey);
 
-  cookies().set("session", session, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",  
-    expires: expiredAt,
-    path: "/",
-  });
+  // Use "lax" for localhost (HTTP), "none" for production (HTTPS)
+  const isProduction = process.env.NODE_ENV === "production";
+  const sameSiteValue = isProduction ? "none" : "lax";
 
-  cookies().set("access_token", sessionPayload.accessToken, {
+  // Set all cookies with consistent settings
+  const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
+    secure: isProduction,
+    sameSite: sameSiteValue as "lax" | "none",
     expires: expiredAt,
     path: "/",
-  });
+  };
 
-  cookies().set("refresh_token", sessionPayload.refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "none",
-    expires: expiredAt,
-    path: "/",
-  });
+  cookies().set("session", session, cookieOptions);
+  cookies().set("access_token", sessionPayload.accessToken, cookieOptions);
+  cookies().set("refresh_token", sessionPayload.refreshToken, cookieOptions);
 }
 
 export async function getSession() {
   const cookie = cookies().get("session")?.value;
   const accessToken = cookies().get("access_token")?.value;
-  
+
   if (!cookie) return null;
 
   try {
@@ -84,6 +76,7 @@ export async function getSession() {
 
     const session = payload as Session;
 
+    // Always sync accessToken from cookie if available (in case it was refreshed)
     if (accessToken) {
       session.user.accessToken = accessToken;
     }
@@ -96,7 +89,7 @@ export async function getSession() {
 
 export async function updateUserInSession(updatedUser: UpdatedUser) {
   const currentSession = await getSession();
-  
+
   if (!currentSession) {
     throw new Error("No session found");
   }
@@ -106,7 +99,7 @@ export async function updateUserInSession(updatedUser: UpdatedUser) {
       accessToken: currentSession.user.accessToken,
       refreshToken: currentSession.user.refreshToken,
       provider: currentSession.user.provider,
-      userId: updatedUser.iduser || currentSession.user.userId, 
+      userId: updatedUser.iduser || currentSession.user.userId,
       name: updatedUser.name,
       email: updatedUser.email,
       course: updatedUser.course,
