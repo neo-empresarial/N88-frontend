@@ -1,9 +1,39 @@
 ﻿import axios from "axios";
 
+// Helper to get access token
+async function getAccessToken(): Promise<string | null> {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const response = await fetch("/api/session", {
+      credentials: "include",
+    });
+    const data = await response.json();
+    return data.session?.user?.accessToken || null;
+  } catch {
+    return null;
+  }
+}
+
+// Create instance with interceptor to add token
 const instance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
-  withCredentials: true, // garante que cookies sejam enviados
+  withCredentials: true,
 });
+
+// Add request interceptor to include Authorization header
+instance.interceptors.request.use(
+  async (config) => {
+    const token = await getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 const useAxios = () => {
   const axiosPublicInstance = axios.create({
@@ -46,7 +76,9 @@ const useAxios = () => {
 
   const getFilteredSubjects = async (search: string) => {
     try {
-      const response = await instance.get(`/subjects?search=${encodeURIComponent(search)}`);
+      const response = await instance.get(
+        `/subjects?search=${encodeURIComponent(search)}`
+      );
       return response.data;
     } catch (error) {
       console.error("Error fetching filtered subjects:", error);
@@ -59,7 +91,6 @@ const useAxios = () => {
       const response = await instance.get(`/subjects/${id}`);
       return response.data;
     } catch (error: unknown) {
-
       if (axios.isAxiosError(error) && error.response?.status === 401) {
         if (typeof window !== "undefined") {
           window.location.href = "/auth/signin";
@@ -71,12 +102,14 @@ const useAxios = () => {
     }
   };
 
-
   const getCheckUserExtraInfo = async (email: string) => {
     try {
-      const response = await axiosPublicInstance.get("/users/check_extra_info", {
-        params: { email },
-      });
+      const response = await axiosPublicInstance.get(
+        "/users/check_extra_info",
+        {
+          params: { email },
+        }
+      );
       return response.data;
     } catch (error) {
       throw error;
@@ -87,7 +120,10 @@ const useAxios = () => {
 
   const register = async (formData: object) => {
     try {
-      const response = await axiosPublicInstance.post("auth/register", formData);
+      const response = await axiosPublicInstance.post(
+        "auth/register",
+        formData
+      );
       return response;
     } catch (error) {
       return error;

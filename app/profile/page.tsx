@@ -17,32 +17,38 @@ export default function Profile() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: session, isLoading: sessionLoading } = useQuery({
+  const { data: sessionData, isLoading: sessionLoading } = useQuery({
     queryKey: ["session"],
-    queryFn: () => getSession(),
-    staleTime: 0,
-    gcTime: 1000 * 60 * 5,
+    queryFn: async () => {
+      const response = await fetch("/api/session", {
+        credentials: "include",
+      });
+      const data = await response.json();
+      return data.session;
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 10, // 10 minutes
     refetchOnWindowFocus: true,
   });
 
   const useGroups = () => {
     return useQuery({
-    queryKey: ["groups"],
-    queryFn: async () => {
-      const response = await fetchWithAuth(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}groups`,
-        {
-          credentials: "include",
-        }
-      );
+      queryKey: ["groups"],
+      queryFn: async () => {
+        const response = await fetchWithAuth(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}groups`,
+          {
+            credentials: "include",
+          }
+        );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch groups");
-      }
+        if (!response.ok) {
+          throw new Error("Failed to fetch groups");
+        }
 
         return response.json();
       },
-      enabled: !!session,
+      enabled: !!sessionData,
     });
   };
 
@@ -61,7 +67,7 @@ export default function Profile() {
             <div className="flex gap-2 items-center">
               <Avatar>
                 <AvatarFallback className="bg-gray-500 dark:bg-gray-700">
-                  {session?.user?.name?.charAt(0)}
+                  {sessionData?.user?.name?.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="flex flex-col">
@@ -73,13 +79,13 @@ export default function Profile() {
                 ) : (
                   <>
                     <h1 className="text-2xl font-bold">
-                      {session?.user?.name}
+                      {sessionData?.user?.name}
                     </h1>
                     <p className="text-sm text-gray-500">
-                      {session?.user?.course}
+                      {sessionData?.user?.course}
                     </p>
                     <p className="text-sm text-gray-500">
-                      {session?.user?.email}
+                      {sessionData?.user?.email}
                     </p>
                   </>
                 )}
@@ -91,15 +97,15 @@ export default function Profile() {
               onClick={() => setIsEditDialogOpen(true)}
               className="h-8 w-8 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-md hover:scale-105 transition-all duration-200 ease-in-out"
               disabled={sessionLoading}
-              title="Editar perfil" 
+              title="Editar perfil"
             >
               <Edit className="h-4 w-4" />
             </Button>
           </div>
 
-          {session && (
+          {sessionData && (
             <EditProfileDialog
-              session={session}
+              session={sessionData}
               isOpen={isEditDialogOpen}
               onClose={() => setIsEditDialogOpen(false)}
               onProfileUpdated={handleProfileUpdated}
