@@ -258,20 +258,6 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                placeholder="seu@email.com"
-                disabled={isLoading}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
               <Label htmlFor="course">Curso</Label>
               <input
                 type="hidden"
