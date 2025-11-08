@@ -1,9 +1,39 @@
 ﻿import axios from "axios";
 
+// Helper to get access token
+async function getAccessToken(): Promise<string | null> {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const response = await fetch("/api/session", {
+      credentials: "include",
+    });
+    const data = await response.json();
+    return data.session?.user?.accessToken || null;
+  } catch {
+    return null;
+  }
+}
+
+// Create instance with interceptor to add token
 const instance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
-  withCredentials: true, // garante que cookies sejam enviados
+  withCredentials: true,
 });
+
+// Add request interceptor to include Authorization header
+instance.interceptors.request.use(
+  async (config) => {
+    const token = await getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 const useAxios = () => {
   const axiosPublicInstance = axios.create({
