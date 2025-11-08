@@ -45,14 +45,20 @@ export async function createSession(payload: Session) {
     .setExpirationTime(expiredAt)
     .sign(encodedKey);
 
-  // Use "lax" for localhost (HTTP), "none" for production (HTTPS)
-  const isProduction = process.env.NODE_ENV === "production";
-  const sameSiteValue = isProduction ? "none" : "lax";
+  // Check if using HTTPS by checking the frontend URL
+  // For HTTP (like your current setup), use lax and secure: false
+  const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL || "";
+  const isHttps = frontendUrl.startsWith("https://");
+
+  // Use "lax" for HTTP, "none" for HTTPS (cross-origin)
+  // secure: true only works with HTTPS
+  const sameSiteValue = isHttps ? "none" : "lax";
+  const secureValue = isHttps;
 
   // Set all cookies with consistent settings
   const cookieOptions = {
     httpOnly: true,
-    secure: isProduction,
+    secure: secureValue,
     sameSite: sameSiteValue as "lax" | "none",
     expires: expiredAt,
     path: "/",

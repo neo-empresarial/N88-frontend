@@ -1,6 +1,5 @@
-﻿import { getSession } from "@/lib/session";
-import { NextRequest, NextResponse } from "next/server";
-import { SignJWT, jwtVerify } from "jose";
+﻿import { NextRequest, NextResponse } from "next/server";
+import { jwtVerify } from "jose";
 
 const secretKey = process.env.SESSION_SECRET_KEY!;
 const encodedKey = new TextEncoder().encode(secretKey);
