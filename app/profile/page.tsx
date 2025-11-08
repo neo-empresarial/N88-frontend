@@ -1,4 +1,4 @@
-﻿﻿"use client";
+﻿"use client";
 import { getSession } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -35,12 +35,14 @@ export default function Profile() {
     });
   };
 
-  const { data: session } = useQuery({
+  const { data: session, isLoading: sessionLoading } = useQuery({
     queryKey: ["session"],
     queryFn: () => getSession(),
   });
 
   const { data: groups, isLoading } = useGroups();
+
+  const queryClient = useQueryClient();
 
   const handleProfileUpdated = async () => {
     await queryClient.invalidateQueries({ queryKey: ["session"] });
@@ -97,7 +99,12 @@ export default function Profile() {
                 {groups && groups.length > 0 ? (
                   groups.map((group: groupType) => (
                     <MyGroupsCard key={group.id} group={group} />
-                  ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    Você ainda não participa de grupos.
+                  </p>
+                )}
                 <div className="flex justify-center">
                   <CreateGroupDialog />
                 </div>
