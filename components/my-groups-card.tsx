@@ -11,6 +11,7 @@ import { getSession } from "@/lib/session";
 import { useEffect, useState } from "react";
 import LeaveGroupDialog from "./leave-group-dialog";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import DeleteGroupDialog from "./delete-group-dialog";
 
 export type groupType = {
   id: string;
@@ -136,7 +137,9 @@ const MyGroupsCard = ({ group }: { group: groupType }) => {
             {isOwner ? (
               <>
                 <AddMembersToGroupDialog groupId={Number(group.id)} />
-                <RemoveMembersFromGroupDialog groupId={Number(group.id)} />
+                {group.members?.length > 1 && (
+                <RemoveMembersFromGroupDialog groupId={Number(group.id)} />)}
+                <DeleteGroupDialog groupId={Number(group.id)} />
               </>
             ) : (
               <LeaveGroupDialog onConfirm={handleLeaveGroup} />
