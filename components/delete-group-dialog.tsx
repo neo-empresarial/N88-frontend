@@ -16,12 +16,6 @@ import { toast } from "sonner";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 
-interface User {
-    iduser: number;
-    name: string;
-    email: string;
-}
-
 const DeleteGroupDialog = ({ groupId }: { groupId: number }) => {
     const queryClient = useQueryClient();
     const router = useRouter();
