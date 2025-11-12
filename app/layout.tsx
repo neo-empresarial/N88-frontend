@@ -11,6 +11,7 @@ import { Toaster } from "sonner";
 import NotificationsDropdown from "@/components/notifications-dropdown";
 import Image from "next/image";
 import logo from "./assets/logo-neo.svg";
+import BlackLogo from "./assets/black-logo.svg"
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -55,7 +56,12 @@ export default function RootLayout({
                   <MenubarMenu>
                     <Link href={"/"}>
                       <div className="text-sm lg:text-base flex gap-2 items-center ml-6">
-                        <Image src={logo} alt="grade" width={20} height={20} />
+                        <span className="hidden dark:block">
+                          <Image src={logo} alt="grade" width={20} height={20} />
+                        </span>
+                        <span className="block dark:hidden">
+                          <Image src={BlackLogo} alt="grade" width={20} height={20} />
+                        </span>
                         MatrUFSC 2.0
                       </div>
                     </Link>
