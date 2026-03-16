@@ -1,4 +1,4 @@
-﻿﻿import { User } from "lucide-react";
+﻿import { User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -38,7 +38,7 @@ export default async function ProfileOptions() {
 
             <Avatar className="w-8 h-8">
               <AvatarImage
-                src={"/default-avatar.png"}
+                src={session?.user?.profilePicture || "/default-avatar.png"}
                 alt={session?.user?.name || "User"}
               />
               <AvatarFallback>

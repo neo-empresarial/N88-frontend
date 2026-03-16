@@ -17,7 +17,7 @@ function normalizeSchedules(x: unknown): SavedSchedule[] {
   return [];
 }
 
-export const useSavedSchedulesQuery = () => {
+export const useSavedSchedulesQuery = (isAuthenticated = false) => {
   const {
     getSavedSchedules,
     createSavedSchedule,
@@ -33,6 +33,7 @@ export const useSavedSchedulesQuery = () => {
       const raw = await getSavedSchedules();
       return normalizeSchedules(raw);
     },
+    enabled: isAuthenticated,
     initialData: [],         // evita undefined no primeiro render
     select: (data) => data ?? [],
     staleTime: 30_000,       // opcional: menos refetch

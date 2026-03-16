@@ -1,5 +1,6 @@
-﻿import React, { useContext, useEffect, createContext, useState } from "react";
+import React, { useContext, useEffect, useCallback, createContext, useState } from "react";
 import { SubjectsType } from "../types/dataType";
+import { restoreColorUsage } from "../utils/colorUtils";
 
 export type scheduleSubjectsType = {
   code: string;
@@ -8,6 +9,8 @@ export type scheduleSubjectsType = {
   activated: boolean;
   schedules?: string;
 };
+
+type LocalSaveStatus = "idle" | "saving" | "saved";
 
 type SubjectsContextType = {
   searchedSubjects: SubjectsType[];
@@ -28,10 +31,16 @@ type SubjectsContextType = {
   setCurrentScheduleId: React.Dispatch<React.SetStateAction<number | null>>;
   totalCredits: number;
   setTotalCredits: React.Dispatch<React.SetStateAction<number>>;
+  localSaveStatus: LocalSaveStatus;
+  clearLocalSchedule: () => void;
+  scheduleTitle: string;
+  setScheduleTitle: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const STORAGE_KEY = "schedule_subjects";
 const SEARCHED_SUBJECTS_KEY = "searched_subjects";
+const STORAGE_TITLE_KEY = "schedule_title";
+const STORAGE_CURRENT_ID_KEY = "current_schedule_id";
 
 export const SubjectsContext = createContext<SubjectsContextType>({
   searchedSubjects: [],
@@ -48,6 +57,10 @@ export const SubjectsContext = createContext<SubjectsContextType>({
   setCurrentScheduleId: () => {},
   totalCredits: 0,
   setTotalCredits: () => {},
+  localSaveStatus: "idle",
+  clearLocalSchedule: () => {},
+  scheduleTitle: "Grade sem título",
+  setScheduleTitle: () => {},
 });
 
 export function SubjectsProvider({
@@ -95,33 +108,98 @@ export function SubjectsProvider({
   const [onFocusSubjectClass, setOnFocusSubjectClass] = useState(
     {} as { code: string; classcode: string }
   );
-  const [currentScheduleId, setCurrentScheduleId] = useState<number | null>(
-    null
-  );
+  const [currentScheduleId, setCurrentScheduleId] = useState<number | null>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        const savedId = localStorage.getItem(STORAGE_CURRENT_ID_KEY);
+        return savedId ? Number(savedId) : null;
+      }
+    } catch {}
+    return null;
+  });
   const [totalCredits, setTotalCredits] = useState<number>(0);
+  const [localSaveStatus, setLocalSaveStatus] = useState<LocalSaveStatus>("idle");
+  const [scheduleTitle, setScheduleTitle] = useState<string>(() => {
+    try {
+      if (typeof window !== "undefined") {
+        return localStorage.getItem(STORAGE_TITLE_KEY) || "Grade sem título";
+      }
+    } catch {}
+    return "Grade sem título";
+  });
+
+  const clearLocalSchedule = useCallback(() => {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(SEARCHED_SUBJECTS_KEY);
+    } catch (e) {
+      console.error("Error clearing local schedule:", e);
+    }
+    setScheduleSubjects([]);
+    setSearchedSubjects([]);
+    setCurrentScheduleId(null);
+    setLocalSaveStatus("idle");
+    setScheduleTitle("Grade sem título");
+    try {
+      localStorage.removeItem(STORAGE_TITLE_KEY);
+      localStorage.removeItem(STORAGE_CURRENT_ID_KEY);
+    } catch (e) {}
+  }, []);
+
+  // Restore color usage on mount so new subjects don't repeat colors
+  // already assigned to subjects loaded from localStorage.
+  useEffect(() => {
+    if (searchedSubjects.length > 0) {
+      const pairs = searchedSubjects
+        .filter((s) => s.color)
+        .map((s) => s.color as [string, string]);
+      restoreColorUsage(pairs);
+    }
+    // Only run on mount — deps intentionally empty
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     try {
-      if (typeof window !== "undefined" && scheduleSubjects.length > 0) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleSubjects));
-      }
+      setLocalSaveStatus("saving");
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleSubjects));
+      setLocalSaveStatus("saved");
     } catch (error) {
       console.error("Error saving schedule subjects to localStorage:", error);
+      setLocalSaveStatus("idle");
     }
   }, [scheduleSubjects]);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
     try {
-      if (typeof window !== "undefined" && searchedSubjects.length > 0) {
-        localStorage.setItem(
-          SEARCHED_SUBJECTS_KEY,
-          JSON.stringify(searchedSubjects)
-        );
-      }
+      localStorage.setItem(
+        SEARCHED_SUBJECTS_KEY,
+        JSON.stringify(searchedSubjects)
+      );
     } catch (error) {
       console.error("Error saving searched subjects to localStorage:", error);
     }
   }, [searchedSubjects]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(STORAGE_TITLE_KEY, scheduleTitle);
+    } catch (error) {}
+  }, [scheduleTitle]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (currentScheduleId !== null) {
+        localStorage.setItem(STORAGE_CURRENT_ID_KEY, currentScheduleId.toString());
+      } else {
+        localStorage.removeItem(STORAGE_CURRENT_ID_KEY);
+      }
+    } catch (error) {}
+  }, [currentScheduleId]);
 
   return (
     <SubjectsContext.Provider
@@ -140,6 +218,10 @@ export function SubjectsProvider({
         setCurrentScheduleId,
         totalCredits,
         setTotalCredits,
+        localSaveStatus,
+        clearLocalSchedule,
+        scheduleTitle,
+        setScheduleTitle,
       }}
     >
       {children}

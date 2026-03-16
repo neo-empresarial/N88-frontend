@@ -13,16 +13,17 @@ import { Loader2 } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { useEffect } from "react";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
+import { useRouter } from "next/navigation";
 
 interface Notification {
   id: number;
   type: string;
   status: string;
-  sender: {
+  sender?: {
     iduser: number;
     name: string;
   };
-  group: {
+  group?: {
     id: number;
     name: string;
   };
@@ -31,6 +32,7 @@ interface Notification {
 
 const NotificationsDropdown = () => {
   const queryClient = useQueryClient();
+  const router = useRouter();
   useEffect(() => {
     const checkSession = async () => {
       await getSession();
@@ -87,7 +89,9 @@ const NotificationsDropdown = () => {
         }
       );
       queryClient.invalidateQueries({ queryKey: ["groups"] });
-      toast.success("Invitation responded to successfully");
+      if (updatedNotification.type !== "PROFILE_COMPLETION") {
+        toast.success("Invitation responded to successfully");
+      }
     },
   });
 
@@ -138,56 +142,83 @@ const NotificationsDropdown = () => {
             No new notifications
           </div>
         ) : (
-          pendingNotifications?.map((notification: Notification) => (
-            <div key={notification.id} className="p-4 border-b last:border-0">
-              <div className="flex flex-col gap-2">
-                <p className="text-sm">
-                  <span className="font-medium">
-                    {notification.sender.name}
-                  </span>{" "}
-                  invited you to join group{" "}
-                  <span className="font-medium">{notification.group.name}</span>
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => handleRespond(notification.id, true)}
-                    disabled={
-                      isResponding(notification.id, true) ||
-                      isResponding(notification.id, false)
-                    }
-                  >
-                    {isResponding(notification.id, true) ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Accepting...
-                      </div>
-                    ) : (
-                      "Accept"
-                    )}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleRespond(notification.id, false)}
-                    disabled={
-                      isResponding(notification.id, true) ||
-                      isResponding(notification.id, false)
-                    }
-                  >
-                    {isResponding(notification.id, false) ? (
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Declining...
-                      </div>
-                    ) : (
-                      "Decline"
-                    )}
-                  </Button>
+          pendingNotifications?.map((notification: Notification) => {
+            if (notification.type === "PROFILE_COMPLETION") {
+              return (
+                <div key={notification.id} className="p-4 border-b last:border-0">
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm">
+                      <span className="font-medium">Complete seu perfil</span>
+                      <br />
+                      Mantenha seu perfil atualizado com seu curso atual para aproveitar ao máximo a plataforma.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' })); // Close dropdown
+                          router.push('/profile');
+                        }}
+                      >
+                        Me leve lá
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div key={notification.id} className="p-4 border-b last:border-0">
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm">
+                    <span className="font-medium">
+                      {notification.sender?.name || "Desconhecido"}
+                    </span>{" "}
+                    convidou você para o grupo{" "}
+                    <span className="font-medium">{notification.group?.name || "Desconhecido"}</span>
+                  </p>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleRespond(notification.id, true)}
+                      disabled={
+                        isResponding(notification.id, true) ||
+                        isResponding(notification.id, false)
+                      }
+                    >
+                      {isResponding(notification.id, true) ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Aceitando...
+                        </div>
+                      ) : (
+                        "Aceitar"
+                      )}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleRespond(notification.id, false)}
+                      disabled={
+                        isResponding(notification.id, true) ||
+                        isResponding(notification.id, false)
+                      }
+                    >
+                      {isResponding(notification.id, false) ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Recusando...
+                        </div>
+                      ) : (
+                        "Recusar"
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </DropdownMenuContent>
     </DropdownMenu>

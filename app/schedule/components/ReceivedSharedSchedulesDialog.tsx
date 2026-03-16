@@ -31,7 +31,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Download, X, Loader2, Inbox, CheckCircle, Clock } from "lucide-react";
 import { useSharedSchedulesQuery } from "@/app/hooks/useSharedSchedules";
+import { useSession } from "@/app/hooks/useSession";
 import { SharedSchedule } from "@/app/services/sharedSchedulesService";
+import { toast } from "sonner";
+import LoginSuggestionDialog from "./LoginSuggestionDialog";
 
 export default function ReceivedSharedSchedulesDialog() {
   const [open, setOpen] = useState(false);
@@ -39,6 +42,8 @@ export default function ReceivedSharedSchedulesDialog() {
     useState<SharedSchedule | null>(null);
   const [showDeclineAlert, setShowDeclineAlert] = useState(false);
 
+  const { isAuthenticated } = useSession();
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const {
     receivedSharedSchedules,
     isLoadingReceived,
@@ -46,7 +51,7 @@ export default function ReceivedSharedSchedulesDialog() {
     declineSharedSchedule,
     isAccepting,
     isDeclining,
-  } = useSharedSchedulesQuery();
+  } = useSharedSchedulesQuery(isAuthenticated);
 
   const handleAccept = (sharedSchedule: SharedSchedule) => {
     acceptSharedSchedule({
@@ -83,7 +88,16 @@ export default function ReceivedSharedSchedulesDialog() {
 
   return (
     <>
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(newOpen) => {
+          if (newOpen && !isAuthenticated) {
+            setShowLoginDialog(true);
+            return;
+          }
+          setOpen(newOpen);
+        }}
+      >
         <DialogTrigger asChild>
           <Button variant="outline" className="gap-2">
             <Inbox className="h-4 w-4" />
@@ -255,6 +269,10 @@ export default function ReceivedSharedSchedulesDialog() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <LoginSuggestionDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+      />
     </>
   );
 }

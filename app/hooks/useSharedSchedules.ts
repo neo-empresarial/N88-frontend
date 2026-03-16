@@ -6,7 +6,7 @@ import {
 } from "../services/sharedSchedulesService";
 import { toast } from "sonner";
 
-export const useSharedSchedulesQuery = () => {
+export const useSharedSchedulesQuery = (isAuthenticated = false) => {
   const {
     shareSchedule,
     getReceivedSharedSchedules,
@@ -19,11 +19,13 @@ export const useSharedSchedulesQuery = () => {
   const receivedSharedSchedulesQuery = useQuery({
     queryKey: ["receivedSharedSchedules"],
     queryFn: getReceivedSharedSchedules,
+    enabled: isAuthenticated,
   });
 
   const sentSharedSchedulesQuery = useQuery({
     queryKey: ["sentSharedSchedules"],
     queryFn: getSentSharedSchedules,
+    enabled: isAuthenticated,
   });
 
   const shareMutation = useMutation({

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Edit, Loader2, Check, ChevronsUpDown } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "react-toastify";
@@ -226,6 +226,10 @@ const handleSubmit = async (e: React.FormEvent) => {
           <div className="flex items-center justify-center mb-4">
             <div className="relative">
               <Avatar className="h-20 w-20">
+                <AvatarImage 
+                  src={session?.user?.profilePicture || "/default-avatar.png"} 
+                  alt={formData.name || "User"} 
+                />
                 <AvatarFallback className="bg-gray-500 dark:bg-gray-700 text-xl">
                   {formData.name?.charAt(0) || "U"}
                 </AvatarFallback>

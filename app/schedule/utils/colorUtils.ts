@@ -40,3 +40,14 @@ export function resetColorUsage() {
   usedLightColors.clear();
   usedDarkColors.clear();
 }
+
+/**
+ * Re-marks colors from already-stored subjects as used so that
+ * getUniqueColorPair() skips them after a page refresh.
+ */
+export function restoreColorUsage(colorPairs: [string, string][]) {
+  for (const [light, dark] of colorPairs) {
+    if (light) usedLightColors.add(light);
+    if (dark) usedDarkColors.add(dark);
+  }
+}
