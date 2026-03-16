@@ -1,11 +1,9 @@
-﻿"use client";
+"use client";
 import { SubjectsType } from "../types/dataType";
-import { useState, useMemo } from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 
-import {
-  useSubjects,
-} from "../providers/subjectsContext";
+import { useSubjects } from "../providers/subjectsContext";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,6 +28,8 @@ interface SearchSubjectProps {
   subjects: SubjectsType[];
 }
 
+const PAGE_SIZE = 20;
+
 export default function SearchSubject({ subjects }: SearchSubjectProps) {
   const {
     searchedSubjects,
@@ -42,7 +42,11 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
   const [value, setValue] = useState("");
   const { getSubject } = useAxios();
   const [searchTerm, setSearchTerm] = useState("");
-  const [paginationLimit, setPaginationLimit] = useState(20);
+  const [paginationLimit, setPaginationLimit] = useState(PAGE_SIZE);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // Ref to the Command wrapper div — used to locate the [cmdk-list] element
+  const commandRef = useRef<HTMLDivElement>(null);
 
   const filteredSubjects = useMemo(() => {
     const subjectsArray = subjects || [];
@@ -53,19 +57,56 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
         subject.code.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    return filtered_subjects.map((subject) => {
-      return {
-        ...subject,
-        name: `${subject.code} - ${subject.name}`,
-      };
-    });
+    return filtered_subjects.map((subject) => ({
+      ...subject,
+      name: `${subject.code} - ${subject.name}`,
+    }));
   }, [subjects, searchTerm]);
 
-  const paginatedSubjects = filteredSubjects.slice(0, paginationLimit);
+  // Reset pagination whenever the search term changes
+  useEffect(() => {
+    setPaginationLimit(PAGE_SIZE);
+  }, [searchTerm]);
 
-  const loadMoreItems = () => {
-    setPaginationLimit((prevLimit) => prevLimit + 20);
-  };
+  const paginatedSubjects = filteredSubjects.slice(0, paginationLimit);
+  const hasMore = filteredSubjects.length > paginationLimit;
+
+  const loadMoreItems = useCallback(() => {
+    if (!hasMore || isLoadingMore) return;
+    setIsLoadingMore(true);
+    setTimeout(() => {
+      setPaginationLimit((prev) => prev + PAGE_SIZE);
+      setIsLoadingMore(false);
+    }, 150);
+  }, [hasMore, isLoadingMore]);
+
+  // Attach a scroll listener to CommandList's internal scroll container ([cmdk-list]).
+  // IntersectionObserver won't work here because CommandList clips its children
+  // via overflow:auto — the sentinel would never intersect the browser viewport.
+  useEffect(() => {
+    if (!open) return;
+
+    // Give the DOM a moment to render the popover before querying
+    const timeoutId = setTimeout(() => {
+      const listEl = commandRef.current?.querySelector<HTMLElement>(
+        "[cmdk-list]"
+      );
+      if (!listEl) return;
+
+      const handleScroll = () => {
+        const { scrollTop, scrollHeight, clientHeight } = listEl;
+        // Trigger when within 60px of the bottom
+        if (scrollHeight - scrollTop - clientHeight < 60) {
+          loadMoreItems();
+        }
+      };
+
+      listEl.addEventListener("scroll", handleScroll, { passive: true });
+      return () => listEl.removeEventListener("scroll", handleScroll);
+    }, 50);
+
+    return () => clearTimeout(timeoutId);
+  }, [open, loadMoreItems]);
 
   const handleInterrestSubjects = async (subject: SubjectsType) => {
     const isAlreadySelected = searchedSubjects.some(
@@ -80,15 +121,12 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
         releaseColorPair(subjectToRemove.color[0], subjectToRemove.color[1]);
       }
 
-      const newSearchedSubjects = searchedSubjects.filter(
-        (interestsSubject) => interestsSubject.code !== subject.code
+      setSearchedSubjects(
+        searchedSubjects.filter((s) => s.code !== subject.code)
       );
-      const newScheduleSubjects = scheduleSubjects.filter(
-        (interestsSubject) => interestsSubject.code !== subject.code
+      setScheduleSubjects(
+        scheduleSubjects.filter((s) => s.code !== subject.code)
       );
-
-      setSearchedSubjects(newSearchedSubjects);
-      setScheduleSubjects(newScheduleSubjects);
       setSelectedSubject({} as SubjectsType);
       setValue("");
     } else {
@@ -106,17 +144,13 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
           activated: true,
         };
 
-        const newSearchedSubjects = [...searchedSubjects, dataWithColors];
-        const newScheduleSubjects = [...scheduleSubjects, newScheduleSubject];
-
-        setSearchedSubjects(newSearchedSubjects);
-        setScheduleSubjects(newScheduleSubjects);
+        setSearchedSubjects([...searchedSubjects, dataWithColors]);
+        setScheduleSubjects([...scheduleSubjects, newScheduleSubject]);
         setSelectedSubject(dataWithColors);
         setValue(subject.name);
       } catch (error) {
         console.error("Error fetching subject:", error);
       }
-
     }
   };
 
@@ -146,7 +180,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[500px] p-0">
-        <Command>
+        <Command ref={commandRef}>
           <CommandInput
             placeholder="Procurar matéria..."
             value={searchTerm}
@@ -165,8 +199,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
                     className={cn(
                       "mr-2 h-4 w-4",
                       searchedSubjects.some(
-                        (interestsSubject) =>
-                          interestsSubject.code === subject.code
+                        (s) => s.code === subject.code
                       )
                         ? "opacity-100"
                         : "opacity-0"
@@ -175,16 +208,14 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
                   {subject.name}
                 </CommandItem>
               ))}
-              {filteredSubjects.length > paginationLimit && (
-                <CommandItem
-                  onSelect={loadMoreItems}
-                  className="text-center text-muted-foreground"
-                >
-                  Load more...
-                </CommandItem>
-
-              )}
             </CommandGroup>
+
+            {/* Loading indicator — rendered outside CommandGroup so it's always visible */}
+            {isLoadingMore && (
+              <div className="py-2 flex justify-center items-center">
+                <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              </div>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

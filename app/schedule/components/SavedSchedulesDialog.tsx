@@ -9,6 +9,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useSavedSchedulesQuery } from "@/app/hooks/useSavedSchedules";
+import { useSession } from "@/app/hooks/useSession";
+import LoginSuggestionDialog from "./LoginSuggestionDialog";
 import { Loader2, List, Trash2, Share2, Download } from "lucide-react";
 import {
   Table,
@@ -47,9 +49,11 @@ export default function SavedSchedulesDialog() {
   const [loadingScheduleId, setLoadingScheduleId] = useState<number | null>(
     null
   );
+  const { isAuthenticated } = useSession();
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { savedSchedules, isLoading, deleteSchedule, isDeleting } =
-    useSavedSchedulesQuery();
-  const { setScheduleSubjects, setSearchedSubjects, setCurrentScheduleId } =
+    useSavedSchedulesQuery(isAuthenticated);
+  const { setScheduleSubjects, setSearchedSubjects, setCurrentScheduleId, setScheduleTitle } =
     useSubjects();
   const { getSubjectsByCodes } = useAxios();
 
@@ -109,6 +113,7 @@ export default function SavedSchedulesDialog() {
       // Update the UI
       setSearchedSubjects(subjectsToLoad);
       setScheduleSubjects(scheduleItems);
+      setScheduleTitle(schedule.title);
 
       // Close dialog and show success
       setOpen(false);
@@ -129,6 +134,10 @@ export default function SavedSchedulesDialog() {
       <Dialog
         open={open}
         onOpenChange={(newOpen) => {
+          if (newOpen && !isAuthenticated) {
+            setShowLoginDialog(true);
+            return;
+          }
           setOpen(newOpen);
         }}
       >
@@ -249,6 +258,10 @@ export default function SavedSchedulesDialog() {
           onOpenChange={setShowShareDialog}
         />
       )}
+      <LoginSuggestionDialog
+        open={showLoginDialog}
+        onOpenChange={setShowLoginDialog}
+      />
     </>
   );
 }

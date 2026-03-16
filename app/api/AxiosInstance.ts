@@ -44,7 +44,7 @@ const useAxios = () => {
   });
 
   const getAllSubjects = async () => {
-    const response = await instance.get("subjects");
+    const response = await axiosPublicInstance.get("subjects");
     return response.data;
   };
 
@@ -54,7 +54,7 @@ const useAxios = () => {
     }
 
     try {
-      const response = await instance.get(
+      const response = await axiosPublicInstance.get(
         `/subjects/by-codes?codes=${codes.join(",")}`
       );
       return response.data;
@@ -66,7 +66,7 @@ const useAxios = () => {
 
   const getAllSubjectsWithRelations = async () => {
     try {
-      const response = await instance.get("/subjects");
+      const response = await axiosPublicInstance.get("/subjects");
       return response.data;
     } catch (error) {
       console.error("Error fetching subjects with relations:", error);
@@ -76,7 +76,7 @@ const useAxios = () => {
 
   const getFilteredSubjects = async (search: string) => {
     try {
-      const response = await instance.get(
+      const response = await axiosPublicInstance.get(
         `/subjects?search=${encodeURIComponent(search)}`
       );
       return response.data;
@@ -88,7 +88,7 @@ const useAxios = () => {
 
   const getSubject = async (id: number) => {
     try {
-      const response = await instance.get(`/subjects/${id}`);
+      const response = await axiosPublicInstance.get(`/subjects/${id}`);
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {

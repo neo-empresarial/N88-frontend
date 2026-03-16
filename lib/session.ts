@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
@@ -12,6 +12,7 @@ export type Session = {
     name: string;
     email: string;
     course: string;
+    profilePicture?: string;
   };
 };
 
@@ -20,6 +21,7 @@ type UpdatedUser = {
   name: string;
   email: string;
   course: string;
+  profilePicture?: string;
 };
 
 const secretKey = process.env.SESSION_SECRET_KEY!;
@@ -35,6 +37,7 @@ export async function createSession(payload: Session) {
       email: payload.user.email,
       course: payload.user.course,
       provider: payload.user.provider,
+      profilePicture: payload.user.profilePicture,
     },
     accessToken: payload.user.accessToken,
     refreshToken: payload.user.refreshToken,
@@ -106,9 +109,10 @@ export async function updateUserInSession(updatedUser: UpdatedUser) {
       refreshToken: currentSession.user.refreshToken,
       provider: currentSession.user.provider,
       userId: updatedUser.iduser || currentSession.user.userId,
-      name: updatedUser.name,
-      email: updatedUser.email,
-      course: updatedUser.course,
+      name: updatedUser.name || currentSession.user.name,
+      email: updatedUser.email || currentSession.user.email,
+      course: updatedUser.course || currentSession.user.course,
+      profilePicture: updatedUser.profilePicture || currentSession.user.profilePicture,
     },
   };
 
