@@ -17,8 +17,9 @@ export function useSession() {
   const { data: session, isLoading } = useQuery<Session | null>({
     queryKey: ["session"],
     queryFn: fetchSession,
-    staleTime: Infinity,
-    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
+    refetchInterval: 10 * 60 * 1000,
   });
 
   return {

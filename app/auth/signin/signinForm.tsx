@@ -1,17 +1,36 @@
-﻿"use client";
+"use client";
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SubmitButton from "@/components/submit-button";
 import { signIn } from "@/lib/auth";
 import { useFormState } from "react-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 const SignInForm = () => {
   const [state, action] = useFormState(signIn, undefined);
   const [showPassword, setShowPassword]=useState(false);
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (state?.success) {
+      queryClient.invalidateQueries({ queryKey: ["savedSchedules"] });
+      queryClient.invalidateQueries({ queryKey: ["sharedSchedules"] });
+      
+      const redirectPath = localStorage.getItem("redirectAfterLogin");
+      if (redirectPath) {
+        localStorage.removeItem("redirectAfterLogin");
+        router.push(redirectPath);
+      } else {
+        router.push("/");
+      }
+    }
+  }, [state?.success, router, queryClient]);
 
   const togglePasswordVisibility = ()=> {
     setShowPassword(!showPassword)

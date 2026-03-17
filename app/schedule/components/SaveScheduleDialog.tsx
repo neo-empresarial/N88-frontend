@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,21 +24,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { useSavedSchedulesQuery } from "@/app/hooks/useSavedSchedules";
 import { useSession } from "@/app/hooks/useSession";
 import { useSubjects } from "../providers/subjectsContext";
-import { Save, Plus } from "lucide-react";
+import { Save, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { SavedSchedule } from "@/app/services/savedSchedulesService";
 import LoginSuggestionDialog from "./LoginSuggestionDialog";
 
 export default function SaveScheduleDialog() {
-  const { scheduleSubjects, currentScheduleId, scheduleTitle, clearLocalSchedule, setCurrentScheduleId, setScheduleTitle } = useSubjects();
+  const { scheduleSubjects, currentScheduleId, scheduleTitle, clearLocalSchedule, resetToDefault, setCurrentScheduleId, setScheduleTitle, plansData, markAsSaved, calculateTotalCredits, getPlansDataForSave } = useSubjects();
   const { isAuthenticated } = useSession();
-  const { updateSchedule, createSchedule, savedSchedules, isCreating, isUpdating, isLoading } = useSavedSchedulesQuery(isAuthenticated);
+  const { updateScheduleAsync, createSchedule, deleteSchedule, savedSchedules, isCreating, isUpdating, isDeleting, isLoading } = useSavedSchedulesQuery(isAuthenticated);
   
-  const isSaving = isCreating || isUpdating;
+  const isSaving = isCreating || isUpdating || isDeleting;
 
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [showDiscardAlert, setShowDiscardAlert] = useState(false);
+  const [showClearAlert, setShowClearAlert] = useState(false);
   
   const [title, setTitle] = useState(scheduleTitle);
   const [description, setDescription] = useState("");
@@ -50,11 +51,21 @@ export default function SaveScheduleDialog() {
   const currentSchedule = savedSchedules?.find(
     (s: SavedSchedule) => s.idsavedschedule === currentScheduleId
   );
+  
   const isTitleDirty = currentSchedule ? currentSchedule.title !== scheduleTitle : false;
+  
+  const currentScheduleItems = currentSchedule 
+    ? (currentSchedule.items && Array.isArray(currentSchedule.items) 
+        ? currentSchedule.items 
+        : currentSchedule.plans && Array.isArray(currentSchedule.plans)
+          ? currentSchedule.plans.flatMap(p => p.items || [])
+          : [])
+    : [];
+
   const isSubjectsDirty = currentSchedule ? (
-    scheduleSubjects.length !== currentSchedule.items.length ||
+    scheduleSubjects.length !== currentScheduleItems.length ||
     scheduleSubjects.some(subj => {
-      const savedItem = currentSchedule.items.find(i => i.subjectCode === subj.code && i.classCode === subj.class);
+      const savedItem = currentScheduleItems.find(i => i.subjectCode === subj.code && i.classCode === subj.class);
       return !savedItem || savedItem.activated !== subj.activated;
     })
   ) : false;
@@ -63,25 +74,25 @@ export default function SaveScheduleDialog() {
     ? (isLoading ? false : (!currentSchedule || isTitleDirty || isSubjectsDirty))
     : scheduleSubjects.length > 0;
 
-  const handleSaveClick = () => {
+  const handleSaveClick = async () => {
     if (!isAuthenticated) {
       setShowLoginDialog(true);
       return;
     }
     
-    if (scheduleSubjects.length === 0) {
-      toast.info("A grade está vazia.");
-      return;
-    }
-
     if (currentScheduleId && currentSchedule) {
-      // Quick Save existing
-      updateSchedule({
-        id: currentScheduleId,
-        title: scheduleTitle,
-        description: currentSchedule.description || '',
-        scheduleSubjects: scheduleSubjects,
-      });
+      try {
+        await updateScheduleAsync({
+          id: currentScheduleId,
+          title: scheduleTitle,
+          description: currentSchedule.description || '',
+          plans: getPlansDataForSave(),
+          totalCredits: calculateTotalCredits(),
+        });
+        markAsSaved();
+      } catch (error) {
+        console.error("Save failed:", error);
+      }
     } else {
       // Save New
       setTitle(scheduleTitle);
@@ -103,6 +114,38 @@ export default function SaveScheduleDialog() {
     clearLocalSchedule();
   };
 
+  const handleClearClick = () => {
+    const hasScheduleToDelete = currentScheduleId && isAuthenticated;
+    const hasLocalData = scheduleSubjects.length > 0;
+    
+    if (!hasScheduleToDelete && !hasLocalData) {
+      toast.info("A grade já está vazia.");
+      return;
+    }
+    setShowClearAlert(true);
+  };
+
+  const handleProceedClear = () => {
+    setShowClearAlert(false);
+    
+    if (currentScheduleId && isAuthenticated) {
+      deleteSchedule(currentScheduleId, {
+        onSuccess: () => {
+          resetToDefault();
+          toast.success("Grade excluída da conta e dados locais limpos!");
+        },
+        onError: (error: Error) => {
+          console.error("Error deleting schedule:", error);
+          toast.error("Falha ao excluir da conta. Dados locais serão limpos.");
+          resetToDefault();
+        }
+      });
+    } else {
+      resetToDefault();
+      toast.success("Dados locais limpos com sucesso!");
+    }
+  };
+
   const handleConfirmSaveNew = () => {
     if (!title.trim()) {
       toast.error("Por favor, insira um título.");
@@ -111,28 +154,80 @@ export default function SaveScheduleDialog() {
     createSchedule({
       title: title.trim(),
       description: description.trim(),
-      scheduleSubjects,
+      plans: getPlansDataForSave(),
+      totalCredits: calculateTotalCredits(),
     }, {
-      onSuccess: (data: any) => {
+      onSuccess: (data: SavedSchedule) => {
         if (data && data.idsavedschedule) {
           setCurrentScheduleId(data.idsavedschedule);
           setScheduleTitle(data.title);
+          markAsSaved();
         }
       }
     });
     setShowSaveModal(false);
   };
 
+  // Auto-save event listener
+  useEffect(() => {
+    const handleAutoSave = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { plans: eventPlans, currentScheduleId: eventScheduleId, scheduleTitle: eventTitle } = customEvent.detail;
+      
+      if (!isAuthenticated || !eventScheduleId) return;
+      
+      const currentSchedule = savedSchedules?.find(
+        (s: SavedSchedule) => s.idsavedschedule === eventScheduleId
+      );
+      
+      if (currentSchedule) {
+        try {
+          await updateScheduleAsync({
+            id: eventScheduleId,
+            title: eventTitle,
+            description: currentSchedule.description || '',
+            plans: eventPlans,
+            totalCredits: calculateTotalCredits(),
+          });
+          markAsSaved();
+        } catch (error) {
+          console.error("Auto-save failed:", error);
+        }
+      }
+    };
+
+    window.addEventListener('autoSaveSchedule', handleAutoSave);
+    
+    return () => {
+      window.removeEventListener('autoSaveSchedule', handleAutoSave);
+    };
+  }, [isAuthenticated, savedSchedules, updateScheduleAsync, markAsSaved]);
+
   return (
-    <div className="flex gap-2">
-      <Button variant="outline" className="gap-2" onClick={handleSaveClick} disabled={isSaving}>
-        <Save className="h-4 w-4" />
-        {isSaving ? "Salvando..." : "Salvar"}
+    <div className="flex gap-0 space-x-2">
+      <Button variant="outline" className="group relative overflow-hidden transition-all p-2 hover:px-3" onClick={handleSaveClick} disabled={isSaving}>
+        <Save className="h-4 w-4 ml-2 shrink-0 transition-all duration-300 ease-in-out group-hover:ml-0" />
+        <span className="max-w-0 overflow-hidden opacity-0 transition-all duration-300 ease-in-out group-hover:max-w-[200px] group-hover:opacity-100 whitespace-nowrap">
+          {isSaving ? "Salvando..." : "Salvar"}
+        </span>
       </Button>
       
-      <Button variant="outline" className="gap-2" onClick={handleCreateNewClick}>
-        <Plus className="h-4 w-4" />
-        Nova grade
+      <Button variant="outline" className="group relative overflow-hidden transition-all p-2 hover:px-3" onClick={handleCreateNewClick}>
+        <Plus className="h-4 w-4 ml-2 shrink-0 transition-all duration-300 ease-in-out group-hover:ml-0" />
+        <span className="max-w-0 overflow-hidden opacity-0 transition-all duration-300 ease-in-out group-hover:max-w-[200px] group-hover:opacity-100 whitespace-nowrap">
+          Nova grade
+        </span>
+      </Button>
+
+      <Button 
+        variant="destructive" 
+        className="group relative overflow-hidden transition-all p-2 hover:px-3" 
+        onClick={handleClearClick}
+      >
+        <Trash2 className="h-4 w-4 ml-2 shrink-0 transition-all duration-300 ease-in-out group-hover:ml-0" />
+        <span className="max-w-0 overflow-hidden opacity-0 transition-all duration-300 ease-in-out group-hover:max-w-[200px] group-hover:opacity-100 whitespace-nowrap">
+          Excluir
+        </span>
       </Button>
 
       <LoginSuggestionDialog
@@ -200,6 +295,48 @@ export default function SaveScheduleDialog() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Prosseguir perdendo modificações
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showClearAlert} onOpenChange={setShowClearAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir grade</AlertDialogTitle>
+            <AlertDialogDescription>
+              {currentScheduleId && isAuthenticated ? (
+                <>
+                  Tem certeza que deseja excluir esta grade? Esta ação irá:
+                  <br />
+                  • Excluir permanentemente a grade da sua conta
+                  <br />
+                  • Limpar todos os dados locais (todos os 3 planos)
+                  <br />
+                  • Restaurar a página para o estado padrão com apenas o Plano 1
+                  <br /><br />
+                  Esta ação não pode ser desfeita.
+                </>
+              ) : (
+                <>
+                  Tem certeza que deseja limpar a grade? Esta ação irá:
+                  <br />
+                  • Limpar todos os dados locais (todos os 3 planos)
+                  <br />
+                  • Restaurar a página para o estado padrão com apenas o Plano 1
+                  <br /><br />
+                  As alterações não salvas serão perdidas.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleProceedClear}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {currentScheduleId && isAuthenticated ? "Sim, excluir da conta" : "Sim, limpar dados"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

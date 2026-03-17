@@ -157,6 +157,8 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
   const handleOnSelect = (currentSubject: SubjectsType) => {
     handleInterrestSubjects(currentSubject);
     setOpen(false);
+    setValue("");
+    setSearchTerm("");
   };
 
   const handleOpenChange = (newOpen: boolean) => {

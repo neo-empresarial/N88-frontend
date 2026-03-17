@@ -29,11 +29,11 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Download, X, Loader2, Inbox, CheckCircle, Clock } from "lucide-react";
+import { Download, X, Loader2, Inbox, CheckCircle, Clock, Share2 } from "lucide-react";
 import { useSharedSchedulesQuery } from "@/app/hooks/useSharedSchedules";
 import { useSession } from "@/app/hooks/useSession";
 import { SharedSchedule } from "@/app/services/sharedSchedulesService";
-import { toast } from "sonner";
+
 import LoginSuggestionDialog from "./LoginSuggestionDialog";
 
 export default function ReceivedSharedSchedulesDialog() {
@@ -99,18 +99,18 @@ export default function ReceivedSharedSchedulesDialog() {
         }}
       >
         <DialogTrigger asChild>
-          <Button variant="outline" className="gap-2">
-            <Inbox className="h-4 w-4" />
-            Compartilhados comigo
-            {receivedSharedSchedules && receivedSharedSchedules.length > 0 && (
-              <Badge variant="secondary" className="ml-1">
-                {
-                  receivedSharedSchedules.filter(
-                    (s: SharedSchedule) => !s.isAccepted
-                  ).length
-                }
-              </Badge>
-            )}
+          <Button variant="outline" className="group relative overflow-hidden transition-all p-2 hover:px-3">
+            <div className="relative shrink-0 flex items-center justify-center h-4 w-4 ml-2 transition-all duration-300 ease-in-out group-hover:ml-0">
+              <Inbox className="h-4 w-4" />
+              {receivedSharedSchedules && receivedSharedSchedules.length > 0 && receivedSharedSchedules.filter((s: SharedSchedule) => !s.isAccepted).length > 0 && (
+                <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white">
+                  {receivedSharedSchedules.filter((s: SharedSchedule) => !s.isAccepted).length}
+                </span>
+              )}
+            </div>
+            <span className="max-w-0 overflow-hidden opacity-0 transition-all duration-300 ease-in-out group-hover:max-w-[200px] group-hover:opacity-100 whitespace-nowrap">
+              Compartilhados comigo
+            </span>
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[800px] max-h-[600px]">
@@ -195,7 +195,7 @@ export default function ReceivedSharedSchedulesDialog() {
                         </TableCell>
                         <TableCell>
                           {!sharedSchedule.isAccepted ? (
-                            <div className="flex gap-2">
+                            <div className="flex gap-0 space-x-2">
                               <Button
                                 variant="outline"
                                 size="sm"

@@ -1,4 +1,4 @@
-﻿import { z } from "zod";
+import { z } from "zod";
 
 export interface ICourse {
   idcourse: number;
@@ -19,6 +19,7 @@ export type FormState = {
     password?: string[];
   };
   message?: string;
+  success?: boolean;
 } | undefined;
 
 const strongPasswordRegex = new RegExp (

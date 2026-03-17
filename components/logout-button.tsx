@@ -1,10 +1,12 @@
-﻿"use client";
+"use client";
 
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function LogoutButton() {
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const handleSignOut = async () => {
 
@@ -13,6 +15,8 @@ export default function LogoutButton() {
     });
 
     if (response.ok) {
+      await queryClient.invalidateQueries({ queryKey: ["session"] });
+      queryClient.clear();
       router.push("/");
       router.refresh();
     }

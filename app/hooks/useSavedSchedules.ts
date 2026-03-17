@@ -34,26 +34,60 @@ export const useSavedSchedulesQuery = (isAuthenticated = false) => {
       return normalizeSchedules(raw);
     },
     enabled: isAuthenticated,
-    initialData: [],         // evita undefined no primeiro render
     select: (data) => data ?? [],
-    staleTime: 30_000,       // opcional: menos refetch
+    refetchOnMount: "always",
+    staleTime: 0,
   });
 
   const createMutation = useMutation({
     mutationFn: (data: {
       title: string;
       description?: string;
-      scheduleSubjects: scheduleSubjectsType[];
-    }) =>
-      createSavedSchedule({
+      plans?: {
+        planNumber: number;
+        items: {
+          subjectCode: string;
+          classCode: string;
+          activated: boolean;
+          credits: number;
+        }[];
+      }[];
+      plansData?: Record<number, any>; // Legacy support
+      scheduleSubjects?: scheduleSubjectsType[];
+      totalCredits?: number;
+    }) => {
+      const payload: any = {
         title: data.title,
         description: data.description || "",
-        items: data.scheduleSubjects.map((subject) => ({
+        totalCredits: data.totalCredits || 0,
+      };
+
+      if (data.plans) {
+        // Use the new plans data structure with credits
+        payload.plans = data.plans;
+      } else if (data.plansData) {
+        // Legacy format conversion
+        payload.plans = Object.entries(data.plansData).map(([planNumber, plan]: [string, any]) => ({
+          planNumber: Number(planNumber),
+          items: plan.scheduleSubjects.map((subject: any) => ({
+            subjectCode: subject.code,
+            classCode: subject.class || "",
+            activated: subject.activated ?? true,
+            credits: 0, // Default credits for legacy data
+          })),
+        }));
+      } else if (data.scheduleSubjects) {
+        // Very old legacy format
+        payload.items = data.scheduleSubjects.map((subject) => ({
           subjectCode: subject.code,
           classCode: subject.class || "",
           activated: subject.activated ?? true,
-        })),
-      }),
+          credits: 0, // Default credits for legacy data
+        }));
+      }
+
+      return createSavedSchedule(payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["savedSchedules"] });
       toast.success("Grade salva com sucesso");
@@ -68,17 +102,51 @@ export const useSavedSchedulesQuery = (isAuthenticated = false) => {
       id: number;
       title: string;
       description?: string;
-      scheduleSubjects: scheduleSubjectsType[];
-    }) =>
-      updateSavedSchedule(data.id, {
+      plans?: {
+        planNumber: number;
+        items: {
+          subjectCode: string;
+          classCode: string;
+          activated: boolean;
+          credits: number;
+        }[];
+      }[];
+      plansData?: Record<number, any>; // Legacy support
+      scheduleSubjects?: scheduleSubjectsType[];
+      totalCredits?: number;
+    }) => {
+      const payload: any = {
         title: data.title,
         description: data.description || "",
-        items: data.scheduleSubjects.map((subject) => ({
+        totalCredits: data.totalCredits || 0,
+      };
+
+      if (data.plans) {
+        // Use the new plans data structure with credits
+        payload.plans = data.plans;
+      } else if (data.plansData) {
+        // Legacy format conversion
+        payload.plans = Object.entries(data.plansData).map(([planNumber, plan]: [string, any]) => ({
+          planNumber: Number(planNumber),
+          items: plan.scheduleSubjects.map((subject: any) => ({
+            subjectCode: subject.code,
+            classCode: subject.class || "",
+            activated: subject.activated ?? true,
+            credits: 0, // Default credits for legacy data
+          })),
+        }));
+      } else if (data.scheduleSubjects) {
+        // Very old legacy format
+        payload.items = data.scheduleSubjects.map((subject) => ({
           subjectCode: subject.code,
           classCode: subject.class || "",
           activated: subject.activated ?? true,
-        })),
-      }),
+          credits: 0, // Default credits for legacy data
+        }));
+      }
+
+      return updateSavedSchedule(data.id, payload);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["savedSchedules"] });
       toast.success("Grade atualizada com sucesso");
@@ -106,7 +174,9 @@ export const useSavedSchedulesQuery = (isAuthenticated = false) => {
     isLoading: savedSchedulesQuery.isLoading,
     error: savedSchedulesQuery.error,
     createSchedule: createMutation.mutate,
+    createScheduleAsync: createMutation.mutateAsync,
     updateSchedule: updateMutation.mutate,
+    updateScheduleAsync: updateMutation.mutateAsync,
     deleteSchedule: deleteMutation.mutate,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,

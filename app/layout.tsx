@@ -14,6 +14,7 @@ import logo from "./assets/logo-neo.svg";
 import BlackLogo from "./assets/black-logo.svg"
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Footer from "@/components/Footer";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -94,6 +95,7 @@ export default function RootLayout({
                 </div>
               </Menubar>
               <main className="flex-1">{children}</main>
+              <Footer />
               <FeedbackButton />
             </div>
           </ThemeProvider>
