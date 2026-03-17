@@ -1,4 +1,4 @@
-﻿"use server";
+"use server";
 
 import { redirect } from "next/navigation";
 import { FormState, SignUpFormSchema, SignInFormSchema } from "./type";
@@ -70,7 +70,7 @@ export async function signIn(
   if (response.status === 201) {
     const user = response.data
     await createSession({ user });
-    redirect("/");
+    return { success: true };
   } else {
     return {
       message:

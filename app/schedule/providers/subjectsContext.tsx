@@ -10,7 +10,16 @@ export type scheduleSubjectsType = {
   schedules?: string;
 };
 
-type LocalSaveStatus = "idle" | "saving" | "saved";
+type LocalSaveStatus = "idle" | "saving" | "saved" | "modified";
+type PlanNumber = 1 | 2 | 3;
+
+type PlanData = {
+  scheduleSubjects: scheduleSubjectsType[];
+  searchedSubjects: SubjectsType[];
+  selectedSubject: SubjectsType;
+  onFocusSubject: { code: string };
+  onFocusSubjectClass: { code: string; classcode: string };
+};
 
 type SubjectsContextType = {
   searchedSubjects: SubjectsType[];
@@ -33,14 +42,60 @@ type SubjectsContextType = {
   setTotalCredits: React.Dispatch<React.SetStateAction<number>>;
   localSaveStatus: LocalSaveStatus;
   clearLocalSchedule: () => void;
+  clearCurrentPlan: () => void;
+  resetToDefault: () => void;
   scheduleTitle: string;
   setScheduleTitle: React.Dispatch<React.SetStateAction<string>>;
+  currentPlan: PlanNumber;
+  setCurrentPlan: (plan: PlanNumber) => void;
+  showCopyPlanDialog: boolean;
+  setShowCopyPlanDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  targetPlan: PlanNumber | null;
+  setTargetPlan: React.Dispatch<React.SetStateAction<PlanNumber | null>>;
+  copyPlanData: (sourcePlan: PlanNumber, targetPlan: PlanNumber) => void;
+  markPlanAsInitialized: (plan: PlanNumber) => void;
+  loadFullSchedule: (data: {
+    plansData: Record<PlanNumber, PlanData>;
+    title: string;
+    id: number;
+    initializedPlans: PlanNumber[];
+  }) => void;
+  plansInitialized: Set<PlanNumber>;
+  plansData: Record<PlanNumber, PlanData>;
+  isDirty: boolean;
+  lastSavedState: Record<PlanNumber, PlanData> | null;
+  markAsSaved: () => void;
+  calculateTotalCredits: () => number;
+  calculateCurrentPlanCredits: () => number;
+  autoSaveEnabled: boolean;
+  setAutoSaveEnabled: (enabled: boolean) => void;
+  getPlansDataForSave: () => {
+    planNumber: number;
+    items: {
+      subjectCode: string;
+      classCode: string;
+      activated: boolean;
+      credits: number;
+    }[];
+  }[];
 };
 
 const STORAGE_KEY = "schedule_subjects";
 const SEARCHED_SUBJECTS_KEY = "searched_subjects";
 const STORAGE_TITLE_KEY = "schedule_title";
 const STORAGE_CURRENT_ID_KEY = "current_schedule_id";
+const STORAGE_CURRENT_PLAN_KEY = "current_plan";
+const STORAGE_PLANS_DATA_KEY = "plans_data";
+const STORAGE_PLANS_INITIALIZED_KEY = "plans_initialized";
+const STORAGE_AUTO_SAVE_ENABLED_KEY = "auto_save_enabled";
+
+const emptyPlanData = (): PlanData => ({
+  scheduleSubjects: [],
+  searchedSubjects: [],
+  selectedSubject: {} as SubjectsType,
+  onFocusSubject: { code: "" },
+  onFocusSubjectClass: { code: "", classcode: "" },
+});
 
 export const SubjectsContext = createContext<SubjectsContextType>({
   searchedSubjects: [],
@@ -59,8 +114,33 @@ export const SubjectsContext = createContext<SubjectsContextType>({
   setTotalCredits: () => {},
   localSaveStatus: "idle",
   clearLocalSchedule: () => {},
+  clearCurrentPlan: () => {},
+  resetToDefault: () => {},
   scheduleTitle: "Grade sem título",
   setScheduleTitle: () => {},
+  currentPlan: 1,
+  setCurrentPlan: () => {},
+  showCopyPlanDialog: false,
+  setShowCopyPlanDialog: () => {},
+  targetPlan: null,
+  setTargetPlan: () => {},
+  copyPlanData: () => {},
+  markPlanAsInitialized: () => {},
+  loadFullSchedule: () => {},
+  plansInitialized: new Set<PlanNumber>([1]),
+  plansData: {
+    1: emptyPlanData(),
+    2: emptyPlanData(),
+    3: emptyPlanData(),
+  },
+  isDirty: false,
+  lastSavedState: null,
+  markAsSaved: () => {},
+  calculateTotalCredits: () => 0,
+  calculateCurrentPlanCredits: () => 0,
+  autoSaveEnabled: true,
+  setAutoSaveEnabled: () => {},
+  getPlansDataForSave: () => [],
 });
 
 export function SubjectsProvider({
@@ -68,121 +148,474 @@ export function SubjectsProvider({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Load initial state from localStorage
-  const [searchedSubjects, setSearchedSubjects] = useState<SubjectsType[]>(
-    () => {
-      try {
-        if (typeof window !== "undefined") {
-          const savedSubjects = localStorage.getItem(SEARCHED_SUBJECTS_KEY);
-          return savedSubjects ? JSON.parse(savedSubjects) : [];
-        }
-      } catch (error) {
-        console.error(
-          "Error loading searched subjects from localStorage:",
-          error
-        );
-      }
-      return [];
-    }
-  );
-
-  const [scheduleSubjects, setScheduleSubjects] = useState<
-    scheduleSubjectsType[]
-  >(() => {
+  const [plansInitialized, setPlansInitialized] = useState<Set<PlanNumber>>(new Set<PlanNumber>([1]));
+  const [plansData, setPlansData] = useState<Record<PlanNumber, PlanData>>({
+    1: emptyPlanData(),
+    2: emptyPlanData(),
+    3: emptyPlanData(),
+  });
+  const [internalCurrentPlan, setInternalCurrentPlan] = useState<PlanNumber>(1);
+  const [currentScheduleId, setCurrentScheduleId] = useState<number | null>(null);
+  const [scheduleTitle, setScheduleTitle] = useState<string>("Grade sem título");
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
+  const [autoSaveEnabled, setAutoSaveEnabled] = useState(() => {
+    if (typeof window === "undefined") return true;
     try {
-      if (typeof window !== "undefined") {
-        const savedSubjects = localStorage.getItem(STORAGE_KEY);
-        return savedSubjects ? JSON.parse(savedSubjects) : [];
-      }
+      const savedAutoSaveEnabled = localStorage.getItem(STORAGE_AUTO_SAVE_ENABLED_KEY);
+      return savedAutoSaveEnabled !== null ? savedAutoSaveEnabled === "true" : true;
     } catch (error) {
-      console.error(
-        "Error loading schedule subjects from localStorage:",
-        error
-      );
+      return true;
     }
-    return [];
   });
 
-  const [selectedSubject, setSelectedSubject] = useState({} as SubjectsType);
-  const [onFocusSubject, setOnFocusSubject] = useState({} as { code: string });
-  const [onFocusSubjectClass, setOnFocusSubjectClass] = useState(
-    {} as { code: string; classcode: string }
-  );
-  const [currentScheduleId, setCurrentScheduleId] = useState<number | null>(() => {
+  useEffect(() => {
+    if (typeof window === "undefined" || isHydrated) return;
+    
     try {
-      if (typeof window !== "undefined") {
-        const savedId = localStorage.getItem(STORAGE_CURRENT_ID_KEY);
-        return savedId ? Number(savedId) : null;
+      const savedInitialized = localStorage.getItem(STORAGE_PLANS_INITIALIZED_KEY);
+      if (savedInitialized) {
+        setPlansInitialized(new Set<PlanNumber>(JSON.parse(savedInitialized)));
       }
-    } catch {}
-    return null;
-  });
+
+      const savedPlansData = localStorage.getItem(STORAGE_PLANS_DATA_KEY);
+      if (savedPlansData) {
+        setPlansData(JSON.parse(savedPlansData));
+      } else {
+        const oldScheduleSubjects = localStorage.getItem(STORAGE_KEY);
+        const oldSearchedSubjects = localStorage.getItem(SEARCHED_SUBJECTS_KEY);
+        
+        if (oldScheduleSubjects || oldSearchedSubjects) {
+          const plan1Data: PlanData = {
+            scheduleSubjects: oldScheduleSubjects ? JSON.parse(oldScheduleSubjects) : [],
+            searchedSubjects: oldSearchedSubjects ? JSON.parse(oldSearchedSubjects) : [],
+            selectedSubject: {} as SubjectsType,
+            onFocusSubject: { code: "" },
+            onFocusSubjectClass: { code: "", classcode: "" },
+          };
+          
+          setPlansData({
+            1: plan1Data,
+            2: emptyPlanData(),
+            3: emptyPlanData(),
+          });
+        }
+      }
+
+      const savedPlan = localStorage.getItem(STORAGE_CURRENT_PLAN_KEY);
+      if (savedPlan) {
+        const plan = parseInt(savedPlan) as PlanNumber;
+        if ([1, 2, 3].includes(plan)) {
+          setInternalCurrentPlan(plan);
+        }
+      }
+
+      const savedId = localStorage.getItem(STORAGE_CURRENT_ID_KEY);
+      if (savedId) {
+        setCurrentScheduleId(parseInt(savedId));
+      }
+
+      const savedTitle = localStorage.getItem(STORAGE_TITLE_KEY);
+      if (savedTitle) {
+        setScheduleTitle(savedTitle);
+      }
+
+      if (savedId) {
+        setLocalSaveStatus("saved");
+      } else {
+        setLocalSaveStatus("idle");
+      }
+
+      setIsHydrated(true);
+    } catch (error) {
+      console.error("Error hydrating from localStorage:", error);
+      setIsHydrated(true);
+    }
+  }, [isHydrated]);
+
+  const [showCopyPlanDialog, setShowCopyPlanDialog] = useState(false);
+  const [targetPlan, setTargetPlan] = useState<PlanNumber | null>(null);
+
+  // Current plan data accessors
+  const currentPlanData = plansData[internalCurrentPlan];
+  const scheduleSubjects = currentPlanData.scheduleSubjects;
+  const searchedSubjects = currentPlanData.searchedSubjects;
+  const selectedSubject = currentPlanData.selectedSubject;
+  const onFocusSubject = currentPlanData.onFocusSubject;
+  const onFocusSubjectClass = currentPlanData.onFocusSubjectClass;
+
+  // Setters that update current plan
+  const setScheduleSubjects = useCallback((value: React.SetStateAction<scheduleSubjectsType[]>) => {
+    setPlansData(prev => {
+      const newScheduleSubjects = typeof value === 'function' 
+        ? value(prev[internalCurrentPlan].scheduleSubjects) 
+        : value;
+      return {
+        ...prev,
+        [internalCurrentPlan]: {
+          ...prev[internalCurrentPlan],
+          scheduleSubjects: newScheduleSubjects,
+        },
+      };
+    });
+    
+    if (!isLoadingSchedule) {
+      setLocalSaveStatus("modified");
+    }
+  }, [internalCurrentPlan, isLoadingSchedule]);
+
+  const setSearchedSubjects = useCallback((value: React.SetStateAction<SubjectsType[]>) => {
+    setPlansData(prev => {
+      const newSearchedSubjects = typeof value === 'function'
+        ? value(prev[internalCurrentPlan].searchedSubjects)
+        : value;
+      return {
+        ...prev,
+        [internalCurrentPlan]: {
+          ...prev[internalCurrentPlan],
+          searchedSubjects: newSearchedSubjects,
+        },
+      };
+    });
+  }, [internalCurrentPlan]);
+
+  const setSelectedSubject = useCallback((value: React.SetStateAction<SubjectsType>) => {
+    setPlansData(prev => {
+      const newSelectedSubject = typeof value === 'function'
+        ? value(prev[internalCurrentPlan].selectedSubject)
+        : value;
+      return {
+        ...prev,
+        [internalCurrentPlan]: {
+          ...prev[internalCurrentPlan],
+          selectedSubject: newSelectedSubject,
+        },
+      };
+    });
+  }, [internalCurrentPlan]);
+
+  const setOnFocusSubject = useCallback((value: React.SetStateAction<{ code: string }>) => {
+    setPlansData(prev => {
+      const newOnFocusSubject = typeof value === 'function'
+        ? value(prev[internalCurrentPlan].onFocusSubject)
+        : value;
+      return {
+        ...prev,
+        [internalCurrentPlan]: {
+          ...prev[internalCurrentPlan],
+          onFocusSubject: newOnFocusSubject,
+        },
+      };
+    });
+  }, [internalCurrentPlan]);
+
+  const setOnFocusSubjectClass = useCallback((value: React.SetStateAction<{ code: string; classcode: string }>) => {
+    setPlansData(prev => {
+      const newOnFocusSubjectClass = typeof value === 'function'
+        ? value(prev[internalCurrentPlan].onFocusSubjectClass)
+        : value;
+      return {
+        ...prev,
+        [internalCurrentPlan]: {
+          ...prev[internalCurrentPlan],
+          onFocusSubjectClass: newOnFocusSubjectClass,
+        },
+      };
+    });
+  }, [internalCurrentPlan]);
+
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [localSaveStatus, setLocalSaveStatus] = useState<LocalSaveStatus>("idle");
-  const [scheduleTitle, setScheduleTitle] = useState<string>(() => {
-    try {
-      if (typeof window !== "undefined") {
-        return localStorage.getItem(STORAGE_TITLE_KEY) || "Grade sem título";
-      }
-    } catch {}
-    return "Grade sem título";
-  });
 
-  const clearLocalSchedule = useCallback(() => {
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(SEARCHED_SUBJECTS_KEY);
-    } catch (e) {
-      console.error("Error clearing local schedule:", e);
+  const setScheduleTitleWithModify = useCallback((title: string | ((prevState: string) => string)) => {
+    const newTitle = typeof title === "function" ? title(scheduleTitle) : title;
+    setScheduleTitle(newTitle);
+    if (!isLoadingSchedule) {
+      setLocalSaveStatus("modified");
     }
-    setScheduleSubjects([]);
-    setSearchedSubjects([]);
-    setCurrentScheduleId(null);
-    setLocalSaveStatus("idle");
-    setScheduleTitle("Grade sem título");
-    try {
-      localStorage.removeItem(STORAGE_TITLE_KEY);
-      localStorage.removeItem(STORAGE_CURRENT_ID_KEY);
-    } catch (e) {}
+  }, [isLoadingSchedule, scheduleTitle]);
+
+  // Mark data as saved and update last saved state
+  const markAsSaved = useCallback(() => {
+    setLocalSaveStatus("saved");
   }, []);
 
-  // Restore color usage on mount so new subjects don't repeat colors
-  // already assigned to subjects loaded from localStorage.
+  const calculateTotalCredits = useCallback(() => {
+    let totalCredits = 0;
+    
+    Object.values(plansData).forEach(plan => {
+      plan.scheduleSubjects.forEach(scheduleSubject => {
+        if (!scheduleSubject.activated) return;
+        
+        const fullSubjectData = plan.searchedSubjects.find(
+          s => s.code === scheduleSubject.code
+        );
+        
+        if (fullSubjectData) {
+          const targetClass = fullSubjectData.classes.find(
+            c => c.classcode === scheduleSubject.class
+          );
+          
+          if (targetClass) {
+            targetClass.schedules.forEach(schedule => {
+              totalCredits += schedule.classesnumber;
+            });
+          }
+        }
+      });
+    });
+    
+    return totalCredits;
+  }, [plansData]);
+
+  const calculateCurrentPlanCredits = useCallback(() => {
+    let planCredits = 0;
+    const currentPlanData = plansData[internalCurrentPlan];
+    
+    currentPlanData.scheduleSubjects.forEach(scheduleSubject => {
+      if (!scheduleSubject.activated) return;
+      
+      const fullSubjectData = currentPlanData.searchedSubjects.find(
+        s => s.code === scheduleSubject.code
+      );
+      
+      if (fullSubjectData) {
+        const targetClass = fullSubjectData.classes.find(
+          c => c.classcode === scheduleSubject.class
+        );
+        
+        if (targetClass) {
+          targetClass.schedules.forEach(schedule => {
+            planCredits += schedule.classesnumber;
+          });
+        }
+      }
+    });
+    
+    return planCredits;
+  }, [plansData, internalCurrentPlan]);
+
+  const calculateCreditsForSubject = useCallback((subjectCode: string, classCode: string, planNumber: 1|2|3) => {
+    const plan = plansData[planNumber];
+    const fullSubjectData = plan.searchedSubjects.find(s => s.code === subjectCode);
+    
+    if (fullSubjectData) {
+      const targetClass = fullSubjectData.classes.find(c => c.classcode === classCode);
+      
+      if (targetClass) {
+        return targetClass.schedules.reduce((sum, schedule) => sum + schedule.classesnumber, 0);
+      }
+    }
+    
+    return 0;
+  }, [plansData]);
+
+  const getPlansDataForSave = useCallback(() => {
+    const plans: {
+      planNumber: number;
+      items: {
+        subjectCode: string;
+        classCode: string;
+        activated: boolean;
+        credits: number;
+      }[];
+    }[] = [];
+
+    Object.entries(plansData).forEach(([planNumberStr, plan]) => {
+      const planNumber = parseInt(planNumberStr) as 1|2|3;
+      const items = plan.scheduleSubjects.map(subject => ({
+        subjectCode: subject.code,
+        classCode: subject.class,
+        activated: subject.activated,
+        credits: calculateCreditsForSubject(subject.code, subject.class, planNumber),
+      }));
+
+      if (items.length > 0) {
+        plans.push({ planNumber, items });
+      }
+    });
+
+    return plans;
+  }, [plansData, calculateCreditsForSubject]);
+
+  // Auto-save functionality with 2-second delay
   useEffect(() => {
-    if (searchedSubjects.length > 0) {
-      const pairs = searchedSubjects
+    if (!autoSaveEnabled || localSaveStatus !== "modified" || !currentScheduleId) return;
+
+    const hasAnySubjects = Object.values(plansData).some(plan => 
+      plan.scheduleSubjects && plan.scheduleSubjects.length > 0
+    );
+    
+    if (!hasAnySubjects) {
+      return;
+    }
+
+    const autoSaveTimer = setTimeout(() => {
+      const autoSaveEvent = new CustomEvent('autoSaveSchedule', { 
+        detail: { 
+          plans: getPlansDataForSave(),
+          currentScheduleId, 
+          scheduleTitle 
+        } 
+      });
+      window.dispatchEvent(autoSaveEvent);
+    }, 2000);
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [autoSaveEnabled, localSaveStatus, currentScheduleId, plansData, scheduleTitle]);
+
+  const setCurrentPlan = useCallback((plan: PlanNumber) => {
+    if (!plansInitialized.has(plan)) {
+      // Show dialog to ask if user wants to copy from another plan
+      setTargetPlan(plan);
+      setShowCopyPlanDialog(true);
+    } else {
+      setInternalCurrentPlan(plan);
+    }
+  }, [plansInitialized]);
+
+  // Copy plan data from source to target
+  const copyPlanData = useCallback((sourcePlan: PlanNumber, targetPlan: PlanNumber) => {
+    setPlansData(prev => {
+      const sourceData = prev[sourcePlan];
+      // Deep clone the data to avoid references
+      return {
+        ...prev,
+        [targetPlan]: {
+          scheduleSubjects: JSON.parse(JSON.stringify(sourceData.scheduleSubjects)),
+          searchedSubjects: JSON.parse(JSON.stringify(sourceData.searchedSubjects)),
+          selectedSubject: JSON.parse(JSON.stringify(sourceData.selectedSubject)),
+          onFocusSubject: { ...sourceData.onFocusSubject },
+          onFocusSubjectClass: { ...sourceData.onFocusSubjectClass },
+        },
+      };
+    });
+
+    // Mark target plan as initialized
+    setPlansInitialized(prev => new Set([...Array.from(prev), targetPlan]));
+    setInternalCurrentPlan(targetPlan);
+  }, []);
+
+  // Mark a plan as initialized and switch to it
+  const markPlanAsInitialized = useCallback((plan: PlanNumber) => {
+    setPlansInitialized(prev => new Set([...Array.from(prev), plan]));
+    setInternalCurrentPlan(plan);
+  }, []);
+
+  const loadFullSchedule = useCallback((data: {
+    plansData: Record<PlanNumber, PlanData>;
+    title: string;
+    id: number;
+    initializedPlans: PlanNumber[];
+  }) => {
+    setIsLoadingSchedule(true);
+    
+    setPlansData(data.plansData);
+    setScheduleTitle(data.title);
+    setCurrentScheduleId(data.id);
+    setPlansInitialized(new Set(data.initializedPlans));
+    setInternalCurrentPlan(1);
+    setLocalSaveStatus("saved");
+    
+    // Use setTimeout to ensure the flag is cleared after all state updates
+    setTimeout(() => {
+      setIsLoadingSchedule(false);
+    }, 100);
+  }, []);
+
+  // Reset everything to default state (only Plan 1, no subjects)
+  const resetToDefault = useCallback(() => {
+    // Reset plans data to initial state
+    const initialPlansData: Record<PlanNumber, PlanData> = {
+      1: emptyPlanData(),
+      2: emptyPlanData(),
+      3: emptyPlanData(),
+    };
+    setPlansData(initialPlansData);
+    
+    // Reset initialized plans to only Plan 1
+    setPlansInitialized(new Set<PlanNumber>([1]));
+    
+    // Reset to Plan 1
+    setInternalCurrentPlan(1);
+    
+    // Clear schedule metadata
+    setCurrentScheduleId(null);
+    setScheduleTitle("Grade sem título");
+    setLocalSaveStatus("idle");
+    
+    // Clear all localStorage
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(SEARCHED_SUBJECTS_KEY);
+        localStorage.removeItem(STORAGE_TITLE_KEY);
+        localStorage.removeItem(STORAGE_CURRENT_ID_KEY);
+        localStorage.removeItem(STORAGE_CURRENT_PLAN_KEY);
+        localStorage.removeItem(STORAGE_PLANS_DATA_KEY);
+        localStorage.removeItem(STORAGE_PLANS_INITIALIZED_KEY);
+      } catch (error) {
+        console.error("Error clearing localStorage:", error);
+      }
+    }
+  }, []);
+
+  // Clear all plans and reset to default state (for "Nova Grade" button)
+  const clearLocalSchedule = useCallback(() => {
+    resetToDefault();
+  }, [resetToDefault]);
+
+  // Clear only the current plan's subjects (local action)
+  const clearCurrentPlan = useCallback(() => {
+    setPlansData(prev => ({
+      ...prev,
+      [internalCurrentPlan]: emptyPlanData(),
+    }));
+    if (!isLoadingSchedule) {
+      setLocalSaveStatus("modified");
+    }
+  }, [internalCurrentPlan, isLoadingSchedule]);
+
+  // Restore color usage on mount
+  useEffect(() => {
+    const allSubjects = Object.values(plansData).flatMap(plan => plan.searchedSubjects);
+    if (allSubjects.length > 0) {
+      const pairs = allSubjects
         .filter((s) => s.color)
         .map((s) => s.color as [string, string]);
       restoreColorUsage(pairs);
     }
-    // Only run on mount — deps intentionally empty
+    // Only run on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Persist plans data to localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      setLocalSaveStatus("saving");
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(scheduleSubjects));
-      setLocalSaveStatus("saved");
+      localStorage.setItem(STORAGE_PLANS_DATA_KEY, JSON.stringify(plansData));
+      
+      // Also save to old keys for backwards compatibility with plan 1
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(plansData[1].scheduleSubjects));
+      localStorage.setItem(SEARCHED_SUBJECTS_KEY, JSON.stringify(plansData[1].searchedSubjects));
+      
+      // Do NOT change localSaveStatus here - localStorage saving is different from account saving
     } catch (error) {
-      console.error("Error saving schedule subjects to localStorage:", error);
-      setLocalSaveStatus("idle");
+      console.error("Error saving plans data to localStorage:", error);
     }
-  }, [scheduleSubjects]);
+  }, [plansData]);
 
+  // Persist plans initialized status
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      localStorage.setItem(
-        SEARCHED_SUBJECTS_KEY,
-        JSON.stringify(searchedSubjects)
-      );
+      localStorage.setItem(STORAGE_PLANS_INITIALIZED_KEY, JSON.stringify(Array.from(plansInitialized)));
     } catch (error) {
-      console.error("Error saving searched subjects to localStorage:", error);
+      console.error("Error saving plans initialized status:", error);
     }
-  }, [searchedSubjects]);
+  }, [plansInitialized]);
 
+  // Persist schedule title
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -190,6 +623,7 @@ export function SubjectsProvider({
     } catch (error) {}
   }, [scheduleTitle]);
 
+  // Persist current schedule ID
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
@@ -200,6 +634,22 @@ export function SubjectsProvider({
       }
     } catch (error) {}
   }, [currentScheduleId]);
+
+  // Persist current plan
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      localStorage.setItem(STORAGE_CURRENT_PLAN_KEY, internalCurrentPlan.toString());
+    } catch (error) {}
+  }, [internalCurrentPlan]);
+
+  // Persist auto-save enabled state
+  useEffect(() => {
+    if (typeof window === "undefined" || !isHydrated) return;
+    try {
+      localStorage.setItem(STORAGE_AUTO_SAVE_ENABLED_KEY, autoSaveEnabled.toString());
+    } catch (error) {}
+  }, [autoSaveEnabled, isHydrated]);
 
   return (
     <SubjectsContext.Provider
@@ -220,8 +670,29 @@ export function SubjectsProvider({
         setTotalCredits,
         localSaveStatus,
         clearLocalSchedule,
+        clearCurrentPlan,
+        resetToDefault,
         scheduleTitle,
-        setScheduleTitle,
+        setScheduleTitle: setScheduleTitleWithModify,
+        currentPlan: internalCurrentPlan,
+        setCurrentPlan,
+        showCopyPlanDialog,
+        setShowCopyPlanDialog,
+        targetPlan,
+        setTargetPlan,
+        copyPlanData,
+        markPlanAsInitialized,
+        loadFullSchedule,
+        plansInitialized,
+        plansData,
+        isDirty: false,
+        lastSavedState: null,
+        markAsSaved,
+        calculateTotalCredits,
+        calculateCurrentPlanCredits,
+        autoSaveEnabled,
+        setAutoSaveEnabled,
+        getPlansDataForSave,
       }}
     >
       {children}

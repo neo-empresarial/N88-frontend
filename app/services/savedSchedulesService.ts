@@ -4,20 +4,43 @@ export interface SavedSchedule {
   idsavedschedule: number;
   title: string;
   description: string;
-  items: {
+  totalCredits?: number;
+  plans?: {
+    planNumber: number;
+    credits: number;
+    items: {
+      subjectCode: string;
+      classCode: string;
+      activated: boolean;
+      credits?: number;
+    }[];
+  }[];
+  items?: {
     subjectCode: string;
     classCode: string;
     activated: boolean;
+    credits?: number;
   }[];
 }
 
 export interface CreateSavedScheduleDto {
   title: string;
   description: string;
-  items: {
+  totalCredits?: number;
+  items?: {
     subjectCode: string;
     classCode: string;
     activated: boolean;
+    credits?: number;
+  }[];
+  plans?: {
+    planNumber: number;
+    items: {
+      subjectCode: string;
+      classCode: string;
+      activated: boolean;
+      credits?: number;
+    }[];
   }[];
 }
 
@@ -79,8 +102,6 @@ export const useSavedSchedules = () => {
     if (!response.ok) {
       throw new Error("Falha em deletar a grade");
     }
-    window.location.reload(); 
-
   };
 
 

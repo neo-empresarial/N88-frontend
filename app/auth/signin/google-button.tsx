@@ -1,14 +1,16 @@
-﻿"use client";
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { IconBrandGoogle } from "@tabler/icons-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createSession } from "@/lib/session";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function GoogleLoginButton(props: { style: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleGoogleLogin = () => {
@@ -21,7 +23,7 @@ export default function GoogleLoginButton(props: { style: string }) {
     const userId = searchParams.get("userId");
     const name = searchParams.get("name") || "";
     const email = searchParams.get("email") || "";
-    const provider = searchParams.get("provider") || "google"; // Default para "google"
+    const provider = searchParams.get("provider") || "google";
     const accessToken = searchParams.get("accessToken") || "";
     const refreshToken = searchParams.get("refreshToken") || "";
 
@@ -43,20 +45,29 @@ export default function GoogleLoginButton(props: { style: string }) {
           provider,
           accessToken,
           refreshToken,
-          course, // Add course to the user object
+          course,
         },
       };
 
       createSession(payload)
         .then(() => {
-          router.push("/");
+          queryClient.invalidateQueries({ queryKey: ["savedSchedules"] });
+          queryClient.invalidateQueries({ queryKey: ["sharedSchedules"] });
+          
+          const redirectPath = localStorage.getItem("redirectAfterLogin");
+          if (redirectPath) {
+            localStorage.removeItem("redirectAfterLogin");
+            router.push(redirectPath);
+          } else {
+            router.push("/");
+          }
         })
         .catch((error) => {
           console.error("Erro ao criar sessão:", error);
           router.push("/login?error=auth_failed");
         });
     }
-  }, [searchParams, isProcessing, router]);
+  }, [searchParams, isProcessing, router, queryClient]);
 
   return (
     <div className="w-1/2">
