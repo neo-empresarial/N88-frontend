@@ -30,7 +30,7 @@ import { SavedSchedule } from "@/app/services/savedSchedulesService";
 import LoginSuggestionDialog from "./LoginSuggestionDialog";
 
 export default function SaveScheduleDialog() {
-  const { scheduleSubjects, currentScheduleId, scheduleTitle, clearLocalSchedule, resetToDefault, setCurrentScheduleId, setScheduleTitle, plansData, markAsSaved, calculateTotalCredits, getPlansDataForSave } = useSubjects();
+  const { scheduleSubjects, currentScheduleId, scheduleTitle, clearLocalSchedule, resetToDefault, setCurrentScheduleId, setScheduleTitle, plansData, markAsSaved, calculateTotalCredits, getPlansDataForSave, selectedSemester, localSaveStatus } = useSubjects();
   const { isAuthenticated } = useSession();
   const { updateScheduleAsync, createSchedule, deleteSchedule, savedSchedules, isCreating, isUpdating, isDeleting, isLoading } = useSavedSchedulesQuery(isAuthenticated);
   
@@ -86,6 +86,7 @@ export default function SaveScheduleDialog() {
           id: currentScheduleId,
           title: scheduleTitle,
           description: currentSchedule.description || '',
+          semester: selectedSemester || undefined,
           plans: getPlansDataForSave(),
           totalCredits: calculateTotalCredits(),
         });
@@ -102,7 +103,7 @@ export default function SaveScheduleDialog() {
   };
 
   const handleCreateNewClick = () => {
-    if (isDirty) {
+    if (localSaveStatus === "modified") {
       setShowDiscardAlert(true);
     } else {
       clearLocalSchedule();
@@ -154,6 +155,7 @@ export default function SaveScheduleDialog() {
     createSchedule({
       title: title.trim(),
       description: description.trim(),
+      semester: selectedSemester || undefined,
       plans: getPlansDataForSave(),
       totalCredits: calculateTotalCredits(),
     }, {
@@ -186,6 +188,7 @@ export default function SaveScheduleDialog() {
             id: eventScheduleId,
             title: eventTitle,
             description: currentSchedule.description || '',
+            semester: selectedSemester || undefined,
             plans: eventPlans,
             totalCredits: calculateTotalCredits(),
           });

@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState, useRef } from "react";
 import { useSubjects } from "../providers/subjectsContext";
+import { useTheme } from "next-themes";
 import {
   Table,
   TableBody,
@@ -16,6 +17,7 @@ import { ClassesType } from "../types/dataType";
 
 export default function SelectedSubject() {
   const [rowSelection, setRowSelection] = useState<string | null>(null);
+  const { theme } = useTheme();
 
   const tableContainerRef = useRef<HTMLDivElement | null>(null);
   const [maxHeight, setMaxHeight] = useState<string | undefined>(undefined);
@@ -165,7 +167,20 @@ export default function SelectedSubject() {
               onClick={() => handleRowSelect(row)}
               data-state={rowSelection === row.classcode ? "selected" : ""}
             >
-              <TableCell>{row.classcode}</TableCell>
+              <TableCell>
+                <Badge
+                  variant="outline"
+                  className={`${
+                    selectedSubject.color && Array.isArray(selectedSubject.color)
+                      ? theme === "light"
+                        ? selectedSubject.color[0] + " text-black"
+                        : selectedSubject.color[1] + " text-white"
+                      : ""
+                  }`}
+                >
+                  {row.classcode}
+                </Badge>
+              </TableCell>
               <TableCell>
                 {`${row.totalvacancies - row.freevacancies}/${
                   row.totalvacancies
