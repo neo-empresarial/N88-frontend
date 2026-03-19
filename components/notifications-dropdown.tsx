@@ -11,9 +11,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { getSession } from "@/lib/session";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/app/hooks/useSession";
 
 interface Notification {
   id: number;
@@ -33,6 +34,9 @@ interface Notification {
 const NotificationsDropdown = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
+  const { isAuthenticated } = useSession();
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
   useEffect(() => {
     const checkSession = async () => {
       await getSession();
@@ -40,7 +44,7 @@ const NotificationsDropdown = () => {
     checkSession();
   }, []);
 
-  const { data: notifications, isLoading, refetch } = useQuery({
+  const { data: notifications, isLoading } = useQuery({
     queryKey: ["notifications"],
     queryFn: async () => {
       const response = await fetchWithAuth(`${process.env.NEXT_PUBLIC_BACKEND_URL}notifications`);
@@ -48,6 +52,7 @@ const NotificationsDropdown = () => {
       const data: Notification[] = await response.json();
       return data;
     },
+    enabled: isAuthenticated,
   });
 
   const respondMutation = useMutation({
@@ -100,6 +105,18 @@ const NotificationsDropdown = () => {
     respondMutation.mutate({ notificationId, accept });
   };
 
+  const handleBellClick = () => {
+    if (!isAuthenticated) {
+      toast.info("Faça login para ver suas notificações", {
+        description: "Entre na sua conta para acessar notificações e convites de grupos.",
+        action: {
+          label: "Fazer login",
+          onClick: () => router.push("/auth/signin"),
+        },
+      });
+    }
+  };
+
   const pendingNotifications = notifications?.filter(
     (n: Notification) => n.status === "PENDING"
   );
@@ -113,35 +130,36 @@ const NotificationsDropdown = () => {
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isAuthenticated && dropdownOpen} onOpenChange={setDropdownOpen}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="relative"
+          onClick={(e) => {
+            if (!isAuthenticated) {
+              e.preventDefault();
+              handleBellClick();
+            }
+          }}
+        >
           <Bell className="h-5 w-5" />
-          {pendingNotifications && pendingNotifications.length > 0 && (
+          {isAuthenticated && pendingNotifications && pendingNotifications.length > 0 && (
             <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-red-500 text-[10px] text-white flex items-center justify-center">
               {pendingNotifications?.length}
             </span>
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80">
-        <div className="p-2 border-b">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => refetch()}
-            className="w-full"
-          >
-            Atualizar notificações
-          </Button>
-        </div>
-        {isLoading ? (
-          <div className="p-4 text-center">Loading...</div>
-        ) : pendingNotifications?.length === 0 ? (
-          <div className="p-4 text-center text-muted-foreground">
-            No new notifications
-          </div>
-        ) : (
+      {isAuthenticated && (
+        <DropdownMenuContent align="end" className="w-80">
+          {isLoading ? (
+            <div className="p-4 text-center">Loading...</div>
+          ) : pendingNotifications?.length === 0 ? (
+            <div className="p-4 text-center text-muted-foreground">
+              Você não tem notificações
+            </div>
+          ) : (
           pendingNotifications?.map((notification: Notification) => {
             if (notification.type === "PROFILE_COMPLETION") {
               return (
@@ -220,7 +238,8 @@ const NotificationsDropdown = () => {
             );
           })
         )}
-      </DropdownMenuContent>
+        </DropdownMenuContent>
+      )}
     </DropdownMenu>
   );
 };

@@ -71,7 +71,7 @@ export default function RootLayout({
                     </MenubarMenu>
                     <MenubarMenu>
                       <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
-                        <Link href={"/schedule"}>Matérias</Link>
+                        <Link href={"/schedule"}>Monte sua grade!</Link>
                       </MenubarTrigger>
                     </MenubarMenu>
                     {/* <MenubarMenu>
@@ -79,11 +79,6 @@ export default function RootLayout({
                         <Link href={"/professors"}>Professores</Link>
                       </MenubarTrigger>
                     </MenubarMenu> */}
-                    <MenubarMenu>
-                      <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
-                        <Link href={"/groups"}>Grupos e Amizades</Link>
-                      </MenubarTrigger>
-                    </MenubarMenu>
                   </div>
 
                   <div className="flex gap-2">

@@ -1,15 +1,10 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 
 const secretKey = process.env.SESSION_SECRET_KEY!;
 const encodedKey = new TextEncoder().encode(secretKey);
 
 export default async function middleware(req: NextRequest) {
-  // Check if we're in development environment
-  if (process.env.NODE_ENV === "development") {
-    return NextResponse.next();
-  }
-
   // Read cookies from the request (middleware can't use cookies() from next/headers)
   const sessionCookie = req.cookies.get("session")?.value;
   const accessTokenCookie = req.cookies.get("access_token")?.value;
@@ -40,5 +35,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/schedule", "/professors", "/profile"],
+  matcher: ["/schedule", "/professors", "/profile", "/groups"],
 };
