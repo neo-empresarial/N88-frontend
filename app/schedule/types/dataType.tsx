@@ -1,4 +1,4 @@
-﻿export type SchedulesType = {
+export type SchedulesType = {
   idschedule: number;
   weekday: string;
   starttime: string;
@@ -28,6 +28,16 @@ export type SubjectsType = {
   classes: ClassesType[];
   color?: string[];
   schedules?: string;
+  semester?: {
+    id: number;
+    semester: string;
+    createdAt: string;
+  };
+  competition?: {
+    averageOrdersWithoutVacancy: number;
+    category: "Baixa" | "Média" | "Alta";
+    semesterCount: number;
+  };
 };
 
 export type DataType = {

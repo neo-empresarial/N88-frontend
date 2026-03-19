@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useCallback, createContext, useState } from "react";
 import { SubjectsType } from "../types/dataType";
 import { restoreColorUsage } from "../utils/colorUtils";
+import { useSemestersQuery } from "@/app/hooks/useSemesters";
 
 export type scheduleSubjectsType = {
   code: string;
@@ -78,6 +79,15 @@ type SubjectsContextType = {
       credits: number;
     }[];
   }[];
+  selectedSemester: string | null;
+  setSelectedSemester: (semester: string | null) => void;
+  setSelectedSemesterDirectly: (semester: string | null) => void;
+  showSemesterChangeModal: boolean;
+  setShowSemesterChangeModal: React.Dispatch<React.SetStateAction<boolean>>;
+  confirmSemesterChange: (newSemester: string) => void;
+  cancelSemesterChange: () => void;
+  pendingSemester: string | null;
+  isResetting: boolean;
 };
 
 const STORAGE_KEY = "schedule_subjects";
@@ -88,6 +98,7 @@ const STORAGE_CURRENT_PLAN_KEY = "current_plan";
 const STORAGE_PLANS_DATA_KEY = "plans_data";
 const STORAGE_PLANS_INITIALIZED_KEY = "plans_initialized";
 const STORAGE_AUTO_SAVE_ENABLED_KEY = "auto_save_enabled";
+const STORAGE_SELECTED_SEMESTER_KEY = "selected_semester";
 
 const emptyPlanData = (): PlanData => ({
   scheduleSubjects: [],
@@ -141,6 +152,15 @@ export const SubjectsContext = createContext<SubjectsContextType>({
   autoSaveEnabled: true,
   setAutoSaveEnabled: () => {},
   getPlansDataForSave: () => [],
+  selectedSemester: null,
+  setSelectedSemester: () => {},
+  setSelectedSemesterDirectly: () => {},
+  showSemesterChangeModal: false,
+  setShowSemesterChangeModal: () => {},
+  confirmSemesterChange: () => {},
+  cancelSemesterChange: () => {},
+  pendingSemester: null,
+  isResetting: false,
 });
 
 export function SubjectsProvider({
@@ -159,6 +179,7 @@ export function SubjectsProvider({
   const [scheduleTitle, setScheduleTitle] = useState<string>("Grade sem título");
   const [isHydrated, setIsHydrated] = useState(false);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [autoSaveEnabled, setAutoSaveEnabled] = useState(() => {
     if (typeof window === "undefined") return true;
     try {
@@ -169,8 +190,43 @@ export function SubjectsProvider({
     }
   });
 
+  const [selectedSemester, setSelectedSemester] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      return localStorage.getItem(STORAGE_SELECTED_SEMESTER_KEY);
+    } catch (error) {
+      return null;
+    }
+  });
+
+  const [showSemesterChangeModal, setShowSemesterChangeModal] = useState(false);
+  const [pendingSemester, setPendingSemester] = useState<string | null>(null);
+  const [totalCredits, setTotalCredits] = useState<number>(0);
+  const [localSaveStatus, setLocalSaveStatus] = useState<LocalSaveStatus>("idle");
+
+  // Fetch semesters for default selection
+  const { data: semesters } = useSemestersQuery();
+
+  // Set default semester to the latest (backend returns semesters ordered DESC)
+  // Only set if nothing is saved in localStorage (selectedSemester === null)
+  // and if there are no active subjects (safe to overwrite)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (selectedSemester !== null) return; // respect saved value
+    if (!semesters || semesters.length === 0) return;
+    // If there are active subjects, avoid automatic switch (safety)
+    const hasActiveSubjects = Object.values(plansData).some(plan => 
+      plan.scheduleSubjects && plan.scheduleSubjects.length > 0
+    );
+    if (hasActiveSubjects) return;
+    // Set silently (do not use handleSemesterChange which triggers confirmation)
+    setSelectedSemester(semesters[0].semester);
+  }, [semesters, selectedSemester, plansData, setSelectedSemester]);
+
   useEffect(() => {
     if (typeof window === "undefined" || isHydrated) return;
+    
+    setIsResetting(true);
     
     try {
       const savedInitialized = localStorage.getItem(STORAGE_PLANS_INITIALIZED_KEY);
@@ -227,9 +283,16 @@ export function SubjectsProvider({
       }
 
       setIsHydrated(true);
+      
+      setTimeout(() => {
+        setIsResetting(false);
+      }, 100);
     } catch (error) {
       console.error("Error hydrating from localStorage:", error);
       setIsHydrated(true);
+      setTimeout(() => {
+        setIsResetting(false);
+      }, 100);
     }
   }, [isHydrated]);
 
@@ -259,10 +322,10 @@ export function SubjectsProvider({
       };
     });
     
-    if (!isLoadingSchedule) {
+    if (!isLoadingSchedule && !isResetting) {
       setLocalSaveStatus("modified");
     }
-  }, [internalCurrentPlan, isLoadingSchedule]);
+  }, [internalCurrentPlan, isLoadingSchedule, isResetting]);
 
   const setSearchedSubjects = useCallback((value: React.SetStateAction<SubjectsType[]>) => {
     setPlansData(prev => {
@@ -324,16 +387,13 @@ export function SubjectsProvider({
     });
   }, [internalCurrentPlan]);
 
-  const [totalCredits, setTotalCredits] = useState<number>(0);
-  const [localSaveStatus, setLocalSaveStatus] = useState<LocalSaveStatus>("idle");
-
   const setScheduleTitleWithModify = useCallback((title: string | ((prevState: string) => string)) => {
     const newTitle = typeof title === "function" ? title(scheduleTitle) : title;
     setScheduleTitle(newTitle);
-    if (!isLoadingSchedule) {
+    if (!isLoadingSchedule && !isResetting) {
       setLocalSaveStatus("modified");
     }
-  }, [isLoadingSchedule, scheduleTitle]);
+  }, [isLoadingSchedule, isResetting, scheduleTitle]);
 
   // Mark data as saved and update last saved state
   const markAsSaved = useCallback(() => {
@@ -525,6 +585,8 @@ export function SubjectsProvider({
 
   // Reset everything to default state (only Plan 1, no subjects)
   const resetToDefault = useCallback(() => {
+    setIsResetting(true);
+    
     // Reset plans data to initial state
     const initialPlansData: Record<PlanNumber, PlanData> = {
       1: emptyPlanData(),
@@ -544,6 +606,10 @@ export function SubjectsProvider({
     setScheduleTitle("Grade sem título");
     setLocalSaveStatus("idle");
     
+    if (semesters && semesters.length > 0) {
+      setSelectedSemester(semesters[0].semester);
+    }
+    
     // Clear all localStorage
     if (typeof window !== "undefined") {
       try {
@@ -558,6 +624,66 @@ export function SubjectsProvider({
         console.error("Error clearing localStorage:", error);
       }
     }
+    
+    // Clear the resetting flag after all state updates
+    setTimeout(() => {
+      setIsResetting(false);
+    }, 100);
+  }, [semesters]);
+
+  // Semester change logic
+  const handleSemesterChange = useCallback((newSemester: string | null) => {
+    if (newSemester === selectedSemester) return;
+    
+    // Check if any plan has active subjects
+    const hasActiveSubjects = Object.values(plansData).some(plan => 
+      plan.scheduleSubjects && plan.scheduleSubjects.length > 0
+    );
+    
+    if (hasActiveSubjects && !isLoadingSchedule) {
+      // Show confirmation modal
+      setPendingSemester(newSemester);
+      setShowSemesterChangeModal(true);
+    } else {
+      // No active subjects, change directly
+      setSelectedSemester(newSemester);
+    }
+  }, [selectedSemester, plansData, isLoadingSchedule]);
+
+  const confirmSemesterChange = useCallback((newSemester: string) => {
+    const targetSemester = newSemester || pendingSemester;
+    if (!targetSemester) return;
+    
+    // Trigger auto-save if there are unsaved changes
+    if (autoSaveEnabled && localSaveStatus === "modified" && currentScheduleId) {
+      const autoSaveEvent = new CustomEvent('autoSaveSchedule', { 
+        detail: { 
+          plans: getPlansDataForSave(),
+          currentScheduleId, 
+          scheduleTitle 
+        } 
+      });
+      window.dispatchEvent(autoSaveEvent);
+    }
+    
+    // Reset to default state (clear all plans)
+    resetToDefault();
+    
+    // Set new semester
+    setSelectedSemester(targetSemester);
+    
+    // Close modal
+    setShowSemesterChangeModal(false);
+    setPendingSemester(null);
+  }, [autoSaveEnabled, localSaveStatus, currentScheduleId, getPlansDataForSave, scheduleTitle, resetToDefault, pendingSemester]);
+
+  const cancelSemesterChange = useCallback(() => {
+    setShowSemesterChangeModal(false);
+    setPendingSemester(null);
+  }, []);
+
+  const setSelectedSemesterDirectly = useCallback((semester: string | null) => {
+    setSelectedSemester(semester);
   }, []);
 
   // Clear all plans and reset to default state (for "Nova Grade" button)
@@ -571,10 +697,10 @@ export function SubjectsProvider({
       ...prev,
       [internalCurrentPlan]: emptyPlanData(),
     }));
-    if (!isLoadingSchedule) {
+    if (!isLoadingSchedule && !isResetting) {
       setLocalSaveStatus("modified");
     }
-  }, [internalCurrentPlan, isLoadingSchedule]);
+  }, [internalCurrentPlan, isLoadingSchedule, isResetting]);
 
   // Restore color usage on mount
   useEffect(() => {
@@ -651,6 +777,18 @@ export function SubjectsProvider({
     } catch (error) {}
   }, [autoSaveEnabled, isHydrated]);
 
+  // Persist selected semester
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (selectedSemester !== null) {
+        localStorage.setItem(STORAGE_SELECTED_SEMESTER_KEY, selectedSemester);
+      } else {
+        localStorage.removeItem(STORAGE_SELECTED_SEMESTER_KEY);
+      }
+    } catch (error) {}
+  }, [selectedSemester]);
+
   return (
     <SubjectsContext.Provider
       value={{
@@ -693,6 +831,15 @@ export function SubjectsProvider({
         autoSaveEnabled,
         setAutoSaveEnabled,
         getPlansDataForSave,
+        selectedSemester,
+        setSelectedSemester: handleSemesterChange,
+        setSelectedSemesterDirectly,
+        showSemesterChangeModal,
+        setShowSemesterChangeModal,
+        confirmSemesterChange,
+        cancelSemesterChange,
+        pendingSemester,
+        isResetting,
       }}
     >
       {children}

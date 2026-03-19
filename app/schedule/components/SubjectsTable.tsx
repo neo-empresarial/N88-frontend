@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect, useRef } from "react";
 import { useSubjects } from "../providers/subjectsContext";
@@ -18,6 +18,7 @@ import { SubjectsType } from "../types/dataType";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import CompetitionBadge from "./CompetitionBadge";
 
 export default function SubjectsTable() {
   const [rowSelection, setRowSelection] = useState<{ [key: string]: boolean }>(
@@ -165,6 +166,7 @@ export default function SubjectsTable() {
             <TableHead>Código</TableHead>
             <TableHead>Turma</TableHead>
             <TableHead>Créditos</TableHead>
+            <TableHead>Concorrência</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
@@ -189,8 +191,23 @@ export default function SubjectsTable() {
                 {row.code}
               </TableCell>
               <TableCell onClick={() => setSelectedSubject(row)}>
-                {scheduleSubjects.find((s) => s.code === row.code)?.class ||
-                  "-"}
+                {(() => {
+                  const selectedClass = scheduleSubjects.find((s) => s.code === row.code)?.class;
+                  return selectedClass ? (
+                    <Badge
+                      variant="outline"
+                      className={`${
+                        row.color && Array.isArray(row.color)
+                          ? theme === "light"
+                            ? row.color[0] + " text-black"
+                            : row.color[1] + " text-white"
+                          : ""
+                      }`}
+                    >
+                      {selectedClass}
+                    </Badge>
+                  ) : "-";
+                })()}
               </TableCell>
               <TableCell onClick={() => setSelectedSubject(row)}>
                 <Badge
@@ -205,6 +222,9 @@ export default function SubjectsTable() {
                 >
                   {row.name}
                 </Badge>
+              </TableCell>
+              <TableCell onClick={() => setSelectedSubject(row)}>
+                <CompetitionBadge score={row.competition} />
               </TableCell>
               <TableCell className="flex justify-end space-x-2">
                 <Button

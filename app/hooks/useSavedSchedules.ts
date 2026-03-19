@@ -43,6 +43,7 @@ export const useSavedSchedulesQuery = (isAuthenticated = false) => {
     mutationFn: (data: {
       title: string;
       description?: string;
+      semester?: string;
       plans?: {
         planNumber: number;
         items: {
@@ -59,6 +60,7 @@ export const useSavedSchedulesQuery = (isAuthenticated = false) => {
       const payload: any = {
         title: data.title,
         description: data.description || "",
+        semester: data.semester,
         totalCredits: data.totalCredits || 0,
       };
 
@@ -102,6 +104,7 @@ export const useSavedSchedulesQuery = (isAuthenticated = false) => {
       id: number;
       title: string;
       description?: string;
+      semester?: string;
       plans?: {
         planNumber: number;
         items: {
@@ -118,6 +121,7 @@ export const useSavedSchedulesQuery = (isAuthenticated = false) => {
       const payload: any = {
         title: data.title,
         description: data.description || "",
+        semester: data.semester,
         totalCredits: data.totalCredits || 0,
       };
 

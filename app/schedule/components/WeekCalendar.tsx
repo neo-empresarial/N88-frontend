@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useSubjects } from "../providers/subjectsContext";
@@ -14,7 +14,6 @@ import {
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { weekDays, timeSlots } from "../constants/week-times-and-days";
@@ -277,18 +276,16 @@ export default function WeekCalendarComponent() {
                       >
                         {hasConflict &&
                         !isOneOfTheSubjectsClassOnFocus(cellData.code) ? (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <div className="cursor-pointer w-full h-full flex justify-center items-center text-center">
-                                  Conflito
-                                </div>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                {generateTooltipContent(cellData.code)}
-                              </TooltipContent>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="cursor-pointer w-full h-full flex justify-center items-center text-center">
+                                Conflito
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              {generateTooltipContent(cellData.code)}
+                            </TooltipContent>
                             </Tooltip>
-                          </TooltipProvider>
                         ) : (
                           <div className="text-center font-medium">
                             {codeToDisplay || ""}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Menubar, MenubarMenu, MenubarTrigger } from "@/components/ui/menubar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
 import Providers from "./providers";
 import ProfileOptions from "@/app/profile/ProfileOptions";
@@ -39,65 +40,67 @@ export default function RootLayout({
       >
         <Providers>
           <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-            <ToastContainer
-              position="bottom-right"
-              autoClose={5000}
-              hideProgressBar={false}
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="colored"
-            />
-            <div className="flex flex-col min-h-full">
-              <Menubar className="flex justify-between items-center h-16">
-                <div className="flex space-x-4 items-center">
-                  <MenubarMenu>
-                    <Link href={"/"}>
-                      <div className="text-sm lg:text-base flex gap-2 items-center ml-6">
-                        <span className="hidden dark:block">
-                          <Image src={logo} alt="grade" width={20} height={20} />
-                        </span>
-                        <span className="block dark:hidden">
-                          <Image src={BlackLogo} alt="grade" width={20} height={20} />
-                        </span>
-                        MatrUFSC 2.0
-                      </div>
-                    </Link>
-                  </MenubarMenu>
-                  <MenubarMenu>
-                    <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
-                      <Link href={"/schedule"}>Matérias</Link>
-                    </MenubarTrigger>
-                  </MenubarMenu>
-                  {/* <MenubarMenu>
-                    <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
-                      <Link href={"/professors"}>Professores</Link>
-                    </MenubarTrigger>
-                  </MenubarMenu> */}
-                  <MenubarMenu>
-                    <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
-                      <Link href={"/groups"}>Grupos e Amizades</Link>
-                    </MenubarTrigger>
-                  </MenubarMenu>
-                </div>
+            <TooltipProvider delayDuration={0} skipDelayDuration={0}>
+              <ToastContainer
+                position="bottom-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="colored"
+              />
+              <div className="flex flex-col min-h-full">
+                <Menubar className="flex justify-between items-center h-16">
+                  <div className="flex space-x-4 items-center">
+                    <MenubarMenu>
+                      <Link href={"/"}>
+                        <div className="text-sm lg:text-base flex gap-2 items-center ml-6">
+                          <span className="hidden dark:block">
+                            <Image src={logo} alt="grade" width={20} height={20} />
+                          </span>
+                          <span className="block dark:hidden">
+                            <Image src={BlackLogo} alt="grade" width={20} height={20} />
+                          </span>
+                          MatrUFSC 2.0
+                        </div>
+                      </Link>
+                    </MenubarMenu>
+                    <MenubarMenu>
+                      <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
+                        <Link href={"/schedule"}>Matérias</Link>
+                      </MenubarTrigger>
+                    </MenubarMenu>
+                    {/* <MenubarMenu>
+                      <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
+                        <Link href={"/professors"}>Professores</Link>
+                      </MenubarTrigger>
+                    </MenubarMenu> */}
+                    <MenubarMenu>
+                      <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
+                        <Link href={"/groups"}>Grupos e Amizades</Link>
+                      </MenubarTrigger>
+                    </MenubarMenu>
+                  </div>
 
-                <div className="flex gap-2">
-                  <MenubarMenu>
-                    <Theme />
-                    <NotificationsDropdown />
-                    <MenubarTrigger className="ml-auto">
-                      <ProfileOptions />
-                    </MenubarTrigger>
-                  </MenubarMenu>
-                </div>
-              </Menubar>
-              <main className="flex-1">{children}</main>
-              <Footer />
-              <FeedbackButton />
-            </div>
+                  <div className="flex gap-2">
+                    <MenubarMenu>
+                      <Theme />
+                      <NotificationsDropdown />
+                      <MenubarTrigger className="ml-auto">
+                        <ProfileOptions />
+                      </MenubarTrigger>
+                    </MenubarMenu>
+                  </div>
+                </Menubar>
+                <main className="flex-1">{children}</main>
+                <Footer />
+                <FeedbackButton />
+              </div>
+            </TooltipProvider>
           </ThemeProvider>
         </Providers>
         <Toaster richColors position="bottom-right" />

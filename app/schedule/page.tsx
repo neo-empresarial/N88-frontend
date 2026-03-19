@@ -9,6 +9,8 @@ import SelectedSubject from "./components/SelectedSubject";
 import SubjectsTable from "./components/SubjectsTable";
 import WeekCalendarComponent from "./components/WeekCalendar";
 import SearchSubject from "./components/SearchSubject";
+import SemesterSelector from "./components/SemesterSelector";
+import SemesterChangeModal from "./components/SemesterChangeModal";
 import SaveScheduleDialog from "./components/SaveScheduleDialog";
 import SavedSchedulesDialog from "./components/SavedSchedulesDialog";
 import ReceivedSharedSchedulesDialog from "./components/ReceivedSharedSchedulesDialog";
@@ -18,7 +20,7 @@ import { SubjectsType } from "./types/dataType";
 import { useEffect, useState } from "react";
 import useAxios from "@/app/api/AxiosInstance";
 import { SubjectsProvider, useSubjects } from "./providers/subjectsContext";
-import { Loader2, Cloud, CloudOff, AlertCircle, Edit2, Check, X, Eraser, Calculator, Zap } from "lucide-react";
+import { Loader2, Cloud, CloudOff, AlertCircle, Edit2, Check, X, Eraser, Calculator, Zap, FileText } from "lucide-react";
 import { useUnsavedChangesWarning } from "@/app/hooks/useUnsavedChangesWarning";
 import { useSavedSchedulesQuery } from "@/app/hooks/useSavedSchedules";
 import { useSession } from "@/app/hooks/useSession";
@@ -72,6 +74,14 @@ function AccountSaveStatusBadge() {
   }
 
   if (!currentScheduleId) {
+    if (localSaveStatus === "idle") {
+      return (
+        <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground mt-1">
+          <FileText className="h-3 w-3" />
+          Grade local
+        </div>
+      );
+    }
     return (
       <div className="flex items-center gap-1.5 text-xs font-medium text-amber-500 mt-1">
         <AlertCircle className="h-3 w-3" />
@@ -354,7 +364,20 @@ function CreditsCounter() {
 }
 
 function ScheduleContent({ subjects }: { subjects: SubjectsType[] }) {
-  const { currentPlan, setCurrentPlan, scheduleSubjects, clearCurrentPlan, plansInitialized } = useSubjects();
+  const { 
+    currentPlan, 
+    setCurrentPlan, 
+    scheduleSubjects, 
+    clearCurrentPlan, 
+    plansInitialized,
+    selectedSemester,
+    setSelectedSemester,
+    showSemesterChangeModal,
+    confirmSemesterChange,
+    cancelSemesterChange,
+    pendingSemester,
+    plansData
+  } = useSubjects();
   const [showClearPlanAlert, setShowClearPlanAlert] = useState(false);
 
   const handleClearPlanClick = () => {
@@ -371,10 +394,18 @@ function ScheduleContent({ subjects }: { subjects: SubjectsType[] }) {
     toast.success(`Matérias do Plano ${currentPlan} removidas com sucesso!`);
   };
 
+  const plan2HasSubjects = plansData[2]?.scheduleSubjects?.length > 0;
+  const isPlan3Disabled = !plan2HasSubjects && currentPlan !== 3;
+
   return (
     <>
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
+          <SemesterSelector
+            selectedSemester={selectedSemester}
+            onSemesterChange={setSelectedSemester}
+            disabled={false}
+          />
           <SearchSubject subjects={subjects} />
           <Button
             variant="outline"
@@ -412,7 +443,8 @@ function ScheduleContent({ subjects }: { subjects: SubjectsType[] }) {
               variant={currentPlan === 3 ? "default" : "outline"} 
               size="sm"
               onClick={() => setCurrentPlan(3)}
-              className={`relative ${!plansInitialized.has(3) && currentPlan !== 3 ? 'text-muted-foreground border-dashed' : ''}`}
+              disabled={isPlan3Disabled}
+              className={`relative ${!plansInitialized.has(3) && currentPlan !== 3 ? 'text-muted-foreground border-dashed' : ''} ${isPlan3Disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               Plano 3
               {!plansInitialized.has(3) && (
@@ -474,6 +506,13 @@ function ScheduleContent({ subjects }: { subjects: SubjectsType[] }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <SemesterChangeModal
+        open={showSemesterChangeModal}
+        onConfirm={() => confirmSemesterChange('')}
+        onCancel={cancelSemesterChange}
+        pendingSemester={pendingSemester}
+      />
     </>
   );
 }

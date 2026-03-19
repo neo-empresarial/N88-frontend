@@ -4,6 +4,7 @@ import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react";
 
 import { useSubjects } from "../providers/subjectsContext";
+import { useCompetitionService } from "@/app/services/competitionService";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -37,10 +38,12 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
     scheduleSubjects,
     setScheduleSubjects,
     setSelectedSubject,
+    selectedSemester,
   } = useSubjects();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
   const { getSubject } = useAxios();
+  const { getSingleCompetitionScore } = useCompetitionService();
   const [searchTerm, setSearchTerm] = useState("");
   const [paginationLimit, setPaginationLimit] = useState(PAGE_SIZE);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -51,7 +54,47 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
   const filteredSubjects = useMemo(() => {
     const subjectsArray = subjects || [];
 
-    const filtered_subjects = subjectsArray.filter(
+    let semesterFilteredSubjects = subjectsArray;
+    if (selectedSemester) {
+      // Merge .2 and .3 for the same year
+      const parts = selectedSemester.split('.');
+      const suffix = parts[1]; // e.g. "2" or "3"
+      if (suffix === '2' || suffix === '3') {
+        const year = parts[0];
+        const sem2 = `${year}.2`;
+        const sem3 = `${year}.3`;
+        // Collect subjects in either sem2 or sem3
+        const candidates = subjectsArray.filter(
+          (subject) =>
+            subject.semester?.semester === sem2 ||
+            subject.semester?.semester === sem3
+        );
+        // Deduplicate by code preferring sem3 version
+        const byCode = new Map<string, SubjectsType>();
+        for (const subj of candidates) {
+          const existing = byCode.get(subj.code);
+          if (!existing) {
+            byCode.set(subj.code, subj);
+            continue;
+          }
+          const existingSem = existing.semester?.semester;
+          const currentSem = subj.semester?.semester;
+          // If existing is .2 and current is .3, replace (prefer .3)
+          if (existingSem?.endsWith('.2') && currentSem?.endsWith('.3')) {
+            byCode.set(subj.code, subj);
+          }
+          // If existing is .3 and current is .2, keep existing (.3 already preferred)
+        }
+        semesterFilteredSubjects = Array.from(byCode.values());
+      } else {
+        // default exact-match behavior for other semesters (e.g., .1)
+        semesterFilteredSubjects = subjectsArray.filter(
+          (subject) => subject.semester?.semester === selectedSemester
+        );
+      }
+    }
+
+    const filtered_subjects = semesterFilteredSubjects.filter(
       (subject) =>
         subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         subject.code.toLowerCase().includes(searchTerm.toLowerCase())
@@ -61,7 +104,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
       ...subject,
       name: `${subject.code} - ${subject.name}`,
     }));
-  }, [subjects, searchTerm]);
+  }, [subjects, searchTerm, selectedSemester]);
 
   // Reset pagination whenever the search term changes
   useEffect(() => {
@@ -131,11 +174,28 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
       setValue("");
     } else {
       try {
-        const response = await getSubject(subject.idsubject);
+        // Fetch subject data and competition score in parallel
+        const [response, competitionScore] = await Promise.allSettled([
+          getSubject(subject.idsubject),
+          getSingleCompetitionScore(subject.code)
+        ]);
+
+        // Handle subject data
+        if (response.status === 'rejected') {
+          throw new Error('Failed to fetch subject data');
+        }
+
         const dataWithColors = {
-          ...response,
+          ...response.value,
           color: getUniqueColorPair(),
         };
+
+        // Handle competition score (optional - don't fail if it fails)
+        if (competitionScore.status === 'fulfilled') {
+          dataWithColors.competition = competitionScore.value;
+        } else {
+          console.warn(`Failed to fetch competition score for ${subject.code}:`, competitionScore.reason);
+        }
 
         const newScheduleSubject = {
           code: dataWithColors.code,
