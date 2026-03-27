@@ -1,4 +1,4 @@
-﻿import axios from "axios";
+import axios from "axios";
 
 // Helper to get access token
 async function getAccessToken(): Promise<string | null> {
@@ -43,20 +43,26 @@ const useAxios = () => {
     },
   });
 
-  const getAllSubjects = async () => {
-    const response = await axiosPublicInstance.get("subjects");
+  const getAllSubjects = async (campusId?: string | number) => {
+    const params: Record<string, string> = {};
+    if (campusId) params.campus_id = String(campusId);
+    
+    const response = await axiosPublicInstance.get("subjects", { params });
     return response.data;
   };
 
-  const getSubjectsByCodes = async (codes: string[]) => {
+  const getSubjectsByCodes = async (codes: string[], campusId?: string | number) => {
     if (!codes || codes.length === 0) {
       throw new Error("No subject codes provided");
     }
 
     try {
-      const response = await axiosPublicInstance.get(
-        `/subjects/by-codes?codes=${codes.join(",")}`
-      );
+      const params: Record<string, string> = {
+        codes: codes.join(",")
+      };
+      if (campusId) params.campus_id = String(campusId);
+      
+      const response = await axiosPublicInstance.get("/subjects/by-codes", { params });
       return response.data;
     } catch (error) {
       console.error("Error fetching subjects by codes:", error);
@@ -74,11 +80,14 @@ const useAxios = () => {
     }
   };
 
-  const getFilteredSubjects = async (search: string) => {
+  const getFilteredSubjects = async (search: string, campusId?: string | number) => {
     try {
-      const response = await axiosPublicInstance.get(
-        `/subjects?search=${encodeURIComponent(search)}`
-      );
+      const params: Record<string, string> = {
+        search: encodeURIComponent(search)
+      };
+      if (campusId) params.campus_id = String(campusId);
+      
+      const response = await axiosPublicInstance.get("/subjects", { params });
       return response.data;
     } catch (error) {
       console.error("Error fetching filtered subjects:", error);
@@ -86,9 +95,12 @@ const useAxios = () => {
     }
   };
 
-  const getSubject = async (id: number) => {
+  const getSubject = async (id: number, campusId?: string | number) => {
     try {
-      const response = await axiosPublicInstance.get(`/subjects/${id}`);
+      const params: Record<string, string> = {};
+      if (campusId) params.campus_id = String(campusId);
+      
+      const response = await axiosPublicInstance.get(`/subjects/${id}`, { params });
       return response.data;
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response?.status === 401) {

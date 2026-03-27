@@ -62,7 +62,7 @@ export default function SavedSchedulesDialog() {
   const [showLoginDialog, setShowLoginDialog] = useState(false);
   const { savedSchedules, isLoading, deleteSchedule, isDeleting } =
     useSavedSchedulesQuery(isAuthenticated);
-  const { currentScheduleId, setCurrentScheduleId, loadFullSchedule, setSelectedSemesterDirectly, localSaveStatus } =
+  const { currentScheduleId, setCurrentScheduleId, loadFullSchedule, setSelectedSemesterDirectly, setSelectedCampusDirectly, localSaveStatus } =
     useSubjects();
   const { getSubjectsByCodes } = useAxios();
   const { getBatchCompetitionScores } = useCompetitionService();
@@ -157,7 +157,7 @@ export default function SavedSchedulesDialog() {
 
       // Fetch subjects and competition scores in parallel
       const [subjects, competitionResult] = await Promise.allSettled([
-        getSubjectsByCodes(subjectCodes),
+        getSubjectsByCodes(subjectCodes, schedule.campus ? String(schedule.campus) : undefined),
         getBatchCompetitionScores(subjectCodes)
       ]);
 
@@ -252,6 +252,11 @@ export default function SavedSchedulesDialog() {
       // Set the semester from saved schedule
       if (schedule.semester) {
         setSelectedSemesterDirectly(schedule.semester);
+      }
+
+      // Set the campus from saved schedule
+      if (schedule.campus) {
+        setSelectedCampusDirectly(String(schedule.campus));
       }
 
       setOpen(false);

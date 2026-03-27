@@ -30,7 +30,7 @@ import { SavedSchedule } from "@/app/services/savedSchedulesService";
 import LoginSuggestionDialog from "./LoginSuggestionDialog";
 
 export default function SaveScheduleDialog() {
-  const { scheduleSubjects, currentScheduleId, scheduleTitle, clearLocalSchedule, resetToDefault, setCurrentScheduleId, setScheduleTitle, plansData, markAsSaved, calculateTotalCredits, getPlansDataForSave, selectedSemester, localSaveStatus } = useSubjects();
+  const { scheduleSubjects, currentScheduleId, scheduleTitle, clearLocalSchedule, resetToDefault, setCurrentScheduleId, setScheduleTitle, plansData, markAsSaved, calculateTotalCredits, getPlansDataForSave, selectedSemester, selectedCampus, localSaveStatus } = useSubjects();
   const { isAuthenticated } = useSession();
   const { updateScheduleAsync, createSchedule, deleteSchedule, savedSchedules, isCreating, isUpdating, isDeleting, isLoading } = useSavedSchedulesQuery(isAuthenticated);
   
@@ -87,6 +87,7 @@ export default function SaveScheduleDialog() {
           title: scheduleTitle,
           description: currentSchedule.description || '',
           semester: selectedSemester || undefined,
+          campus: selectedCampus || undefined,
           plans: getPlansDataForSave(),
           totalCredits: calculateTotalCredits(),
         });
@@ -156,6 +157,7 @@ export default function SaveScheduleDialog() {
       title: title.trim(),
       description: description.trim(),
       semester: selectedSemester || undefined,
+      campus: selectedCampus || undefined,
       plans: getPlansDataForSave(),
       totalCredits: calculateTotalCredits(),
     }, {
@@ -189,6 +191,7 @@ export default function SaveScheduleDialog() {
             title: eventTitle,
             description: currentSchedule.description || '',
             semester: selectedSemester || undefined,
+            campus: selectedCampus || undefined,
             plans: eventPlans,
             totalCredits: calculateTotalCredits(),
           });

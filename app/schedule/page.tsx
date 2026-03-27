@@ -11,6 +11,8 @@ import WeekCalendarComponent from "./components/WeekCalendar";
 import SearchSubject from "./components/SearchSubject";
 import SemesterSelector from "./components/SemesterSelector";
 import SemesterChangeModal from "./components/SemesterChangeModal";
+import CampusSelector from "./components/CampusSelector";
+import CampusChangeModal from "./components/CampusChangeModal";
 import SaveScheduleDialog from "./components/SaveScheduleDialog";
 import SavedSchedulesDialog from "./components/SavedSchedulesDialog";
 import ReceivedSharedSchedulesDialog from "./components/ReceivedSharedSchedulesDialog";
@@ -306,27 +308,49 @@ function ScheduleHeader() {
 }
 
 export default function SchedulePage() {
-  const { getAllSubjects } = useAxios();
-  const [subjects, setSubjects] = useState<SubjectsType[]>([]);
-
-  useEffect(() => {
-    getAllSubjects().then((data: SubjectsType[]) => {
-      setSubjects(data);
-    });
-    // getAllSubjects is recreated on every render by useAxios() — intentionally
-    // omitted from deps so we only fetch once on mount.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   return (
     <div className="p-10 grid gap-2 grid-cols-1 ">
       <SubjectsProvider>
         <ScheduleHeader />
-        <ScheduleContent subjects={subjects} />
+        <SubjectsLoader />
         <CopyPlanDialog />
       </SubjectsProvider>
     </div>
   );
+}
+
+function SubjectsLoader() {
+  const { getAllSubjects } = useAxios();
+  const { selectedCampus } = useSubjects();
+  const [subjects, setSubjects] = useState<SubjectsType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getAllSubjects(selectedCampus || undefined);
+        setSubjects(data);
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+        setSubjects([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSubjects();
+  }, [selectedCampus]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  return <ScheduleContent subjects={subjects} />;
 }
 
 function AutoSaveToggle() {
@@ -372,10 +396,16 @@ function ScheduleContent({ subjects }: { subjects: SubjectsType[] }) {
     plansInitialized,
     selectedSemester,
     setSelectedSemester,
+    selectedCampus,
+    setSelectedCampus,
     showSemesterChangeModal,
+    showCampusChangeModal,
     confirmSemesterChange,
+    confirmCampusChange,
     cancelSemesterChange,
+    cancelCampusChange,
     pendingSemester,
+    pendingCampusName,
     plansData
   } = useSubjects();
   const [showClearPlanAlert, setShowClearPlanAlert] = useState(false);
@@ -401,6 +431,11 @@ function ScheduleContent({ subjects }: { subjects: SubjectsType[] }) {
     <>
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
+          <CampusSelector
+            selectedCampus={selectedCampus}
+            onCampusChange={setSelectedCampus}
+            disabled={false}
+          />
           <SemesterSelector
             selectedSemester={selectedSemester}
             onSemesterChange={setSelectedSemester}
@@ -512,6 +547,12 @@ function ScheduleContent({ subjects }: { subjects: SubjectsType[] }) {
         onConfirm={() => confirmSemesterChange('')}
         onCancel={cancelSemesterChange}
         pendingSemester={pendingSemester}
+      />
+      <CampusChangeModal
+        open={showCampusChangeModal}
+        onConfirm={() => confirmCampusChange('')}
+        onCancel={cancelCampusChange}
+        pendingCampusName={pendingCampusName}
       />
     </>
   );
