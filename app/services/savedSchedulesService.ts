@@ -6,6 +6,7 @@ export interface SavedSchedule {
   description: string;
   totalCredits?: number;
   semester?: string;
+  campus?: string;
   plans?: {
     planNumber: number;
     credits: number;
@@ -28,6 +29,7 @@ export interface CreateSavedScheduleDto {
   title: string;
   description: string;
   semester?: string;
+  campus?: string;
   totalCredits?: number;
   items?: {
     subjectCode: string;

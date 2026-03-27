@@ -44,6 +44,7 @@ export const useSavedSchedulesQuery = (isAuthenticated = false) => {
       title: string;
       description?: string;
       semester?: string;
+      campus?: string;
       plans?: {
         planNumber: number;
         items: {
@@ -61,6 +62,7 @@ export const useSavedSchedulesQuery = (isAuthenticated = false) => {
         title: data.title,
         description: data.description || "",
         semester: data.semester,
+        campus: data.campus,
         totalCredits: data.totalCredits || 0,
       };
 
@@ -105,6 +107,7 @@ export const useSavedSchedulesQuery = (isAuthenticated = false) => {
       title: string;
       description?: string;
       semester?: string;
+      campus?: string;
       plans?: {
         planNumber: number;
         items: {
@@ -122,6 +125,7 @@ export const useSavedSchedulesQuery = (isAuthenticated = false) => {
         title: data.title,
         description: data.description || "",
         semester: data.semester,
+        campus: data.campus,
         totalCredits: data.totalCredits || 0,
       };
 

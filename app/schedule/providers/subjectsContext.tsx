@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useCallback, createContext, useState } fr
 import { SubjectsType } from "../types/dataType";
 import { restoreColorUsage } from "../utils/colorUtils";
 import { useSemestersQuery } from "@/app/hooks/useSemesters";
+import { useCampusesQuery } from "@/app/hooks/useCampuses";
 
 export type scheduleSubjectsType = {
   code: string;
@@ -87,6 +88,15 @@ type SubjectsContextType = {
   confirmSemesterChange: (newSemester: string) => void;
   cancelSemesterChange: () => void;
   pendingSemester: string | null;
+  selectedCampus: string | null;
+  setSelectedCampus: (campusId: string | null) => void;
+  setSelectedCampusDirectly: (campusId: string | null) => void;
+  showCampusChangeModal: boolean;
+  setShowCampusChangeModal: React.Dispatch<React.SetStateAction<boolean>>;
+  confirmCampusChange: (newCampusId: string) => void;
+  cancelCampusChange: () => void;
+  pendingCampus: string | null;
+  pendingCampusName: string | null;
   isResetting: boolean;
 };
 
@@ -99,6 +109,7 @@ const STORAGE_PLANS_DATA_KEY = "plans_data";
 const STORAGE_PLANS_INITIALIZED_KEY = "plans_initialized";
 const STORAGE_AUTO_SAVE_ENABLED_KEY = "auto_save_enabled";
 const STORAGE_SELECTED_SEMESTER_KEY = "selected_semester";
+const STORAGE_SELECTED_CAMPUS_KEY = "selected_campus";
 
 const emptyPlanData = (): PlanData => ({
   scheduleSubjects: [],
@@ -160,6 +171,15 @@ export const SubjectsContext = createContext<SubjectsContextType>({
   confirmSemesterChange: () => {},
   cancelSemesterChange: () => {},
   pendingSemester: null,
+  selectedCampus: null,
+  setSelectedCampus: () => {},
+  setSelectedCampusDirectly: () => {},
+  showCampusChangeModal: false,
+  setShowCampusChangeModal: () => {},
+  confirmCampusChange: () => {},
+  cancelCampusChange: () => {},
+  pendingCampus: null,
+  pendingCampusName: null,
   isResetting: false,
 });
 
@@ -201,11 +221,28 @@ export function SubjectsProvider({
 
   const [showSemesterChangeModal, setShowSemesterChangeModal] = useState(false);
   const [pendingSemester, setPendingSemester] = useState<string | null>(null);
+
+  const [selectedCampus, setSelectedCampusState] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      return localStorage.getItem(STORAGE_SELECTED_CAMPUS_KEY);
+    } catch (error) {
+      return null;
+    }
+  });
+
+  const [showCampusChangeModal, setShowCampusChangeModal] = useState(false);
+  const [pendingCampus, setPendingCampus] = useState<string | null>(null);
+  const [pendingCampusName, setPendingCampusName] = useState<string | null>(null);
+
   const [totalCredits, setTotalCredits] = useState<number>(0);
   const [localSaveStatus, setLocalSaveStatus] = useState<LocalSaveStatus>("idle");
 
   // Fetch semesters for default selection
   const { data: semesters } = useSemestersQuery();
+
+  // Fetch campuses for default selection
+  const { data: campuses } = useCampusesQuery();
 
   // Set default semester to the latest (backend returns semesters ordered DESC)
   // Only set if nothing is saved in localStorage (selectedSemester === null)
@@ -222,6 +259,23 @@ export function SubjectsProvider({
     // Set silently (do not use handleSemesterChange which triggers confirmation)
     setSelectedSemester(semesters[0].semester);
   }, [semesters, selectedSemester, plansData, setSelectedSemester]);
+
+  // Set default campus to Florianópolis (or first in list if not present)
+  // Only set if nothing is saved in localStorage (selectedCampus === null)
+  // and if there are no active subjects (safe to overwrite)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (selectedCampus !== null) return;
+    if (!campuses || campuses.length === 0) return;
+    
+    const hasActiveSubjects = Object.values(plansData).some(plan => 
+      plan.scheduleSubjects && plan.scheduleSubjects.length > 0
+    );
+    if (hasActiveSubjects) return;
+    
+    const defaultCampus = campuses.find(c => c.name === 'Florianópolis') || campuses[0];
+    setSelectedCampusState(String(defaultCampus.id));
+  }, [campuses, selectedCampus, plansData]);
 
   useEffect(() => {
     if (typeof window === "undefined" || isHydrated) return;
@@ -686,6 +740,63 @@ export function SubjectsProvider({
     setSelectedSemester(semester);
   }, []);
 
+  // Campus change logic
+  const handleCampusChange = useCallback((newCampusId: string | null) => {
+    if (newCampusId === selectedCampus) return;
+
+    const hasActiveSubjects = Object.values(plansData).some(plan =>
+      plan.scheduleSubjects && plan.scheduleSubjects.length > 0
+    );
+
+    if (hasActiveSubjects && !isLoadingSchedule) {
+      const campusName = campuses?.find(c => String(c.id) === newCampusId)?.name || null;
+      
+      setPendingCampus(newCampusId);
+      setPendingCampusName(campusName);
+      setShowCampusChangeModal(true);
+    } else {
+      setSelectedCampusState(newCampusId);
+    }
+  }, [selectedCampus, plansData, isLoadingSchedule, campuses]);
+
+  const confirmCampusChange = useCallback((newCampusId: string) => {
+    const targetCampusId = newCampusId || pendingCampus;
+    if (!targetCampusId) return;
+
+    if (autoSaveEnabled && localSaveStatus === "modified" && currentScheduleId) {
+      const autoSaveEvent = new CustomEvent('autoSaveSchedule', {
+        detail: {
+          plans: getPlansDataForSave(),
+          currentScheduleId,
+          scheduleTitle
+        }
+      });
+      window.dispatchEvent(autoSaveEvent);
+    }
+
+    resetToDefault();
+
+    setSelectedCampusState(targetCampusId);
+
+    setShowCampusChangeModal(false);
+    setPendingCampus(null);
+    setPendingCampusName(null);
+  }, [autoSaveEnabled, localSaveStatus, currentScheduleId, getPlansDataForSave, scheduleTitle, resetToDefault, pendingCampus]);
+
+  const cancelCampusChange = useCallback(() => {
+    setShowCampusChangeModal(false);
+    setPendingCampus(null);
+    setPendingCampusName(null);
+  }, []);
+
+  const setSelectedCampusDirectly = useCallback((campusId: string | null) => {
+    setSelectedCampusState(campusId);
+  }, []);
+
+  const setSelectedCampus = useCallback((campusId: string | null) => {
+    handleCampusChange(campusId);
+  }, [handleCampusChange]);
+
   // Clear all plans and reset to default state (for "Nova Grade" button)
   const clearLocalSchedule = useCallback(() => {
     resetToDefault();
@@ -789,6 +900,18 @@ export function SubjectsProvider({
     } catch (error) {}
   }, [selectedSemester]);
 
+  // Persist selected campus
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (selectedCampus !== null) {
+        localStorage.setItem(STORAGE_SELECTED_CAMPUS_KEY, selectedCampus);
+      } else {
+        localStorage.removeItem(STORAGE_SELECTED_CAMPUS_KEY);
+      }
+    } catch (error) {}
+  }, [selectedCampus]);
+
   return (
     <SubjectsContext.Provider
       value={{
@@ -839,6 +962,15 @@ export function SubjectsProvider({
         confirmSemesterChange,
         cancelSemesterChange,
         pendingSemester,
+        selectedCampus,
+        setSelectedCampus,
+        setSelectedCampusDirectly,
+        showCampusChangeModal,
+        setShowCampusChangeModal,
+        confirmCampusChange,
+        cancelCampusChange,
+        pendingCampus,
+        pendingCampusName,
         isResetting,
       }}
     >

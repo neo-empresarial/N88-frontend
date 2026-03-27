@@ -39,6 +39,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
     setScheduleSubjects,
     setSelectedSubject,
     selectedSemester,
+    selectedCampus,
   } = useSubjects();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState("");
@@ -54,22 +55,20 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
   const filteredSubjects = useMemo(() => {
     const subjectsArray = subjects || [];
 
+    // Campus filtering is handled by the API, not here
     let semesterFilteredSubjects = subjectsArray;
     if (selectedSemester) {
-      // Merge .2 and .3 for the same year
       const parts = selectedSemester.split('.');
-      const suffix = parts[1]; // e.g. "2" or "3"
+      const suffix = parts[1];
       if (suffix === '2' || suffix === '3') {
         const year = parts[0];
         const sem2 = `${year}.2`;
         const sem3 = `${year}.3`;
-        // Collect subjects in either sem2 or sem3
         const candidates = subjectsArray.filter(
           (subject) =>
             subject.semester?.semester === sem2 ||
             subject.semester?.semester === sem3
         );
-        // Deduplicate by code preferring sem3 version
         const byCode = new Map<string, SubjectsType>();
         for (const subj of candidates) {
           const existing = byCode.get(subj.code);
@@ -79,15 +78,12 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
           }
           const existingSem = existing.semester?.semester;
           const currentSem = subj.semester?.semester;
-          // If existing is .2 and current is .3, replace (prefer .3)
           if (existingSem?.endsWith('.2') && currentSem?.endsWith('.3')) {
             byCode.set(subj.code, subj);
           }
-          // If existing is .3 and current is .2, keep existing (.3 already preferred)
         }
         semesterFilteredSubjects = Array.from(byCode.values());
       } else {
-        // default exact-match behavior for other semesters (e.g., .1)
         semesterFilteredSubjects = subjectsArray.filter(
           (subject) => subject.semester?.semester === selectedSemester
         );
@@ -176,7 +172,7 @@ export default function SearchSubject({ subjects }: SearchSubjectProps) {
       try {
         // Fetch subject data and competition score in parallel
         const [response, competitionScore] = await Promise.allSettled([
-          getSubject(subject.idsubject),
+          getSubject(subject.idsubject, selectedCampus || undefined),
           getSingleCompetitionScore(subject.code)
         ]);
 
