@@ -40,20 +40,20 @@ export default function Footer() {
           <Link href="https://neo.certi.org.br/">
             <p>Home</p>
           </Link>
-          <Link href="https://neo.certi.org.br/sobre-nos">
+          <Link href="https://neo.certi.org.br/about-us">
             <p>Sobre o NEO</p>
           </Link>
-          <Link href="https://neo.certi.org.br/equipe">
+          <Link href="https://neo.certi.org.br/team">
             <p>Equipe</p>
           </Link>
-          <Link href="https://neo.certi.org.br/projetos">
+          <Link href="https://neo.certi.org.br/projects">
             <p>Projetos</p>
           </Link>
-          <Link href="https://neo.certi.org.br/trabalhe-conosco">
+          <Link href="https://neo.certi.org.br/work-with-us">
             <p>Trabalhe no NEO</p>
           </Link>
-          <Link href="https://neo.certi.org.br/conteudos">
-            <p>Conteúdos</p>
+          <Link href="https://neo.certi.org.br/alumni">
+            <p>Rede Alumni</p>
           </Link>
         </div>
       </div>

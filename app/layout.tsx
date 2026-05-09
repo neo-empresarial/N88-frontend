@@ -65,13 +65,18 @@ export default function RootLayout({
                           <span className="block dark:hidden">
                             <Image src={BlackLogo} alt="grade" width={20} height={20} />
                           </span>
-                          MatrUFSC 2.0
+                          Gradi
                         </div>
                       </Link>
                     </MenubarMenu>
                     <MenubarMenu>
-                      <MenubarTrigger className="flex transition-colors duration-400 hover:bg-gray-800 cursor-pointer">
+                      <MenubarTrigger className="flex transition-colors duration-400 hover:bg-primary/20 cursor-pointer bg-primary/10 px-4 py-2 rounded-md">
                         <Link href={"/schedule"}>Monte sua grade!</Link>
+                      </MenubarTrigger>
+                    </MenubarMenu>
+                    <MenubarMenu>
+                      <MenubarTrigger className="flex transition-colors duration-400 hover:bg-secondary/80 cursor-pointer">
+                        <Link href={"/tutorial"}>Aprenda a usar o Gradi</Link>
                       </MenubarTrigger>
                     </MenubarMenu>
                     {/* <MenubarMenu>

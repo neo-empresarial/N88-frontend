@@ -10,8 +10,7 @@ import {
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { getSession } from "@/lib/session";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { fetchWithAuth } from "@/lib/fetchWithAuth";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/app/hooks/useSession";
@@ -34,15 +33,8 @@ interface Notification {
 const NotificationsDropdown = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { isAuthenticated } = useSession();
+  const { isAuthenticated, isLoading: isSessionLoading } = useSession();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-
-  useEffect(() => {
-    const checkSession = async () => {
-      await getSession();
-    };
-    checkSession();
-  }, []);
 
   const { data: notifications, isLoading } = useQuery({
     queryKey: ["notifications"],
@@ -52,7 +44,14 @@ const NotificationsDropdown = () => {
       const data: Notification[] = await response.json();
       return data;
     },
-    enabled: isAuthenticated,
+    enabled: !isSessionLoading && isAuthenticated,
+    retry: (failureCount, error) => {
+      // Don't retry if 401 (not authenticated)
+      if (error?.message?.includes('401')) {
+        return false;
+      }
+      return failureCount < 2;
+    },
   });
 
   const respondMutation = useMutation({

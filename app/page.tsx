@@ -1,13 +1,13 @@
 "use client";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import grade from "./assets/grade.png";
+import lightModeImage from "./assets/N88-light-mode.png";
+import darkModeImage from "./assets/N88-dark-mode.png";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import {
   Github,
-  AlertTriangle,
   BarChart,
   Save,
   Coffee,
@@ -20,17 +20,26 @@ import {
 } from "@/components/ui/resizable";
 import useMediaQuery from "./hooks/useMediaQuery";
 import { useMemo } from "react";
+import { useTheme } from "next-themes";
 
 export default function Home() {
   const [displayText, setDisplayText] = useState("qualquer curso");
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const defaultText = "qualquer curso";
-
+  
+  const { theme, resolvedTheme } = useTheme();
   const isSmallScreen = useMediaQuery("(max-width: 640px)");
 
   const indexRef = useRef(0);
-
   const wasSmallScreenRef = useRef(isSmallScreen);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const currentTheme = mounted ? (resolvedTheme ?? theme) : 'light';
+  const gradeImage = currentTheme === 'dark' ? darkModeImage : lightModeImage;
 
 
   const items = useMemo(
@@ -100,7 +109,7 @@ export default function Home() {
           animate={{ transform: "translateY(-30px)" }}
           transition={{ duration: 0.5 }}
         >
-          <Badge variant="outline">Desenvolvido por NEO Empresarial</Badge>
+          <Badge variant="outline">Desenvolvido pelo NEO Empresarial com ❤️</Badge>
           <h1 className=" text-4xl md:text-5xl lg:text-6xl font-sans font-medium ">
             Uma nova forma{" "}
           </h1>
@@ -115,9 +124,9 @@ export default function Home() {
           transition={{ duration: 1 }}
         >
           <p>
-            Construa sua grade curricular, analise e controle o nível de dificuldade,
+            Construa sua grade curricular, analise a concorrência histórica das matérias,
           </p>
-          <p>tudo em um mesmo lugar!</p>
+          <p>compartilhe com os amigos, tudo em um mesmo lugar!</p>
         </motion.div>
         <motion.div
           className="flex flex-col items-center justify-center w-full mb-10"
@@ -126,11 +135,12 @@ export default function Home() {
           transition={{ duration: 1 }}
         >
           <Image
-            src={grade}
-            alt="grade"
-            width={500}
-            height={500}
-            className="h-auto lg:w-auto w-80"
+            src={gradeImage}
+            alt="Interface do Gradi"
+            width={850}
+            height={850}
+            className="h-auto lg:w-auto w-80 transition-opacity duration-300"
+            priority
           />
         </motion.div>
       </div>
@@ -144,25 +154,19 @@ export default function Home() {
         >
           <div className="flex gap-2 items-center ">
             <BarChart />
-            <h1 className="text-2xl font-sans font-small">
-              Calcule a dificuldade da sua grade
+            <h1 className="text-2xl font-sans font-medium">
+              Analise a concorrência histórica das matérias
             </h1>
-          </div>
-          <div className="flex gap-2 items-center ">
-            <AlertTriangle/>
-            <h1 className="text-xl font-sans font-medium">
-              Em desenvolvimento...
-            </h1>
-            <AlertTriangle/>
           </div>
           <p className="text-[#898989] text-center">
-            A plataforma avalia em tempo real a dificuldade da sua grade baseado
-            em diversos critérios, como a taxa de reprovação das matérias.
+            Descubra a demanda real por cada matéria baseado no histórico de matrículas. 
+            Nossa plataforma calcula a média de pedidos de matrícula versus vagas disponíveis 
+            nos últimos semestres, te ajudando a planejar melhor sua grade.
           </p>
           <div>
             <div className="flex flex-col items-center justify-center gap-2">
-              <h1 className="text-5xl font-sans text-red-400">27%</h1>
-              <p className="">é a taxa média de reprovação da sua grade</p>              
+              <h1 className="text-5xl font-sans text-orange-400">2.3x</h1>
+              <p className="">mais pedidos de matrícula que vagas disponíveis</p>              
             </div>
           </div>
         </motion.div>
@@ -179,9 +183,9 @@ export default function Home() {
             </h1>
           </div>
           <p className="text-[#898989] text-center">
-            Pela plataforma você tem a opcão de salvar sua grade diretamente no
-            perfil, além de ter um histórico de todas as grades que você já
-            montou.
+            Chega de perder seu planejamento de matérias entre semestres! 
+            Salve sua grade diretamente no perfil e tenha acesso ao histórico 
+            completo de todas as grades que você já montou.
           </p>
           <div className="flex flex-col items-left justify-center">
             <h1 className="text-3xl font-sans">Seu histórico de grades:</h1>
@@ -207,12 +211,13 @@ export default function Home() {
           <div className="flex gap-2 items-center ">
             <Coffee />
             <h1 className="text-2xl font-sans font-medium">
-              Personalize o seu ambiente
+              Personalize o layout da sua grade
             </h1>
           </div>
           <p className="text-[#898989] text-center">
-            Deixa a plataforma da forma que mais te agrada, com temas
-            personalizados e opções de acessibilidade.
+            Organize sua grade da forma que mais te agrada. Redimensione e reorganize 
+            as seções de matérias, professores e informações para criar o ambiente 
+            perfeito para seu planejamento acadêmico.
           </p>
           <div className='w-full h-full p-2'>
             <ResizablePanelGroup
@@ -220,25 +225,25 @@ export default function Home() {
               className="rounded-lg border w-full h-full"
             >
               <ResizablePanel defaultSize={50}>
-                <div className="flex h-[200px] items-center justify-center p-6">
-                  <span className="font-semibold">Grade</span>
-                </div>
-              </ResizablePanel>
-              <ResizableHandle />
-              <ResizablePanel defaultSize={50}>
                 <ResizablePanelGroup direction="vertical">
-                  <ResizablePanel defaultSize={25}>
+                  <ResizablePanel defaultSize={50}>
                     <div className="flex h-full items-center justify-center p-6">
                       <span className="font-semibold">Matérias</span>
                     </div>
                   </ResizablePanel>
                   <ResizableHandle />
-                  <ResizablePanel defaultSize={75}>
+                  <ResizablePanel defaultSize={50}>
                     <div className="flex h-full items-center justify-center p-6">
                       <span className="font-semibold">Professores</span>
                     </div>
                   </ResizablePanel>
                 </ResizablePanelGroup>
+              </ResizablePanel>
+              <ResizableHandle />
+              <ResizablePanel defaultSize={50}>
+                <div className="flex h-[200px] items-center justify-center p-6">
+                  <span className="font-semibold">Grade</span>
+                </div>
               </ResizablePanel>
             </ResizablePanelGroup>
           </div>
@@ -261,7 +266,7 @@ export default function Home() {
           </p>
           <div className="flex flex-row items-center gap-4 h-full">
             <div className="text-2xl font-sans font-semibold">
-              <h1>Comparar grade</h1>
+              <h1>Compartilhar grade com</h1>
             </div>
             <div className="flex flex-col gap-2">
               {people.map((name) => (
@@ -299,7 +304,7 @@ export default function Home() {
             </motion.div>
           </div>
           <div className="flex flex-row gap-0 justify-center lg:justify-start">
-            {items.map((item) => {
+            {items.map((item, index, array) => {
               const isHovered = hoveredItem === item.label;
               let textColorClass = "text-[#898989]";
               if (isHovered) {
@@ -318,6 +323,9 @@ export default function Home() {
                   className={`text-2xl lg:text-4xl font-semibold p-2 transition-colors duration-300 ${textColorClass}`}
                 >
                   {item.label}
+                  {index === array.length - 1 && (
+                    <span className="text-[#898989] ml-2">...</span>
+                  )}
                 </span>
               );
             })}
@@ -333,7 +341,7 @@ export default function Home() {
           transition={{ duration: 1.5, type: "spring", bounce: 0.2 }}
         >
           <h1 className="text-xl sm:text-2xl lg:text-4xl dark:text-[#FAFAFA] font-sans">
-            Faça do MatrUFSC 2.0 cada vez melhor
+            Faça do Gradi cada vez melhor
           </h1>
           <div className="flex flex-col items-center justify-center w-full gap-1 text-sm lg:text-base text-center">
             <p className="text-[#898989]">

@@ -59,7 +59,7 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
     headers,
   });
 
-  if (response.status === 401) {
+  if (response.status === 401 && token) {
     try {
       await refreshAccessToken();
       // Retry with new token
