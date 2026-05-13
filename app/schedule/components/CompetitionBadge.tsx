@@ -28,7 +28,7 @@ const getCategoryColor = (category: "Baixa" | "Média" | "Alta") => {
 };
 
 const getClassificationLimits = () => {
-  return "Baixa: 0-15 | Média: 15-30 | Alta: 30+";
+  return "Baixa: 0-5 | Média: 5-15 | Alta: 15+";
 };
 
 export default function CompetitionBadge({ score, isLoading, error }: CompetitionBadgeProps) {

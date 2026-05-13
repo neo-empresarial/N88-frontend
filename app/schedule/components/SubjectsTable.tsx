@@ -163,10 +163,11 @@ export default function SubjectsTable() {
                 aria-label="Select all"
               />
             </TableHead>
-            <TableHead>Código</TableHead>
-            <TableHead>Turma</TableHead>
-            <TableHead>Créditos</TableHead>
-            <TableHead>Concorrência</TableHead>
+             <TableHead>Código</TableHead>
+             <TableHead>Turma</TableHead>
+             <TableHead>Créditos</TableHead>
+             <TableHead>Título</TableHead>
+             <TableHead>Concorrência</TableHead>
             <TableHead></TableHead>
           </TableRow>
         </TableHeader>
@@ -190,39 +191,49 @@ export default function SubjectsTable() {
               <TableCell onClick={() => setSelectedSubject(row)}>
                 {row.code}
               </TableCell>
-              <TableCell onClick={() => setSelectedSubject(row)}>
-                {(() => {
-                  const selectedClass = scheduleSubjects.find((s) => s.code === row.code)?.class;
-                  return selectedClass ? (
-                    <Badge
-                      variant="outline"
-                      className={`${
-                        row.color && Array.isArray(row.color)
-                          ? theme === "light"
-                            ? row.color[0] + " text-black"
-                            : row.color[1] + " text-white"
-                          : ""
-                      }`}
-                    >
-                      {selectedClass}
-                    </Badge>
-                  ) : "-";
-                })()}
-              </TableCell>
-              <TableCell onClick={() => setSelectedSubject(row)}>
-                <Badge
-                  variant="outline"
-                  className={`${
-                    row.color && Array.isArray(row.color)
-                      ? theme === "light"
-                        ? row.color[0] + " text-black"
-                        : row.color[1] + " text-white"
-                      : ""
-                  }`}
-                >
-                  {row.name}
-                </Badge>
-              </TableCell>
+               <TableCell onClick={() => setSelectedSubject(row)}>
+                  {(() => {
+                    const selectedClass = scheduleSubjects.find((s) => s.code === row.code)?.class;
+                    if (!selectedClass) return "-";
+                    return (
+                      <Badge
+                        variant="outline"
+                        className={`${
+                          row.color && Array.isArray(row.color)
+                            ? theme === "light"
+                              ? row.color[0] + " text-black"
+                              : row.color[1] + " text-white"
+                            : ""
+                        }`}
+                      >
+                        {selectedClass}
+                      </Badge>
+                    );
+                  })()}
+                </TableCell>
+                <TableCell onClick={() => setSelectedSubject(row)}>
+                  {(() => {
+                    const selectedClass = scheduleSubjects.find((s) => s.code === row.code)?.class;
+                    if (!selectedClass) return "-";
+                    const targetClass = row.classes?.find(c => c.classcode === selectedClass);
+                    if (!targetClass) return "-";
+                    return targetClass.schedules?.reduce((sum, schedule) => sum + (schedule.classesnumber || 0), 0) || "-";
+                  })()}
+                </TableCell>
+               <TableCell onClick={() => setSelectedSubject(row)}>
+                 <Badge
+                   variant="outline"
+                   className={`${
+                     row.color && Array.isArray(row.color)
+                       ? theme === "light"
+                         ? row.color[0] + " text-black"
+                         : row.color[1] + " text-white"
+                       : ""
+                   }`}
+                 >
+                   {row.name}
+                 </Badge>
+               </TableCell>
               <TableCell onClick={() => setSelectedSubject(row)}>
                 <CompetitionBadge score={row.competition} />
               </TableCell>

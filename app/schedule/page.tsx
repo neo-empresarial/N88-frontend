@@ -17,6 +17,7 @@ import SaveScheduleDialog from "./components/SaveScheduleDialog";
 import SavedSchedulesDialog from "./components/SavedSchedulesDialog";
 import ReceivedSharedSchedulesDialog from "./components/ReceivedSharedSchedulesDialog";
 import CopyPlanDialog from "./components/CopyPlanDialog";
+import { ScheduleAutoSaveWrapper } from "./providers/ScheduleAutoSaveWrapper";
 import { SubjectsType } from "./types/dataType";
 
 import { useEffect, useState } from "react";
@@ -311,9 +312,11 @@ export default function SchedulePage() {
   return (
     <div className="p-10 grid gap-2 grid-cols-1 ">
       <SubjectsProvider>
-        <ScheduleHeader />
-        <SubjectsLoader />
-        <CopyPlanDialog />
+        <ScheduleAutoSaveWrapper>
+          <ScheduleHeader />
+          <SubjectsLoader />
+          <CopyPlanDialog />
+        </ScheduleAutoSaveWrapper>
       </SubjectsProvider>
     </div>
   );

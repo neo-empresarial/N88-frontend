@@ -32,8 +32,8 @@ import {
 } from "@/components/ui/resizable";
 
 import SearchSubject from "@/app/schedule/components/SearchSubject";
-import SubjectsTable from "@/app/schedule/components/SubjectsTable";
 import CompetitionBadge from "@/app/schedule/components/CompetitionBadge";
+import TutorialCompetitionDemo from "@/app/schedule/components/TutorialCompetitionDemo";
 import { SubjectsProvider } from "@/app/schedule/providers/subjectsContext";
 import { SubjectsType } from "@/app/schedule/types/dataType";
 import { Switch } from "@/components/ui/switch";
@@ -1078,14 +1078,14 @@ export default function TutorialPage() {
                       <BarChart3 className="h-8 w-8 text-green-600" />
                     </div>
                     <h4 className="font-semibold text-green-700 dark:text-green-300 mb-2">Baixa Concorrência</h4>
-                    <div className="mb-3">
-                      <CompetitionBadge score={{
-                        averageOrdersWithoutVacancy: 8.1,
-                        category: "Baixa",
-                        semesterCount: 5
-                      }} />
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">0 a 15 pedidos sem vaga</p>
+                     <div className="mb-3">
+                       <CompetitionBadge score={{
+                         averageOrdersWithoutVacancy: 3.2,
+                         category: "Baixa",
+                         semesterCount: 5
+                       }} />
+                     </div>
+                     <p className="text-sm text-muted-foreground mb-2">0 a 5 pedidos sem vaga</p>
                     <p className="text-xs text-muted-foreground">Fácil de conseguir vaga</p>
                   </div>
 
@@ -1094,14 +1094,14 @@ export default function TutorialPage() {
                       <BarChart3 className="h-8 w-8 text-yellow-600" />
                     </div>
                     <h4 className="font-semibold text-yellow-700 dark:text-yellow-300 mb-2">Média Concorrência</h4>
-                    <div className="mb-3">
-                      <CompetitionBadge score={{
-                        averageOrdersWithoutVacancy: 18.2,
-                        category: "Média",
-                        semesterCount: 3
-                      }} />
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">15 a 30 pedidos sem vaga</p>
+                     <div className="mb-3">
+                       <CompetitionBadge score={{
+                         averageOrdersWithoutVacancy: 9.7,
+                         category: "Média",
+                         semesterCount: 3
+                       }} />
+                     </div>
+                     <p className="text-sm text-muted-foreground mb-2">5 a 15 pedidos sem vaga</p>
                     <p className="text-xs text-muted-foreground">Moderadamente concorrida</p>
                   </div>
 
@@ -1110,14 +1110,14 @@ export default function TutorialPage() {
                       <BarChart3 className="h-8 w-8 text-red-600" />
                     </div>
                     <h4 className="font-semibold text-red-700 dark:text-red-300 mb-2">Alta Concorrência</h4>
-                    <div className="mb-3">
-                      <CompetitionBadge score={{
-                        averageOrdersWithoutVacancy: 32.5,
-                        category: "Alta",
-                        semesterCount: 4
-                      }} />
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2">Mais de 30 pedidos sem vaga</p>
+                     <div className="mb-3">
+                       <CompetitionBadge score={{
+                         averageOrdersWithoutVacancy: 18.9,
+                         category: "Alta",
+                         semesterCount: 4
+                       }} />
+                     </div>
+                     <p className="text-sm text-muted-foreground mb-2">Mais de 15 pedidos sem vaga</p>
                     <p className="text-xs text-muted-foreground">Muito difícil de conseguir</p>
                   </div>
                 </div>
@@ -1126,14 +1126,7 @@ export default function TutorialPage() {
 
                 <div>
                   <h4 className="font-semibold mb-4">Demonstração: Tabela de Matérias Real</h4>
-                  <div className="bg-muted/20 p-4 rounded-lg border">
-                    <SubjectsProvider>
-                      <SubjectsTable />
-                    </SubjectsProvider>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    💡 <strong>Dica:</strong> Esta é a tabela real que você usará no cronograma!
-                  </p>
+                  <TutorialCompetitionDemo />
                 </div>
               </CardContent>
             </Card>

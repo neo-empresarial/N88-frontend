@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useCallback, createContext, useState } from "react";
+import React, { useContext, useEffect, useCallback, createContext, useState, useRef } from "react";
 import { SubjectsType } from "../types/dataType";
 import { restoreColorUsage } from "../utils/colorUtils";
 import { useSemestersQuery } from "@/app/hooks/useSemesters";
 import { useCampusesQuery } from "@/app/hooks/useCampuses";
+import { setWithExpiration, getWithExpiration, removeMultipleFromStorage } from "../utils/persistenceUtils";
 
 export type scheduleSubjectsType = {
   code: string;
@@ -283,22 +284,22 @@ export function SubjectsProvider({
     setIsResetting(true);
     
     try {
-      const savedInitialized = localStorage.getItem(STORAGE_PLANS_INITIALIZED_KEY);
+      const savedInitialized = getWithExpiration<PlanNumber[]>(STORAGE_PLANS_INITIALIZED_KEY);
       if (savedInitialized) {
-        setPlansInitialized(new Set<PlanNumber>(JSON.parse(savedInitialized)));
+        setPlansInitialized(new Set<PlanNumber>(savedInitialized));
       }
 
-      const savedPlansData = localStorage.getItem(STORAGE_PLANS_DATA_KEY);
+      const savedPlansData = getWithExpiration<Record<PlanNumber, PlanData>>(STORAGE_PLANS_DATA_KEY);
       if (savedPlansData) {
-        setPlansData(JSON.parse(savedPlansData));
+        setPlansData(savedPlansData);
       } else {
-        const oldScheduleSubjects = localStorage.getItem(STORAGE_KEY);
-        const oldSearchedSubjects = localStorage.getItem(SEARCHED_SUBJECTS_KEY);
+        const oldScheduleSubjects = getWithExpiration<scheduleSubjectsType[]>(STORAGE_KEY);
+        const oldSearchedSubjects = getWithExpiration<SubjectsType[]>(SEARCHED_SUBJECTS_KEY);
         
         if (oldScheduleSubjects || oldSearchedSubjects) {
           const plan1Data: PlanData = {
-            scheduleSubjects: oldScheduleSubjects ? JSON.parse(oldScheduleSubjects) : [],
-            searchedSubjects: oldSearchedSubjects ? JSON.parse(oldSearchedSubjects) : [],
+            scheduleSubjects: oldScheduleSubjects ? oldScheduleSubjects : [],
+            searchedSubjects: oldSearchedSubjects ? oldSearchedSubjects : [],
             selectedSubject: {} as SubjectsType,
             onFocusSubject: { code: "" },
             onFocusSubjectClass: { code: "", classcode: "" },
@@ -312,7 +313,7 @@ export function SubjectsProvider({
         }
       }
 
-      const savedPlan = localStorage.getItem(STORAGE_CURRENT_PLAN_KEY);
+      const savedPlan = getWithExpiration<string>(STORAGE_CURRENT_PLAN_KEY);
       if (savedPlan) {
         const plan = parseInt(savedPlan) as PlanNumber;
         if ([1, 2, 3].includes(plan)) {
@@ -320,12 +321,12 @@ export function SubjectsProvider({
         }
       }
 
-      const savedId = localStorage.getItem(STORAGE_CURRENT_ID_KEY);
+      const savedId = getWithExpiration<string>(STORAGE_CURRENT_ID_KEY);
       if (savedId) {
         setCurrentScheduleId(parseInt(savedId));
       }
 
-      const savedTitle = localStorage.getItem(STORAGE_TITLE_KEY);
+      const savedTitle = getWithExpiration<string>(STORAGE_TITLE_KEY);
       if (savedTitle) {
         setScheduleTitle(savedTitle);
       }
@@ -830,11 +831,11 @@ export function SubjectsProvider({
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      localStorage.setItem(STORAGE_PLANS_DATA_KEY, JSON.stringify(plansData));
+      setWithExpiration(STORAGE_PLANS_DATA_KEY, plansData);
       
       // Also save to old keys for backwards compatibility with plan 1
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(plansData[1].scheduleSubjects));
-      localStorage.setItem(SEARCHED_SUBJECTS_KEY, JSON.stringify(plansData[1].searchedSubjects));
+      setWithExpiration(STORAGE_KEY, plansData[1].scheduleSubjects);
+      setWithExpiration(SEARCHED_SUBJECTS_KEY, plansData[1].searchedSubjects);
       
       // Do NOT change localSaveStatus here - localStorage saving is different from account saving
     } catch (error) {
@@ -846,7 +847,7 @@ export function SubjectsProvider({
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      localStorage.setItem(STORAGE_PLANS_INITIALIZED_KEY, JSON.stringify(Array.from(plansInitialized)));
+      setWithExpiration(STORAGE_PLANS_INITIALIZED_KEY, Array.from(plansInitialized));
     } catch (error) {
       console.error("Error saving plans initialized status:", error);
     }
@@ -856,7 +857,7 @@ export function SubjectsProvider({
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      localStorage.setItem(STORAGE_TITLE_KEY, scheduleTitle);
+      setWithExpiration(STORAGE_TITLE_KEY, scheduleTitle);
     } catch (error) {}
   }, [scheduleTitle]);
 
@@ -865,7 +866,7 @@ export function SubjectsProvider({
     if (typeof window === "undefined") return;
     try {
       if (currentScheduleId !== null) {
-        localStorage.setItem(STORAGE_CURRENT_ID_KEY, currentScheduleId.toString());
+        setWithExpiration(STORAGE_CURRENT_ID_KEY, currentScheduleId.toString());
       } else {
         localStorage.removeItem(STORAGE_CURRENT_ID_KEY);
       }
@@ -876,7 +877,7 @@ export function SubjectsProvider({
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      localStorage.setItem(STORAGE_CURRENT_PLAN_KEY, internalCurrentPlan.toString());
+      setWithExpiration(STORAGE_CURRENT_PLAN_KEY, internalCurrentPlan.toString());
     } catch (error) {}
   }, [internalCurrentPlan]);
 
@@ -884,7 +885,7 @@ export function SubjectsProvider({
   useEffect(() => {
     if (typeof window === "undefined" || !isHydrated) return;
     try {
-      localStorage.setItem(STORAGE_AUTO_SAVE_ENABLED_KEY, autoSaveEnabled.toString());
+      setWithExpiration(STORAGE_AUTO_SAVE_ENABLED_KEY, autoSaveEnabled.toString());
     } catch (error) {}
   }, [autoSaveEnabled, isHydrated]);
 
@@ -893,7 +894,7 @@ export function SubjectsProvider({
     if (typeof window === "undefined") return;
     try {
       if (selectedSemester !== null) {
-        localStorage.setItem(STORAGE_SELECTED_SEMESTER_KEY, selectedSemester);
+        setWithExpiration(STORAGE_SELECTED_SEMESTER_KEY, selectedSemester);
       } else {
         localStorage.removeItem(STORAGE_SELECTED_SEMESTER_KEY);
       }
@@ -905,7 +906,7 @@ export function SubjectsProvider({
     if (typeof window === "undefined") return;
     try {
       if (selectedCampus !== null) {
-        localStorage.setItem(STORAGE_SELECTED_CAMPUS_KEY, selectedCampus);
+        setWithExpiration(STORAGE_SELECTED_CAMPUS_KEY, selectedCampus);
       } else {
         localStorage.removeItem(STORAGE_SELECTED_CAMPUS_KEY);
       }
