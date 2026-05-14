@@ -1,9 +1,9 @@
-import React, { useContext, useEffect, useCallback, createContext, useState, useRef } from "react";
+import React, { useContext, useEffect, useCallback, createContext, useState } from "react";
 import { SubjectsType } from "../types/dataType";
 import { restoreColorUsage } from "../utils/colorUtils";
 import { useSemestersQuery } from "@/app/hooks/useSemesters";
 import { useCampusesQuery } from "@/app/hooks/useCampuses";
-import { setWithExpiration, getWithExpiration, removeMultipleFromStorage } from "../utils/persistenceUtils";
+import { setWithExpiration, getWithExpiration } from "../utils/persistenceUtils";
 
 export type scheduleSubjectsType = {
   code: string;
@@ -92,13 +92,14 @@ type SubjectsContextType = {
   selectedCampus: string | null;
   setSelectedCampus: (campusId: string | null) => void;
   setSelectedCampusDirectly: (campusId: string | null) => void;
-  showCampusChangeModal: boolean;
-  setShowCampusChangeModal: React.Dispatch<React.SetStateAction<boolean>>;
-  confirmCampusChange: (newCampusId: string) => void;
-  cancelCampusChange: () => void;
-  pendingCampus: string | null;
-  pendingCampusName: string | null;
-  isResetting: boolean;
+   showCampusChangeModal: boolean;
+   setShowCampusChangeModal: React.Dispatch<React.SetStateAction<boolean>>;
+   confirmCampusChange: (newCampusId: string) => void;
+   cancelCampusChange: () => void;
+   pendingCampus: string | null;
+   pendingCampusName: string | null;
+   isResetting: boolean;
+   isHydrated: boolean;
 };
 
 const STORAGE_KEY = "schedule_subjects";
@@ -179,9 +180,10 @@ export const SubjectsContext = createContext<SubjectsContextType>({
   setShowCampusChangeModal: () => {},
   confirmCampusChange: () => {},
   cancelCampusChange: () => {},
-  pendingCampus: null,
-  pendingCampusName: null,
-  isResetting: false,
+   pendingCampus: null,
+   pendingCampusName: null,
+   isResetting: false,
+   isHydrated: false,
 });
 
 export function SubjectsProvider({
@@ -201,23 +203,19 @@ export function SubjectsProvider({
   const [isHydrated, setIsHydrated] = useState(false);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-  const [autoSaveEnabled, setAutoSaveEnabled] = useState(() => {
-    if (typeof window === "undefined") return true;
-    try {
-      const savedAutoSaveEnabled = localStorage.getItem(STORAGE_AUTO_SAVE_ENABLED_KEY);
-      return savedAutoSaveEnabled !== null ? savedAutoSaveEnabled === "true" : true;
-    } catch (error) {
-      return true;
-    }
-  });
+   const [autoSaveEnabled, setAutoSaveEnabled] = useState(() => {
+     if (typeof window === "undefined") return true;
+     try {
+       const savedAutoSaveEnabled = getWithExpiration<string>(STORAGE_AUTO_SAVE_ENABLED_KEY);
+       return savedAutoSaveEnabled !== null ? savedAutoSaveEnabled === "true" : true;
+     } catch (error) {
+       return true;
+     }
+   });
 
   const [selectedSemester, setSelectedSemester] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
-    try {
-      return localStorage.getItem(STORAGE_SELECTED_SEMESTER_KEY);
-    } catch (error) {
-      return null;
-    }
+    return getWithExpiration<string>(STORAGE_SELECTED_SEMESTER_KEY);
   });
 
   const [showSemesterChangeModal, setShowSemesterChangeModal] = useState(false);
@@ -225,11 +223,7 @@ export function SubjectsProvider({
 
   const [selectedCampus, setSelectedCampusState] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
-    try {
-      return localStorage.getItem(STORAGE_SELECTED_CAMPUS_KEY);
-    } catch (error) {
-      return null;
-    }
+    return getWithExpiration<string>(STORAGE_SELECTED_CAMPUS_KEY);
   });
 
   const [showCampusChangeModal, setShowCampusChangeModal] = useState(false);
@@ -278,40 +272,51 @@ export function SubjectsProvider({
     setSelectedCampusState(String(defaultCampus.id));
   }, [campuses, selectedCampus, plansData]);
 
-  useEffect(() => {
-    if (typeof window === "undefined" || isHydrated) return;
-    
-    setIsResetting(true);
-    
-    try {
-      const savedInitialized = getWithExpiration<PlanNumber[]>(STORAGE_PLANS_INITIALIZED_KEY);
-      if (savedInitialized) {
-        setPlansInitialized(new Set<PlanNumber>(savedInitialized));
-      }
+   useEffect(() => {
+     if (typeof window === "undefined" || isHydrated) return;
+     
+     console.log("[hydration] Starting hydration from localStorage...");
+     setIsResetting(true);
+     
+     try {
+       const savedInitialized = getWithExpiration<PlanNumber[]>(STORAGE_PLANS_INITIALIZED_KEY);
+       if (savedInitialized) {
+         setPlansInitialized(new Set<PlanNumber>(savedInitialized));
+       }
 
-      const savedPlansData = getWithExpiration<Record<PlanNumber, PlanData>>(STORAGE_PLANS_DATA_KEY);
-      if (savedPlansData) {
-        setPlansData(savedPlansData);
-      } else {
-        const oldScheduleSubjects = getWithExpiration<scheduleSubjectsType[]>(STORAGE_KEY);
-        const oldSearchedSubjects = getWithExpiration<SubjectsType[]>(SEARCHED_SUBJECTS_KEY);
-        
-        if (oldScheduleSubjects || oldSearchedSubjects) {
-          const plan1Data: PlanData = {
-            scheduleSubjects: oldScheduleSubjects ? oldScheduleSubjects : [],
-            searchedSubjects: oldSearchedSubjects ? oldSearchedSubjects : [],
-            selectedSubject: {} as SubjectsType,
-            onFocusSubject: { code: "" },
-            onFocusSubjectClass: { code: "", classcode: "" },
-          };
-          
-          setPlansData({
-            1: plan1Data,
-            2: emptyPlanData(),
-            3: emptyPlanData(),
+        const savedPlansData = getWithExpiration<Record<PlanNumber, PlanData>>(STORAGE_PLANS_DATA_KEY);
+        if (savedPlansData) {
+          console.log("[hydration] Hydrating plansData from storage:", {
+            plan1Subjects: savedPlansData[1]?.scheduleSubjects?.length,
+            plan2Subjects: savedPlansData[2]?.scheduleSubjects?.length,
+            plan3Subjects: savedPlansData[3]?.scheduleSubjects?.length,
           });
-        }
-      }
+         setPlansData(savedPlansData);
+       } else {
+         console.log("[localStorage] No plansData found, checking old format...");
+         const oldScheduleSubjects = getWithExpiration<scheduleSubjectsType[]>(STORAGE_KEY);
+         const oldSearchedSubjects = getWithExpiration<SubjectsType[]>(SEARCHED_SUBJECTS_KEY);
+         
+         if (oldScheduleSubjects || oldSearchedSubjects) {
+           console.log("[localStorage] Found old format data:", {
+             scheduleSubjects: oldScheduleSubjects?.length,
+             searchedSubjects: oldSearchedSubjects?.length,
+           });
+           const plan1Data: PlanData = {
+             scheduleSubjects: oldScheduleSubjects ? oldScheduleSubjects : [],
+             searchedSubjects: oldSearchedSubjects ? oldSearchedSubjects : [],
+             selectedSubject: {} as SubjectsType,
+             onFocusSubject: { code: "" },
+             onFocusSubjectClass: { code: "", classcode: "" },
+           };
+           
+           setPlansData({
+             1: plan1Data,
+             2: emptyPlanData(),
+             3: emptyPlanData(),
+           });
+         }
+       }
 
       const savedPlan = getWithExpiration<string>(STORAGE_CURRENT_PLAN_KEY);
       if (savedPlan) {
@@ -321,35 +326,50 @@ export function SubjectsProvider({
         }
       }
 
-      const savedId = getWithExpiration<string>(STORAGE_CURRENT_ID_KEY);
-      if (savedId) {
-        setCurrentScheduleId(parseInt(savedId));
-      }
+       const savedId = getWithExpiration<string>(STORAGE_CURRENT_ID_KEY);
+       if (savedId) {
+         console.log("[localStorage] Hydrating currentScheduleId:", savedId);
+         setCurrentScheduleId(parseInt(savedId));
+       }
 
-      const savedTitle = getWithExpiration<string>(STORAGE_TITLE_KEY);
-      if (savedTitle) {
-        setScheduleTitle(savedTitle);
-      }
+       const savedTitle = getWithExpiration<string>(STORAGE_TITLE_KEY);
+       if (savedTitle) {
+         console.log("[localStorage] Hydrating scheduleTitle:", savedTitle);
+         setScheduleTitle(savedTitle);
+       }
 
-      if (savedId) {
-        setLocalSaveStatus("saved");
-      } else {
-        setLocalSaveStatus("idle");
-      }
+       const hasLocalData = (
+         savedPlansData &&
+         (savedPlansData[1]?.scheduleSubjects?.length > 0 ||
+           savedPlansData[2]?.scheduleSubjects?.length > 0 ||
+           savedPlansData[3]?.scheduleSubjects?.length > 0)
+       );
 
-      setIsHydrated(true);
-      
-      setTimeout(() => {
-        setIsResetting(false);
-      }, 100);
-    } catch (error) {
-      console.error("Error hydrating from localStorage:", error);
-      setIsHydrated(true);
-      setTimeout(() => {
-        setIsResetting(false);
-      }, 100);
-    }
-  }, [isHydrated]);
+       if (savedId) {
+         setLocalSaveStatus("saved");
+       } else if (hasLocalData) {
+         console.log("[localStorage] Setting status to 'modified'");
+         setLocalSaveStatus("modified");
+       } else {
+         console.log("[localStorage] No local data found, status = 'idle'");
+         setLocalSaveStatus("idle");
+        }
+
+       console.log("[hydration] ✅ Hydration complete, isHydrated = true");
+       setIsHydrated(true);
+       
+       setTimeout(() => {
+         setIsResetting(false);
+       }, 100);
+     } catch (error) {
+       console.error("Error hydrating from localStorage:", error);
+       console.log("[hydration] ✅ Hydration complete (with error), isHydrated = true");
+       setIsHydrated(true);
+       setTimeout(() => {
+         setIsResetting(false);
+       }, 100);
+     }
+   }, [isHydrated]);
 
   const [showCopyPlanDialog, setShowCopyPlanDialog] = useState(false);
   const [targetPlan, setTargetPlan] = useState<PlanNumber | null>(null);
@@ -362,23 +382,25 @@ export function SubjectsProvider({
   const onFocusSubject = currentPlanData.onFocusSubject;
   const onFocusSubjectClass = currentPlanData.onFocusSubjectClass;
 
-  // Setters that update current plan
-  const setScheduleSubjects = useCallback((value: React.SetStateAction<scheduleSubjectsType[]>) => {
-    setPlansData(prev => {
-      const newScheduleSubjects = typeof value === 'function' 
-        ? value(prev[internalCurrentPlan].scheduleSubjects) 
-        : value;
-      return {
-        ...prev,
-        [internalCurrentPlan]: {
-          ...prev[internalCurrentPlan],
-          scheduleSubjects: newScheduleSubjects,
-        },
-      };
-    });
-    
-    if (!isLoadingSchedule && !isResetting) {
-      setLocalSaveStatus("modified");
+   // Setters that update current plan
+   const setScheduleSubjects = useCallback((value: React.SetStateAction<scheduleSubjectsType[]>) => {
+     setPlansData(prev => {
+       const newScheduleSubjects = typeof value === 'function' 
+         ? value(prev[internalCurrentPlan].scheduleSubjects) 
+         : value;
+       console.log("[subjects] Updated scheduleSubjects on plan", internalCurrentPlan, "- new count:", newScheduleSubjects.length);
+       return {
+         ...prev,
+         [internalCurrentPlan]: {
+           ...prev[internalCurrentPlan],
+           scheduleSubjects: newScheduleSubjects,
+         },
+       };
+     });
+     
+     if (!isLoadingSchedule && !isResetting) {
+       console.log("[subjects] Setting localSaveStatus to 'modified'");
+       setLocalSaveStatus("modified");
     }
   }, [internalCurrentPlan, isLoadingSchedule, isResetting]);
 
@@ -442,13 +464,15 @@ export function SubjectsProvider({
     });
   }, [internalCurrentPlan]);
 
-  const setScheduleTitleWithModify = useCallback((title: string | ((prevState: string) => string)) => {
-    const newTitle = typeof title === "function" ? title(scheduleTitle) : title;
-    setScheduleTitle(newTitle);
-    if (!isLoadingSchedule && !isResetting) {
-      setLocalSaveStatus("modified");
-    }
-  }, [isLoadingSchedule, isResetting, scheduleTitle]);
+   const setScheduleTitleWithModify = useCallback((title: string | ((prevState: string) => string)) => {
+     const newTitle = typeof title === "function" ? title(scheduleTitle) : title;
+     console.log("[subjects] Updated title to:", newTitle);
+     setScheduleTitle(newTitle);
+     if (!isLoadingSchedule && !isResetting) {
+       console.log("[subjects] Setting localSaveStatus to 'modified' (title change)");
+       setLocalSaveStatus("modified");
+     }
+   }, [isLoadingSchedule, isResetting, scheduleTitle]);
 
   // Mark data as saved and update last saved state
   const markAsSaved = useCallback(() => {
@@ -552,32 +576,6 @@ export function SubjectsProvider({
 
     return plans;
   }, [plansData, calculateCreditsForSubject]);
-
-  // Auto-save functionality with 2-second delay
-  useEffect(() => {
-    if (!autoSaveEnabled || localSaveStatus !== "modified" || !currentScheduleId) return;
-
-    const hasAnySubjects = Object.values(plansData).some(plan => 
-      plan.scheduleSubjects && plan.scheduleSubjects.length > 0
-    );
-    
-    if (!hasAnySubjects) {
-      return;
-    }
-
-    const autoSaveTimer = setTimeout(() => {
-      const autoSaveEvent = new CustomEvent('autoSaveSchedule', { 
-        detail: { 
-          plans: getPlansDataForSave(),
-          currentScheduleId, 
-          scheduleTitle 
-        } 
-      });
-      window.dispatchEvent(autoSaveEvent);
-    }, 2000);
-
-    return () => clearTimeout(autoSaveTimer);
-  }, [autoSaveEnabled, localSaveStatus, currentScheduleId, plansData, scheduleTitle]);
 
   const setCurrentPlan = useCallback((plan: PlanNumber) => {
     if (!plansInitialized.has(plan)) {
@@ -827,51 +825,78 @@ export function SubjectsProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Persist plans data to localStorage
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      setWithExpiration(STORAGE_PLANS_DATA_KEY, plansData);
-      
-      // Also save to old keys for backwards compatibility with plan 1
-      setWithExpiration(STORAGE_KEY, plansData[1].scheduleSubjects);
-      setWithExpiration(SEARCHED_SUBJECTS_KEY, plansData[1].searchedSubjects);
-      
-      // Do NOT change localSaveStatus here - localStorage saving is different from account saving
-    } catch (error) {
-      console.error("Error saving plans data to localStorage:", error);
-    }
-  }, [plansData]);
-
-  // Persist plans initialized status
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      setWithExpiration(STORAGE_PLANS_INITIALIZED_KEY, Array.from(plansInitialized));
-    } catch (error) {
-      console.error("Error saving plans initialized status:", error);
-    }
-  }, [plansInitialized]);
-
-  // Persist schedule title
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      setWithExpiration(STORAGE_TITLE_KEY, scheduleTitle);
-    } catch (error) {}
-  }, [scheduleTitle]);
-
-  // Persist current schedule ID
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      if (currentScheduleId !== null) {
-        setWithExpiration(STORAGE_CURRENT_ID_KEY, currentScheduleId.toString());
-      } else {
-        localStorage.removeItem(STORAGE_CURRENT_ID_KEY);
+    // Persist plans data to localStorage
+    useEffect(() => {
+      if (typeof window === "undefined") {
+        return;
       }
-    } catch (error) {}
-  }, [currentScheduleId]);
+      
+      if (!isHydrated) {
+        console.log("[hydration] Skipping plansData save - not hydrated yet");
+        return;
+      }
+      
+      try {
+        const hasData = plansData[1]?.scheduleSubjects?.length > 0 ||
+                        plansData[2]?.scheduleSubjects?.length > 0 ||
+                        plansData[3]?.scheduleSubjects?.length > 0;
+        
+        if (hasData) {
+          console.log("[localStorage] Saving plansData:", {
+            plan1Subjects: plansData[1]?.scheduleSubjects?.length,
+            plan2Subjects: plansData[2]?.scheduleSubjects?.length,
+            plan3Subjects: plansData[3]?.scheduleSubjects?.length,
+          });
+        }
+        
+        setWithExpiration(STORAGE_PLANS_DATA_KEY, plansData);
+        
+        // Also save to old keys for backwards compatibility with plan 1
+        setWithExpiration(STORAGE_KEY, plansData[1].scheduleSubjects);
+        setWithExpiration(SEARCHED_SUBJECTS_KEY, plansData[1].searchedSubjects);
+       
+       // Do NOT change localSaveStatus here - localStorage saving is different from account saving
+     } catch (error) {
+       console.error("Error saving plans data to localStorage:", error);
+      }
+    }, [plansData, isHydrated]);
+
+   // Persist plans initialized status
+   useEffect(() => {
+     if (typeof window === "undefined") return;
+     
+     if (!isHydrated) {
+       console.log("[hydration] Skipping plansInitialized save - not hydrated yet");
+       return;
+     }
+     
+     try {
+       console.log("[localStorage] Saving plansInitialized:", Array.from(plansInitialized));
+       setWithExpiration(STORAGE_PLANS_INITIALIZED_KEY, Array.from(plansInitialized));
+     } catch (error) {
+       console.error("Error saving plans initialized status:", error);
+     }
+   }, [plansInitialized, isHydrated]);
+
+   // Persist schedule title
+   useEffect(() => {
+     if (typeof window === "undefined" || !isHydrated) return;
+     try {
+       setWithExpiration(STORAGE_TITLE_KEY, scheduleTitle);
+     } catch (error) {}
+   }, [scheduleTitle, isHydrated]);
+
+   // Persist current schedule ID
+   useEffect(() => {
+     if (typeof window === "undefined" || !isHydrated) return;
+     try {
+       if (currentScheduleId !== null) {
+         setWithExpiration(STORAGE_CURRENT_ID_KEY, currentScheduleId.toString());
+       } else {
+         localStorage.removeItem(STORAGE_CURRENT_ID_KEY);
+       }
+     } catch (error) {}
+   }, [currentScheduleId, isHydrated]);
 
   // Persist current plan
   useEffect(() => {
@@ -882,36 +907,39 @@ export function SubjectsProvider({
   }, [internalCurrentPlan]);
 
   // Persist auto-save enabled state
-  useEffect(() => {
-    if (typeof window === "undefined" || !isHydrated) return;
-    try {
-      setWithExpiration(STORAGE_AUTO_SAVE_ENABLED_KEY, autoSaveEnabled.toString());
-    } catch (error) {}
-  }, [autoSaveEnabled, isHydrated]);
+   useEffect(() => {
+     if (typeof window === "undefined" || !isHydrated) return;
+     try {
+       console.log("[localStorage] Saving autoSaveEnabled:", autoSaveEnabled);
+       setWithExpiration(STORAGE_AUTO_SAVE_ENABLED_KEY, autoSaveEnabled.toString());
+     } catch (error) {}
+   }, [autoSaveEnabled, isHydrated]);
 
-  // Persist selected semester
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      if (selectedSemester !== null) {
-        setWithExpiration(STORAGE_SELECTED_SEMESTER_KEY, selectedSemester);
-      } else {
-        localStorage.removeItem(STORAGE_SELECTED_SEMESTER_KEY);
-      }
-    } catch (error) {}
-  }, [selectedSemester]);
+   // Persist selected semester
+   useEffect(() => {
+     if (typeof window === "undefined") return;
+     try {
+       if (selectedSemester !== null) {
+         console.log("[localStorage] Saving selectedSemester:", selectedSemester);
+         setWithExpiration(STORAGE_SELECTED_SEMESTER_KEY, selectedSemester);
+       } else {
+         localStorage.removeItem(STORAGE_SELECTED_SEMESTER_KEY);
+       }
+     } catch (error) {}
+   }, [selectedSemester]);
 
-  // Persist selected campus
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    try {
-      if (selectedCampus !== null) {
-        setWithExpiration(STORAGE_SELECTED_CAMPUS_KEY, selectedCampus);
-      } else {
-        localStorage.removeItem(STORAGE_SELECTED_CAMPUS_KEY);
-      }
-    } catch (error) {}
-  }, [selectedCampus]);
+   // Persist selected campus
+   useEffect(() => {
+     if (typeof window === "undefined") return;
+     try {
+       if (selectedCampus !== null) {
+         console.log("[localStorage] Saving selectedCampus:", selectedCampus);
+         setWithExpiration(STORAGE_SELECTED_CAMPUS_KEY, selectedCampus);
+       } else {
+         localStorage.removeItem(STORAGE_SELECTED_CAMPUS_KEY);
+       }
+     } catch (error) {}
+   }, [selectedCampus]);
 
   return (
     <SubjectsContext.Provider
@@ -970,10 +998,11 @@ export function SubjectsProvider({
         setShowCampusChangeModal,
         confirmCampusChange,
         cancelCampusChange,
-        pendingCampus,
-        pendingCampusName,
-        isResetting,
-      }}
+         pendingCampus,
+         pendingCampusName,
+         isResetting,
+         isHydrated,
+       }}
     >
       {children}
     </SubjectsContext.Provider>

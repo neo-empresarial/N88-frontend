@@ -45,7 +45,9 @@ const useAxios = () => {
 
   const getAllSubjects = async (campusId?: string | number) => {
     const params: Record<string, string> = {};
-    if (campusId) params.campus_id = String(campusId);
+    if (campusId !== undefined && campusId !== null && String(campusId) !== 'NaN') {
+      params.campus_id = String(campusId);
+    }
     
     const response = await axiosPublicInstance.get("subjects", { params });
     return response.data;
@@ -60,7 +62,9 @@ const useAxios = () => {
       const params: Record<string, string> = {
         codes: codes.join(",")
       };
-      if (campusId) params.campus_id = String(campusId);
+      if (campusId !== undefined && campusId !== null && String(campusId) !== 'NaN') {
+        params.campus_id = String(campusId);
+      }
       
       const response = await axiosPublicInstance.get("/subjects/by-codes", { params });
       return response.data;
@@ -85,7 +89,9 @@ const useAxios = () => {
       const params: Record<string, string> = {
         search: encodeURIComponent(search)
       };
-      if (campusId) params.campus_id = String(campusId);
+      if (campusId !== undefined && campusId !== null && String(campusId) !== 'NaN') {
+        params.campus_id = String(campusId);
+      }
       
       const response = await axiosPublicInstance.get("/subjects", { params });
       return response.data;
@@ -98,7 +104,9 @@ const useAxios = () => {
   const getSubject = async (id: number, campusId?: string | number) => {
     try {
       const params: Record<string, string> = {};
-      if (campusId) params.campus_id = String(campusId);
+      if (campusId !== undefined && campusId !== null && String(campusId) !== 'NaN') {
+        params.campus_id = String(campusId);
+      }
       
       const response = await axiosPublicInstance.get(`/subjects/${id}`, { params });
       return response.data;

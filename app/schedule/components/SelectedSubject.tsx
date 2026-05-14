@@ -16,20 +16,21 @@ import { Badge } from "@/components/ui/badge";
 import { ClassesType } from "../types/dataType";
 
 export default function SelectedSubject() {
-  const [rowSelection, setRowSelection] = useState<string | null>(null);
-  const { theme } = useTheme();
+   const [rowSelection, setRowSelection] = useState<string | null>(null);
+   const { theme } = useTheme();
 
-  const tableContainerRef = useRef<HTMLDivElement | null>(null);
-  const [maxHeight, setMaxHeight] = useState<string | undefined>(undefined);
+   const tableContainerRef = useRef<HTMLDivElement | null>(null);
+   const [maxHeight, setMaxHeight] = useState<string | undefined>(undefined);
 
-  const {
-    selectedSubject,
-    onFocusSubjectClass,
-    setOnFocusSubjectClass,
-    scheduleSubjects,
-    setScheduleSubjects,
-    setOnFocusSubject,
-  } = useSubjects();
+   const {
+     selectedSubject,
+     onFocusSubjectClass,
+     setOnFocusSubjectClass,
+     scheduleSubjects,
+     setScheduleSubjects,
+     setOnFocusSubject,
+     isHydrated,
+   } = useSubjects();
 
   const handleRowSelect = (row: ClassesType) => {
     const isSelected = rowSelection === row.classcode;
@@ -67,27 +68,33 @@ export default function SelectedSubject() {
         }
         return subject;
       })
-    );
-  };
+     );
+   };
 
-  useEffect(() => {
-    const isClassSelected =
-      scheduleSubjects.filter((s) => s.code === selectedSubject.code)?.[0]
-        ?.class || null;
-    
-    if (isClassSelected) {
-      return setRowSelection(isClassSelected);
-    }
+   // Sync rowSelection after hydration completes or when selectedSubject changes
+   useEffect(() => {
+     if (!isHydrated) return;
+     
+     console.log("[hydration] Syncing rowSelection for subject:", selectedSubject.code);
+     
+     const isClassSelected =
+       scheduleSubjects.find((s) => s.code === selectedSubject.code)?.class || null;
+     
+     if (isClassSelected) {
+       console.log("[hydration] Found saved class for subject", selectedSubject.code, ":", isClassSelected);
+       setRowSelection(isClassSelected);
+     } else if (selectedSubject.classes?.length) {
+       // Set the first class as selected by default if none is saved
+       console.log("[hydration] Setting default class (first one) for subject:", selectedSubject.code);
+       setRowSelection(selectedSubject.classes[0].classcode);
+       handleRowSelect(selectedSubject.classes[0]);
+     } else {
+       setRowSelection(null);
+     }
+    }, [isHydrated, selectedSubject, scheduleSubjects]);
 
-    // Set the first class as selected by default
-    if (selectedSubject.classes?.length) {
-      setRowSelection(selectedSubject.classes[0].classcode);
-      handleRowSelect(selectedSubject.classes[0]);
-    }
-  }, [selectedSubject]);
-
-  useEffect(() => {
-    if (!onFocusSubjectClass.classcode) {
+   useEffect(() => {
+     if (!onFocusSubjectClass.classcode) {
       if (rowSelection) {
         return addClass({
           code: selectedSubject.code,

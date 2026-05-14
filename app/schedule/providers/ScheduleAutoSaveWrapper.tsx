@@ -39,24 +39,26 @@ export function ScheduleAutoSaveWrapper({
     currentScheduleId,
   };
 
-  const handleAutoSave = useCallback(async () => {
-    if (!currentScheduleId || !isAuthenticated) return;
+   const handleAutoSave = useCallback(async () => {
+     if (!currentScheduleId || !isAuthenticated) return;
 
-    try {
-      const plansForSave = getPlansDataForSave();
-      await updateScheduleAsync({
-        id: currentScheduleId,
-        title: scheduleTitle,
-        semester: selectedSemester || undefined,
-        campus: selectedCampus || undefined,
-        plans: plansForSave,
-      });
+     try {
+       console.log("[auto-save] Starting auto-save...");
+       const plansForSave = getPlansDataForSave();
+       await updateScheduleAsync({
+         id: currentScheduleId,
+         title: scheduleTitle,
+         semester: selectedSemester || undefined,
+         campus: selectedCampus || undefined,
+         plans: plansForSave,
+       });
 
-      removeMultipleFromStorage(STORAGE_KEYS_TO_CLEAR);
-    } catch (error) {
-      console.error("Auto-save error:", error);
-    }
-  }, [
+       console.log("[auto-save] Auto-save successful, clearing localStorage...");
+       removeMultipleFromStorage(STORAGE_KEYS_TO_CLEAR);
+     } catch (error) {
+       console.error("Auto-save error:", error);
+     }
+   }, [
     currentScheduleId,
     isAuthenticated,
     scheduleTitle,
